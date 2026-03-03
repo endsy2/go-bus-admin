@@ -1,0 +1,113 @@
+.reports-page {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.stats-overview {
+  margin-bottom: 30px;
+}
+
+.stats-overview h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: var(--text-dark);
+}
+
+.metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.metric-card {
+  background: var(--white);
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.metric-label {
+  font-size: 14px;
+  color: var(--text-light);
+  margin-bottom: 10px;
+}
+
+.metric-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.metric-change {
+  font-size: 14px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.metric-change.up {
+  color: #27AE60;
+}
+
+.metric-change.down {
+  color: #E74C3C;
+}
+
+.reports-section h2 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: var(--text-dark);
+}
+
+.reports-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.report-card {
+  background: var(--white);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.report-icon {
+  font-size: 50px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.report-info {
+  flex: 1;
+}
+
+.report-info h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  color: var(--text-dark);
+}
+
+.report-meta {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+.report-actions {
+  display: flex;
+  gap: 10px;
+}

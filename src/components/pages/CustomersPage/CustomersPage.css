@@ -1,0 +1,92 @@
+.customers-page {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.customers-table {
+  background: var(--white);
+  padding: 25px;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+}
+
+.customers-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.customers-table thead {
+  background: var(--bg-color);
+}
+
+.customers-table th {
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+.customers-table td {
+  padding: 15px;
+  border-bottom: 1px solid #E8E8E8;
+  color: var(--text-dark);
+}
+
+.customers-table tbody tr:hover {
+  background: var(--bg-color);
+}
+
+.customer-id {
+  font-weight: 700;
+  color: var(--primary-color);
+}
+
+.customer-name {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.bookings-count {
+  background: var(--primary-color);
+  color: var(--white);
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 5px;
+  transition: transform 0.2s ease;
+}
+
+.btn-icon:hover {
+  transform: scale(1.2);
+}
