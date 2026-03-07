@@ -4,6 +4,22 @@
   overflow-y: auto;
 }
 
+.loading-state {
+  text-align: center;
+  padding: 60px;
+  font-size: 18px;
+  color: var(--text-dark);
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c33;
+}
+
 .customers-table {
   background: var(--white);
   padding: 25px;
@@ -73,6 +89,16 @@
   font-size: 14px;
 }
 
+.gender-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
 .action-buttons {
   display: flex;
   gap: 8px;
@@ -81,12 +107,39 @@
 .btn-icon {
   background: none;
   border: none;
-  font-size: 18px;
   cursor: pointer;
-  padding: 5px;
-  transition: transform 0.2s ease;
+  padding: 6px;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-icon:hover {
-  transform: scale(1.2);
+  background: #f0f0f0;
+}
+
+.btn-view {
+  color: #2196F3;
+}
+
+.btn-view:hover {
+  background: #E3F2FD;
+}
+
+.btn-edit {
+  color: #FF9800;
+}
+
+.btn-edit:hover {
+  background: #FFF3E0;
+}
+
+.btn-delete {
+  color: #F44336;
+}
+
+.btn-delete:hover {
+  background: #FFEBEE;
 }
