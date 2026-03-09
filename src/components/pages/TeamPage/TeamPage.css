@@ -1,0 +1,347 @@
+.team-page {
+  flex: 1;
+  padding: 30px;
+  overflow-y: auto;
+}
+
+.page-header {
+  margin-bottom: 30px;
+}
+
+.page-header h1 {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  color: #333;
+}
+
+.page-header p {
+  margin: 0;
+  color: #666;
+  font-size: 15px;
+}
+
+.tabs-container {
+  margin-bottom: 30px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: -2px;
+}
+
+.tab:hover {
+  color: var(--primary-color);
+  background: rgba(0, 123, 255, 0.05);
+}
+
+.tab.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c33;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 60px;
+  font-size: 18px;
+  color: var(--text-dark);
+}
+
+.tab-content {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Team Members Styles */
+.team-members-content,
+.roles-content {
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 30px;
+}
+
+.content-header {
+  margin-bottom: 30px;
+}
+
+.content-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 22px;
+  color: #333;
+}
+
+.content-header p {
+  margin: 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.team-table {
+  overflow-x: auto;
+}
+
+.team-table table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.team-table thead {
+  background: var(--bg-color);
+}
+
+.team-table th {
+  padding: 15px;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 14px;
+}
+
+.team-table td {
+  padding: 15px;
+  border-bottom: 1px solid #E8E8E8;
+  color: var(--text-dark);
+}
+
+.team-table tbody tr:hover {
+  background: var(--bg-color);
+}
+
+.member-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.member-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+.member-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.member-username {
+  font-size: 12px;
+  color: #888;
+}
+
+.role-badge {
+  background: #e3f2fd;
+  color: #1976d2;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  transition: all 0.2s ease;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-icon:hover {
+  background: #f0f0f0;
+}
+
+.btn-edit {
+  color: #FF9800;
+}
+
+.btn-edit:hover {
+  background: #FFF3E0;
+}
+
+/* Roles & Permissions Styles */
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 24px;
+}
+
+.role-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s;
+}
+
+.role-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.role-card-header {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.role-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.role-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+  color: #333;
+  text-transform: capitalize;
+}
+
+.role-info p {
+  margin: 0;
+  font-size: 13px;
+  color: #666;
+  line-height: 1.4;
+}
+
+.role-card-body {
+  padding: 20px 24px;
+}
+
+.permissions-header {
+  margin-bottom: 12px;
+}
+
+.permissions-count {
+  font-size: 12px;
+  font-weight: 600;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.permissions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.permission-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+  padding: 6px 0;
+}
+
+.permission-item.more {
+  color: var(--primary-color);
+  font-weight: 600;
+  padding-left: 22px;
+}
+
+.role-card-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #e0e0e0;
+  background: #fafafa;
+}
+
+.btn-view-details {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: gap 0.2s;
+}
+
+.btn-view-details:hover {
+  gap: 12px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 60px;
+  color: #999;
+  font-size: 16px;
+}
+
+@media (max-width: 768px) {
+  .team-page {
+    padding: 20px;
+  }
+
+  .roles-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tabs {
+    overflow-x: auto;
+  }
+}

@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import NavItem from '../../molecules/NavItem/NavItem';
+import Icon from '../../atoms/Icon/Icon';
 import './Sidebar.css';
 
 const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   const menuItems = [
-    { id: 'dashboard', icon: '📊', label: 'Dashboard' },
-    { id: 'bookings', icon: '🎫', label: 'Bookings' },
-    { id: 'buses', icon: '🚌', label: 'Buses' },
-    { id: 'routes', icon: '🗺️', label: 'Routes' },
-    { id: 'customers', icon: '👥', label: 'Customers' },
-    { id: 'reports', icon: '📈', label: 'Reports' },
+    { id: 'dashboard', icon: <Icon name="dashboard" />, label: 'Dashboard' },
+    { id: 'bookings', icon: <Icon name="calendar" />, label: 'Bookings' },
+    { id: 'buses', icon: <Icon name="bus" />, label: 'Buses' },
+    { id: 'routes', icon: <Icon name="mapPin" />, label: 'Routes' },
+    { id: 'customers', icon: <Icon name="users" />, label: 'Customers' },
+    { id: 'reports', icon: <Icon name="barChart" />, label: 'Reports' },
+  ];
+
+  const teamItems = [
+    { id: 'team', icon: <Icon name="userCheck" />, label: 'Team' },
+    { id: 'settings', icon: <Icon name="settings" />, label: 'Settings' },
   ];
 
   const handleLogoutClick = () => {
@@ -30,19 +36,38 @@ const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
   return (
     <div className="sidebar">
       <div className="sidebar-header">
-        <h2>🚍 BusBooking</h2>
+        <h2>
+          <Icon name="bus" size={24} style={{ verticalAlign: 'middle', marginRight: '8px' }} />
+          BusBooking
+        </h2>
         <p>Admin Panel</p>
       </div>
       <nav className="sidebar-nav">
-        {menuItems.map(item => (
-          <NavItem
-            key={item.id}
-            icon={item.icon}
-            label={item.label}
-            active={activeTab === item.id}
-            onClick={() => setActiveTab(item.id)}
-          />
-        ))}
+        <div className="nav-section">
+          <div className="nav-section-title">Main</div>
+          {menuItems.map(item => (
+            <NavItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              onClick={() => setActiveTab(item.id)}
+            />
+          ))}
+        </div>
+
+        <div className="nav-section">
+          <div className="nav-section-title">Team</div>
+          {teamItems.map(item => (
+            <NavItem
+              key={item.id}
+              icon={item.icon}
+              label={item.label}
+              active={activeTab === item.id}
+              onClick={() => setActiveTab(item.id)}
+            />
+          ))}
+        </div>
       </nav>
       <div className="sidebar-footer">
         <div className="profile-section">
@@ -50,8 +75,8 @@ const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
             {user?.fullName ? user.fullName.charAt(0).toUpperCase() : '👤'}
           </div>
           <div className="profile-info">
-            <div className="profile-name">{user?.fullName || 'User'}</div>
-            <div className="profile-username">@{user?.userName || 'username'}</div>
+            <div className="profile-name">{user?.userName || 'User'}</div>
+            <div className="profile-username">{user?.email || 'email'}</div>
           </div>
         </div>
         <button className="logout-btn" onClick={handleLogoutClick}>

@@ -72,7 +72,7 @@ const LoginPage = ({ onLoginSuccess, onSwitchToRegister }) => {
         console.log('Extracted token:', token);
         
         try {
-          const profileResponse = await fetch(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/profile`, {
+          const profileResponse = await fetch(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/profile`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

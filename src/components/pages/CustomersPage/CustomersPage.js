@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import Button from '../../atoms/Button/Button';
+import Icon from '../../atoms/Icon/Icon';
+import Input from '../../atoms/Input/Input';
+import Snackbar from '../../atoms/Snackbar/Snackbar';
 import ConfirmDialog from '../../molecules/ConfirmDialog/ConfirmDialog';
+import EditCustomerDialog from '../../molecules/EditCustomerDialog/EditCustomerDialog';
+import { apiRequest } from '../../../utils/api';
 import './CustomersPage.css';
 
 const CustomersPage = () => {
@@ -9,6 +14,21 @@ const CustomersPage = () => {
   const [error, setError] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [customerToDelete, setCustomerToDelete] = useState(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [customerToEdit, setCustomerToEdit] = useState(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [createFormData, setCreateFormData] = useState({
+    userName: '',
+    fullName: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+    gender: 'MALE'
+  });
+  const [createErrors, setCreateErrors] = useState({});
+  const [createLoading, setCreateLoading] = useState(false);
+  const [snackbar, setSnackbar] = useState({ isOpen: false, message: '', type: 'success' });
 
   useEffect(() => {
     fetchCustomers();
@@ -17,18 +37,9 @@ const CustomersPage = () => {
   const fetchCustomers = async () => {
     try {
       setLoading(true);
-      const user = JSON.parse(localStorage.getItem('user'));
-      const token = user?.token || user?.accessToken;
 
-      console.log('User from localStorage:', user);
-      console.log('Token being sent:', token);
-
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users`, {
+        method: 'GET'
       });
 
       const result = await response.json();
@@ -61,19 +72,179 @@ const CustomersPage = () => {
     setShowDeleteDialog(true);
   };
 
+  const handleEditClick = (customer) => {
+    setCustomerToEdit(customer);
+    setShowEditDialog(true);
+  };
+
+  const handleSaveEdit = async (updateData) => {
+    if (!customerToEdit) return;
+
+    try {
+      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/${customerToEdit.id}`, {
+        method: 'PUT',
+        body: JSON.stringify(updateData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const updatedCustomer = result.data || result;
+        
+        // Update customer in list
+        setCustomers(customers.map(c => 
+          c.id === customerToEdit.id ? { ...c, ...updatedCustomer } : c
+        ));
+        
+        setShowEditDialog(false);
+        setCustomerToEdit(null);
+        setError('');
+        
+        // Show success snackbar
+        setSnackbar({
+          isOpen: true,
+          message: 'Customer updated successfully!',
+          type: 'success'
+        });
+      } else {
+        const result = await response.json();
+        const errorData = result.data || result;
+        setError(errorData.message || 'Failed to update customer');
+      }
+    } catch (err) {
+      setError('Network error. Failed to update customer.');
+      console.error('Error updating customer:', err);
+    }
+  };
+
+  const cancelEdit = () => {
+    setShowEditDialog(false);
+    setCustomerToEdit(null);
+  };
+
+  const handleCreateClick = () => {
+    setShowCreateForm(true);
+  };
+
+  const handleCreateChange = (e) => {
+    const { name, value } = e.target;
+    setCreateFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    if (createErrors[name]) {
+      setCreateErrors(prev => ({ ...prev, [name]: '' }));
+    }
+    setError('');
+  };
+
+  const validateCreate = () => {
+    const newErrors = {};
+    if (!createFormData.userName.trim()) {
+      newErrors.userName = 'Username is required';
+    }
+    if (!createFormData.fullName.trim()) {
+      newErrors.fullName = 'Full name is required';
+    }
+    if (!createFormData.email.trim()) {
+      newErrors.email = 'Email is required';
+    } else if (!/\S+@\S+\.\S+/.test(createFormData.email)) {
+      newErrors.email = 'Email is invalid';
+    }
+    if (!createFormData.phone.trim()) {
+      newErrors.phone = 'Phone is required';
+    }
+    if (!createFormData.password) {
+      newErrors.password = 'Password is required';
+    } else if (createFormData.password.length < 6) {
+      newErrors.password = 'Password must be at least 6 characters';
+    }
+    if (createFormData.password !== createFormData.confirmPassword) {
+      newErrors.confirmPassword = 'Passwords do not match';
+    }
+    return newErrors;
+  };
+
+  const handleSubmitCreate = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    const newErrors = validateCreate();
+    if (Object.keys(newErrors).length > 0) {
+      setCreateErrors(newErrors);
+      return;
+    }
+
+    setCreateLoading(true);
+
+    try {
+      const { confirmPassword, ...createData } = createFormData;
+
+      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users`, {
+        method: 'POST',
+        body: JSON.stringify(createData)
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        const newCustomer = result.data || result;
+        
+        // Add new customer to list
+        setCustomers([newCustomer, ...customers]);
+        
+        // Reset form and go back to list
+        setCreateFormData({
+          userName: '',
+          fullName: '',
+          email: '',
+          phone: '',
+          password: '',
+          confirmPassword: '',
+          gender: 'MALE'
+        });
+        setCreateErrors({});
+        setShowCreateForm(false);
+        setError('');
+        
+        // Show success snackbar
+        setSnackbar({
+          isOpen: true,
+          message: 'Customer created successfully!',
+          type: 'success'
+        });
+      } else {
+        const result = await response.json();
+        const errorData = result.data || result;
+        setError(errorData.message || 'Failed to create customer');
+      }
+    } catch (err) {
+      setError('Network error. Failed to create customer.');
+      console.error('Error creating customer:', err);
+    } finally {
+      setCreateLoading(false);
+    }
+  };
+
+  const handleCancelCreate = () => {
+    setCreateFormData({
+      userName: '',
+      fullName: '',
+      email: '',
+      phone: '',
+      password: '',
+      confirmPassword: '',
+      gender: 'MALE'
+    });
+    setCreateErrors({});
+    setShowCreateForm(false);
+    setError('');
+  };
+
   const confirmDelete = async () => {
     if (!customerToDelete) return;
 
     try {
-      const user = JSON.parse(localStorage.getItem('user'));
-      const token = user?.token || user?.accessToken;
-
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/${customerToDelete.id}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/${customerToDelete.id}`, {
+        method: 'DELETE'
       });
 
       if (response.ok) {
@@ -107,6 +278,138 @@ const CustomersPage = () => {
     );
   }
 
+  // Show create form
+  if (showCreateForm) {
+    return (
+      <div className="customers-page">
+        <div className="page-header">
+          <button className="back-btn" onClick={handleCancelCreate}>
+            <Icon name="arrowLeft" size={20} />
+            Back to Customers
+          </button>
+        </div>
+
+        <div className="create-customer-container">
+          <div className="create-customer-card">
+            <h1>Create New Customer</h1>
+            <p className="subtitle">Add a new customer to the system</p>
+
+            {error && (
+              <div className="error-message">
+                {error}
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitCreate} className="create-customer-form">
+              <div className="form-grid">
+                <div className="form-group">
+                  <label>Username *</label>
+                  <Input
+                    type="text"
+                    name="userName"
+                    value={createFormData.userName}
+                    onChange={handleCreateChange}
+                    placeholder="Enter username"
+                    required
+                    error={createErrors.userName}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Full Name *</label>
+                  <Input
+                    type="text"
+                    name="fullName"
+                    value={createFormData.fullName}
+                    onChange={handleCreateChange}
+                    placeholder="Enter full name"
+                    required
+                    error={createErrors.fullName}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Email *</label>
+                  <Input
+                    type="email"
+                    name="email"
+                    value={createFormData.email}
+                    onChange={handleCreateChange}
+                    placeholder="Enter email address"
+                    required
+                    error={createErrors.email}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Phone *</label>
+                  <Input
+                    type="tel"
+                    name="phone"
+                    value={createFormData.phone}
+                    onChange={handleCreateChange}
+                    placeholder="Enter phone number"
+                    required
+                    error={createErrors.phone}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Gender *</label>
+                  <select
+                    name="gender"
+                    value={createFormData.gender}
+                    onChange={handleCreateChange}
+                    className="select-input"
+                  >
+                    <option value="MALE">Male</option>
+                    <option value="FEMALE">Female</option>
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Password *</label>
+                  <Input
+                    type="password"
+                    name="password"
+                    value={createFormData.password}
+                    onChange={handleCreateChange}
+                    placeholder="Enter password"
+                    required
+                    error={createErrors.password}
+                  />
+                </div>
+
+                <div className="form-group full-width">
+                  <label>Confirm Password *</label>
+                  <Input
+                    type="password"
+                    name="confirmPassword"
+                    value={createFormData.confirmPassword}
+                    onChange={handleCreateChange}
+                    placeholder="Confirm password"
+                    required
+                    error={createErrors.confirmPassword}
+                  />
+                </div>
+              </div>
+
+              <div className="form-actions">
+                <Button type="button" variant="secondary" onClick={handleCancelCreate}>
+                  Cancel
+                </Button>
+                <Button type="submit" variant="primary" disabled={createLoading}>
+                  {createLoading ? 'Creating...' : 'Create Customer'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show customer list
   return (
     <div className="customers-page">
       <div className="page-header">
@@ -114,7 +417,7 @@ const CustomersPage = () => {
           <h1>Customer Management</h1>
           <p>View and manage customer information</p>
         </div>
-        <Button variant="primary">+ Add Customer</Button>
+        <Button variant="primary" onClick={handleCreateClick}>+ Add Customer</Button>
       </div>
 
       {error && (
@@ -167,22 +470,13 @@ const CustomersPage = () => {
                   <td>
                     <div className="action-buttons">
                       <button className="btn-icon btn-view" title="View">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                          <circle cx="12" cy="12" r="3"></circle>
-                        </svg>
+                        <Icon name="eye" size={18} />
                       </button>
-                      <button className="btn-icon btn-edit" title="Edit">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                        </svg>
+                      <button className="btn-icon btn-edit" title="Edit" onClick={() => handleEditClick(customer)}>
+                        <Icon name="edit" size={18} />
                       </button>
                       <button className="btn-icon btn-delete" title="Delete" onClick={() => handleDeleteClick(customer)}>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <polyline points="3 6 5 6 21 6"></polyline>
-                          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                        </svg>
+                        <Icon name="trash" size={18} />
                       </button>
                     </div>
                   </td>
@@ -202,6 +496,21 @@ const CustomersPage = () => {
         confirmText="Delete"
         cancelText="Cancel"
         type="danger"
+      />
+
+      <EditCustomerDialog
+        isOpen={showEditDialog}
+        customer={customerToEdit}
+        onSave={handleSaveEdit}
+        onCancel={cancelEdit}
+      />
+
+      <Snackbar
+        isOpen={snackbar.isOpen}
+        message={snackbar.message}
+        type={snackbar.type}
+        onClose={() => setSnackbar({ ...snackbar, isOpen: false })}
+        duration={3000}
       />
     </div>
   );
