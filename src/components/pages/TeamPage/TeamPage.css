@@ -173,6 +173,12 @@
   color: #888;
 }
 
+.roles-cell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
 .role-badge {
   background: #e3f2fd;
   color: #1976d2;
@@ -180,6 +186,7 @@
   border-radius: 12px;
   font-size: 12px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .action-buttons {
@@ -201,6 +208,14 @@
 
 .btn-icon:hover {
   background: #f0f0f0;
+}
+
+.btn-assign-role {
+  color: #667eea;
+}
+
+.btn-assign-role:hover {
+  background: #f0f0ff;
 }
 
 .btn-edit {

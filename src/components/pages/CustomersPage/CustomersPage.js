@@ -5,6 +5,7 @@ import Input from '../../atoms/Input/Input';
 import Snackbar from '../../atoms/Snackbar/Snackbar';
 import ConfirmDialog from '../../molecules/ConfirmDialog/ConfirmDialog';
 import EditCustomerDialog from '../../molecules/EditCustomerDialog/EditCustomerDialog';
+import CustomerDetailPage from '../CustomerDetailPage/CustomerDetailPage';
 import { apiRequest } from '../../../utils/api';
 import './CustomersPage.css';
 
@@ -17,6 +18,8 @@ const CustomersPage = () => {
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [customerToEdit, setCustomerToEdit] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showDetailView, setShowDetailView] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [createFormData, setCreateFormData] = useState({
     userName: '',
     fullName: '',
@@ -75,6 +78,18 @@ const CustomersPage = () => {
   const handleEditClick = (customer) => {
     setCustomerToEdit(customer);
     setShowEditDialog(true);
+  };
+
+  const handleViewClick = (customer) => {
+    setSelectedCustomerId(customer.id);
+    setShowDetailView(true);
+  };
+
+  const handleBackFromDetail = () => {
+    setShowDetailView(false);
+    setSelectedCustomerId(null);
+    // Refresh the customer list when coming back from detail
+    fetchCustomers();
   };
 
   const handleSaveEdit = async (updateData) => {
@@ -278,6 +293,16 @@ const CustomersPage = () => {
     );
   }
 
+  // Show detail view
+  if (showDetailView) {
+    return (
+      <CustomerDetailPage
+        customerId={selectedCustomerId}
+        onBack={handleBackFromDetail}
+      />
+    );
+  }
+
   // Show create form
   if (showCreateForm) {
     return (
@@ -469,11 +494,8 @@ const CustomersPage = () => {
                   <td>{formatDate(customer.createdAt)}</td>
                   <td>
                     <div className="action-buttons">
-                      <button className="btn-icon btn-view" title="View">
+                      <button className="btn-icon btn-view" title="View" onClick={() => handleViewClick(customer)}>
                         <Icon name="eye" size={18} />
-                      </button>
-                      <button className="btn-icon btn-edit" title="Edit" onClick={() => handleEditClick(customer)}>
-                        <Icon name="edit" size={18} />
                       </button>
                       <button className="btn-icon btn-delete" title="Delete" onClick={() => handleDeleteClick(customer)}>
                         <Icon name="trash" size={18} />

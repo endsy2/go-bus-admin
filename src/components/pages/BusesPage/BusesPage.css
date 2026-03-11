@@ -4,6 +4,48 @@
   overflow-y: auto;
 }
 
+.loading-state {
+  text-align: center;
+  padding: 60px;
+  font-size: 18px;
+  color: var(--text-dark);
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  border-left: 4px solid #c33;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.empty-state svg,
+.empty-state .icon {
+  color: #ccc;
+  margin-bottom: 20px;
+}
+
+.empty-state h3 {
+  font-size: 24px;
+  color: var(--text-dark);
+  margin-bottom: 10px;
+}
+
+.empty-state p {
+  color: var(--text-light);
+  margin-bottom: 30px;
+  font-size: 16px;
+}
+
 .buses-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
@@ -68,11 +110,15 @@
 .spec-label {
   color: var(--text-light);
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .spec-value {
   font-weight: 600;
   color: var(--text-dark);
+  text-transform: capitalize;
 }
 
 .bus-status {
@@ -99,4 +145,29 @@
 
 .bus-actions button {
   flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+@media (max-width: 768px) {
+  .buses-page {
+    padding: 20px;
+  }
+
+  .buses-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bus-card {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .spec-item {
+    flex-direction: column;
+    gap: 4px;
+  }
 }

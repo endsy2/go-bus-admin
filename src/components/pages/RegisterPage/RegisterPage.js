@@ -16,6 +16,7 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -85,17 +86,66 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
         body: JSON.stringify(registerData)
       });
 
-      const data = await response.json();
+      const responseData = await response.json();
 
       if (response.ok) {
-        const userProfile = {
-          ...data,
-          fullName: data.fullName || registerData.fullName,
-          userName: data.userName || registerData.userName
-        };
-        localStorage.setItem('user', JSON.stringify(userProfile));
-        onRegisterSuccess(userProfile);
+        const data = responseData.data || responseData;
+        const token = data.token || data.accessToken;
+
+        // If registration returns a token, fetch profile and login
+        if (token) {
+          try {
+            const profileResponse = await fetch(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/profile`, {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+              }
+            });
+
+            if (profileResponse.ok) {
+              const profileResult = await profileResponse.json();
+              const profileData = profileResult.data || profileResult;
+              
+              const userProfile = {
+                ...data,
+                ...profileData,
+                fullName: profileData.fullName || registerData.fullName,
+                userName: profileData.userName || registerData.userName
+              };
+              
+              localStorage.setItem('user', JSON.stringify(userProfile));
+              onRegisterSuccess(userProfile);
+            } else {
+              // Profile fetch failed, use registration data
+              const userProfile = {
+                ...data,
+                fullName: data.fullName || registerData.fullName,
+                userName: data.userName || registerData.userName
+              };
+              localStorage.setItem('user', JSON.stringify(userProfile));
+              onRegisterSuccess(userProfile);
+            }
+          } catch (profileError) {
+            console.warn('Profile fetch failed:', profileError);
+            const userProfile = {
+              ...data,
+              fullName: data.fullName || registerData.fullName,
+              userName: data.userName || registerData.userName
+            };
+            localStorage.setItem('user', JSON.stringify(userProfile));
+            onRegisterSuccess(userProfile);
+          }
+        } else {
+          // No token returned, redirect to login
+          setIsSuccess(true);
+          setApiError('Registration successful! Redirecting to login...');
+          setTimeout(() => {
+            onSwitchToLogin();
+          }, 2000);
+        }
       } else {
+        const data = responseData.data || responseData;
         console.error('Registration failed:', data);
         setApiError(data.message || `Registration failed: ${response.status} ${response.statusText}`);
       }
@@ -117,7 +167,7 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
 
         <form onSubmit={handleSubmit} className="register-form">
           {apiError && (
-            <div className="api-error">
+            <div className={`api-error ${isSuccess ? 'success' : ''}`}>
               {apiError}
             </div>
           )}

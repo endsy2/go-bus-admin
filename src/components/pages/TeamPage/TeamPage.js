@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Icon from '../../atoms/Icon/Icon';
 import Snackbar from '../../atoms/Snackbar/Snackbar';
+import AssignRoleDialog from '../../molecules/AssignRoleDialog/AssignRoleDialog';
 import { apiRequest } from '../../../utils/api';
 import './TeamPage.css';
 
@@ -11,6 +12,8 @@ const TeamPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [snackbar, setSnackbar] = useState({ isOpen: false, message: '', type: 'success' });
+  const [showAssignRoleDialog, setShowAssignRoleDialog] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   useEffect(() => {
     if (activeTab === 'roles') {
@@ -76,6 +79,56 @@ const TeamPage = () => {
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
   };
 
+  const handleAssignRole = (user) => {
+    setSelectedUser(user);
+    setShowAssignRoleDialog(true);
+  };
+
+  const handleSaveRoles = async (roles) => {
+    if (!selectedUser) return;
+
+    try {
+      const response = await apiRequest(
+        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/users/${selectedUser.id}/roles`,
+        {
+          method: 'PUT',
+          body: JSON.stringify({ roles })
+        }
+      );
+
+      if (response.ok) {
+        setShowAssignRoleDialog(false);
+        setSnackbar({
+          isOpen: true,
+          message: 'Roles updated successfully!',
+          type: 'success'
+        });
+        // Refresh team members to show updated roles
+        fetchTeamMembers();
+      } else {
+        const result = await response.json();
+        const errorData = result.data || result;
+        setSnackbar({
+          isOpen: true,
+          message: errorData.message || 'Failed to update roles',
+          type: 'error'
+        });
+      }
+    } catch (err) {
+      setSnackbar({
+        isOpen: true,
+        message: 'Network error. Failed to update roles.',
+        type: 'error'
+      });
+      console.error('Error updating roles:', err);
+    }
+  };
+
+  const cancelAssignRole = () => {
+    setShowAssignRoleDialog(false);
+    setSelectedUser(null);
+  };
+
   const renderTeamMembers = () => {
     if (loading) {
       return <div className="loading-state">Loading team members...</div>;
@@ -124,11 +177,28 @@ const TeamPage = () => {
                     <td>{member.email}</td>
                     <td>{member.phone}</td>
                     <td>
-                      <span className="role-badge">User</span>
+                      <div className="roles-cell">
+                        {member.roles && member.roles.length > 0 ? (
+                          member.roles.map((role, index) => (
+                            <span key={index} className="role-badge">
+                              {typeof role === 'string' ? role.replace('ROLE_', '') : role.name?.replace('ROLE_', '')}
+                            </span>
+                          ))
+                        ) : (
+                          <span className="role-badge">User</span>
+                        )}
+                      </div>
                     </td>
                     <td>{formatDate(member.createdAt)}</td>
                     <td>
                       <div className="action-buttons">
+                        <button 
+                          className="btn-icon btn-assign-role" 
+                          title="Assign Roles"
+                          onClick={() => handleAssignRole(member)}
+                        >
+                          <Icon name="shield" size={18} />
+                        </button>
                         <button className="btn-icon btn-edit" title="Edit">
                           <Icon name="edit" size={18} />
                         </button>
@@ -242,6 +312,13 @@ const TeamPage = () => {
       <div className="tab-content">
         {activeTab === 'members' ? renderTeamMembers() : renderRolesAndPermissions()}
       </div>
+
+      <AssignRoleDialog
+        isOpen={showAssignRoleDialog}
+        user={selectedUser}
+        onSave={handleSaveRoles}
+        onCancel={cancelAssignRole}
+      />
 
       <Snackbar
         isOpen={snackbar.isOpen}
