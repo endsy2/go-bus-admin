@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Button from '../../atoms/Button/Button';
 import Icon from '../../atoms/Icon/Icon';
 import Snackbar from '../../atoms/Snackbar/Snackbar';
+import BusDetailPage from '../BusDetailPage/BusDetailPage';
 import { apiRequest } from '../../../utils/api';
 import './BusesPage.css';
 
@@ -10,6 +11,7 @@ const BusesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [snackbar, setSnackbar] = useState({ isOpen: false, message: '', type: 'success' });
+  const [selectedBusId, setSelectedBusId] = useState(null);
 
   useEffect(() => {
     fetchBuses();
@@ -39,6 +41,47 @@ const BusesPage = () => {
       setLoading(false);
     }
   };
+
+  // Generate fake plate number
+  const generatePlateNumber = (id) => {
+    const letters = ['ABC', 'XYZ', 'QWE', 'RTY', 'UIO'];
+    const letter = letters[id % letters.length];
+    const number = String(1000 + (id * 234)).slice(0, 4);
+    return `${letter}-${number}`;
+  };
+
+  // Generate fake status
+  const getStatus = (id) => {
+    const statuses = ['Active', 'Active', 'Active', 'Maintenance', 'Standby'];
+    return statuses[id % statuses.length];
+  };
+
+  // Get route name (fake for now)
+  const getRouteName = (routeId) => {
+    if (!routeId) return 'Not Assigned';
+    const routes = {
+      1: 'Downtown Express',
+      2: 'Airport Shuttle',
+      3: 'Cross Country',
+      4: 'City Loop',
+      5: 'Coastal Route'
+    };
+    return routes[routeId] || `Route ${routeId}`;
+  };
+
+  const handleViewDetails = (busId) => {
+    setSelectedBusId(busId);
+  };
+
+  const handleBackToList = () => {
+    setSelectedBusId(null);
+    fetchBuses(); // Refresh the list
+  };
+
+  // Show detail page if a bus is selected
+  if (selectedBusId) {
+    return <BusDetailPage busId={selectedBusId} onBack={handleBackToList} />;
+  }
 
   if (loading) {
     return (
@@ -78,56 +121,56 @@ const BusesPage = () => {
           </Button>
         </div>
       ) : (
-        <div className="buses-grid">
-          {buses.map(bus => (
-            <div key={bus.id} className="bus-card">
-              <div className="bus-icon">🚌</div>
-              <div className="bus-details">
-                <h3>{bus.busNumber}</h3>
-                <span className="bus-id">ID: {bus.id}</span>
-                <div className="bus-specs">
-                  <div className="spec-item">
-                    <span className="spec-label">
-                      <Icon name="users" size={14} />
-                      Capacity:
-                    </span>
-                    <span className="spec-value">{bus.totalSeats} seats</span>
-                  </div>
-                  <div className="spec-item">
-                    <span className="spec-label">
-                      <Icon name="bus" size={14} />
-                      Type:
-                    </span>
-                    <span className="spec-value">{bus.busType}</span>
-                  </div>
-                  <div className="spec-item">
-                    <span className="spec-label">
-                      <Icon name="map" size={14} />
-                      Route ID:
-                    </span>
-                    <span className="spec-value">{bus.routeId || 'N/A'}</span>
-                  </div>
-                  <div className="spec-item">
-                    <span className="spec-label">
-                      <Icon name="grid" size={14} />
-                      Layout ID:
-                    </span>
-                    <span className="spec-value">{bus.layoutId || 'N/A'}</span>
-                  </div>
-                </div>
-                <div className="bus-actions">
-                  <Button variant="secondary">
-                    <Icon name="eye" size={16} />
-                    View Details
-                  </Button>
-                  <Button variant="primary">
-                    <Icon name="edit" size={16} />
-                    Edit
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="buses-table-container">
+          <table className="buses-table">
+            <thead>
+              <tr>
+                <th>BUS ID</th>
+                <th>NAME/MODEL</th>
+                <th>PLATE NUMBER</th>
+                <th>ROUTE</th>
+                <th>STATUS</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody>
+              {buses.map(bus => {
+                const status = getStatus(bus.id);
+                return (
+                  <tr key={bus.id}>
+                    <td className="bus-id-cell">B-{bus.id}</td>
+                    <td>
+                      <div className="bus-name-cell">
+                        <div className="bus-name">{bus.busNumber}</div>
+                        <div className="bus-type">{bus.busType}</div>
+                      </div>
+                    </td>
+                    <td>{generatePlateNumber(bus.id)}</td>
+                    <td>{getRouteName(bus.routeId)}</td>
+                    <td>
+                      <span className={`status-badge status-${status.toLowerCase()}`}>
+                        {status}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <button 
+                          className="btn-icon" 
+                          title="View Details"
+                          onClick={() => handleViewDetails(bus.id)}
+                        >
+                          <Icon name="eye" size={18} />
+                        </button>
+                        <button className="btn-icon" title="Delete">
+                          <Icon name="trash" size={18} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       )}
 

@@ -32,16 +32,40 @@ const CustomersPage = () => {
   const [createErrors, setCreateErrors] = useState({});
   const [createLoading, setCreateLoading] = useState(false);
   const [snackbar, setSnackbar] = useState({ isOpen: false, message: '', type: 'success' });
+  const [filters, setFilters] = useState({
+    userId: '',
+    email: '',
+    phone: '',
+    username: '',
+    googleId: ''
+  });
 
   useEffect(() => {
     fetchCustomers();
   }, []);
 
-  const fetchCustomers = async () => {
+  const fetchCustomers = async (filterParams = null) => {
     try {
       setLoading(true);
 
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users`, {
+      // Always use the filter endpoint
+      let url = `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/filter/specification`;
+      
+      // If filters are provided, add them as query parameters
+      if (filterParams) {
+        const queryParams = new URLSearchParams();
+        Object.keys(filterParams).forEach(key => {
+          if (filterParams[key]) {
+            queryParams.append(key, filterParams[key]);
+          }
+        });
+        const queryString = queryParams.toString();
+        if (queryString) {
+          url = `${url}?${queryString}`;
+        }
+      }
+
+      const response = await apiRequest(url, {
         method: 'GET'
       });
 
@@ -68,6 +92,46 @@ const CustomersPage = () => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  };
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    fetchCustomers(filters);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      userId: '',
+      email: '',
+      phone: '',
+      username: '',
+      googleId: ''
+    });
+    fetchCustomers();
+  };
+
+  const handleCopyToClipboard = (text, label) => {
+    navigator.clipboard.writeText(text).then(() => {
+      setSnackbar({
+        isOpen: true,
+        message: `${label} copied to clipboard!`,
+        type: 'success'
+      });
+    }).catch(err => {
+      console.error('Failed to copy:', err);
+      setSnackbar({
+        isOpen: true,
+        message: 'Failed to copy to clipboard',
+        type: 'error'
+      });
+    });
   };
 
   const handleDeleteClick = (customer) => {
@@ -288,7 +352,126 @@ const CustomersPage = () => {
   if (loading) {
     return (
       <div className="customers-page">
-        <div className="loading-state">Loading customers...</div>
+        <div className="page-header">
+          <div>
+            <h1>Customer Management</h1>
+            <p>View and manage customer information</p>
+          </div>
+          <Button variant="primary" disabled>
+            <Icon name="plus" size={18} />
+            Add Customer
+          </Button>
+        </div>
+
+        <div className="filters-container">
+          <div className="filters-grid">
+            <div className="filter-group">
+              <label>User ID</label>
+              <Input
+                type="text"
+                name="userId"
+                value={filters.userId}
+                onChange={handleFilterChange}
+                placeholder="Enter user ID"
+                disabled
+              />
+            </div>
+            <div className="filter-group">
+              <label>Username</label>
+              <Input
+                type="text"
+                name="username"
+                value={filters.username}
+                onChange={handleFilterChange}
+                placeholder="Enter username"
+                disabled
+              />
+            </div>
+            <div className="filter-group">
+              <label>Email</label>
+              <Input
+                type="text"
+                name="email"
+                value={filters.email}
+                onChange={handleFilterChange}
+                placeholder="Enter email"
+                disabled
+              />
+            </div>
+            <div className="filter-group">
+              <label>Phone</label>
+              <Input
+                type="text"
+                name="phone"
+                value={filters.phone}
+                onChange={handleFilterChange}
+                placeholder="Enter phone"
+                disabled
+              />
+            </div>
+            <div className="filter-group">
+              <label>Google ID</label>
+              <Input
+                type="text"
+                name="googleId"
+                value={filters.googleId}
+                onChange={handleFilterChange}
+                placeholder="Enter Google ID"
+                disabled
+              />
+            </div>
+          </div>
+          <div className="filter-actions">
+            <Button variant="secondary" disabled>
+              Clear Filters
+            </Button>
+            <Button variant="primary" disabled>
+              Apply Filters
+            </Button>
+          </div>
+        </div>
+
+        <div className="customers-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Customer ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>Gender</th>
+                <th>Joined Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {[1, 2, 3, 4, 5].map(i => (
+                <tr key={i}>
+                  <td><div className="shimmer shimmer-text"></div></td>
+                  <td>
+                    <div className="customer-name">
+                      <div className="shimmer shimmer-avatar"></div>
+                      <div style={{ flex: 1 }}>
+                        <div className="shimmer shimmer-text" style={{ marginBottom: '4px' }}></div>
+                        <div className="shimmer shimmer-text" style={{ width: '60%' }}></div>
+                      </div>
+                    </div>
+                  </td>
+                  <td><div className="shimmer shimmer-text"></div></td>
+                  <td><div className="shimmer shimmer-text"></div></td>
+                  <td><div className="shimmer shimmer-badge"></div></td>
+                  <td><div className="shimmer shimmer-text"></div></td>
+                  <td>
+                    <div className="action-buttons">
+                      <div className="shimmer shimmer-icon"></div>
+                      <div className="shimmer shimmer-icon"></div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
@@ -442,7 +625,10 @@ const CustomersPage = () => {
           <h1>Customer Management</h1>
           <p>View and manage customer information</p>
         </div>
-        <Button variant="primary" onClick={handleCreateClick}>+ Add Customer</Button>
+        <Button variant="primary" onClick={handleCreateClick}>
+          <Icon name="plus" size={18} />
+          Add Customer
+        </Button>
       </div>
 
       {error && (
@@ -450,6 +636,69 @@ const CustomersPage = () => {
           {error}
         </div>
       )}
+
+      <div className="filters-container">
+        <div className="filters-grid">
+          <div className="filter-group">
+            <label>User ID</label>
+            <Input
+              type="text"
+              name="userId"
+              value={filters.userId}
+              onChange={handleFilterChange}
+              placeholder="Enter user ID"
+            />
+          </div>
+          <div className="filter-group">
+            <label>Username</label>
+            <Input
+              type="text"
+              name="username"
+              value={filters.username}
+              onChange={handleFilterChange}
+              placeholder="Enter username"
+            />
+          </div>
+          <div className="filter-group">
+            <label>Email</label>
+            <Input
+              type="text"
+              name="email"
+              value={filters.email}
+              onChange={handleFilterChange}
+              placeholder="Enter email"
+            />
+          </div>
+          <div className="filter-group">
+            <label>Phone</label>
+            <Input
+              type="text"
+              name="phone"
+              value={filters.phone}
+              onChange={handleFilterChange}
+              placeholder="Enter phone"
+            />
+          </div>
+          <div className="filter-group">
+            <label>Google ID</label>
+            <Input
+              type="text"
+              name="googleId"
+              value={filters.googleId}
+              onChange={handleFilterChange}
+              placeholder="Enter Google ID"
+            />
+          </div>
+        </div>
+        <div className="filter-actions">
+          <Button variant="secondary" onClick={handleClearFilters}>
+            Clear Filters
+          </Button>
+          <Button variant="primary" onClick={handleApplyFilters}>
+            Apply Filters
+          </Button>
+        </div>
+      </div>
 
       <div className="customers-table">
         <table>
@@ -474,7 +723,18 @@ const CustomersPage = () => {
             ) : (
               customers.map(customer => (
                 <tr key={customer.id}>
-                  <td className="customer-id">#{customer.id}</td>
+                  <td className="customer-id">
+                    <div className="cell-with-copy">
+                      #{customer.id}
+                      <button 
+                        className="btn-copy" 
+                        title="Copy ID"
+                        onClick={() => handleCopyToClipboard(customer.id.toString(), 'Customer ID')}
+                      >
+                        <Icon name="copy" size={14} />
+                      </button>
+                    </div>
+                  </td>
                   <td>
                     <div className="customer-name">
                       <div className="avatar">
@@ -486,8 +746,30 @@ const CustomersPage = () => {
                       </div>
                     </div>
                   </td>
-                  <td>{customer.email}</td>
-                  <td>{customer.phone}</td>
+                  <td>
+                    <div className="cell-with-copy">
+                      {customer.email}
+                      <button 
+                        className="btn-copy" 
+                        title="Copy Email"
+                        onClick={() => handleCopyToClipboard(customer.email, 'Email')}
+                      >
+                        <Icon name="copy" size={14} />
+                      </button>
+                    </div>
+                  </td>
+                  <td>
+                    <div className="cell-with-copy">
+                      {customer.phone}
+                      <button 
+                        className="btn-copy" 
+                        title="Copy Phone"
+                        onClick={() => handleCopyToClipboard(customer.phone, 'Phone')}
+                      >
+                        <Icon name="copy" size={14} />
+                      </button>
+                    </div>
+                  </td>
                   <td>
                     <span className="gender-badge">{customer.gender}</span>
                   </td>

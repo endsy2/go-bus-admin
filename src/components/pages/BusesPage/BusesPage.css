@@ -46,109 +46,114 @@
   font-size: 16px;
 }
 
-.buses-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
-  gap: 20px;
-}
-
-.bus-card {
-  background: var(--white);
-  padding: 25px;
+/* Table Styles */
+.buses-table-container {
+  background: white;
   border-radius: 12px;
   box-shadow: var(--shadow);
-  display: flex;
-  gap: 20px;
-  transition: transform 0.3s ease;
+  overflow: hidden;
 }
 
-.bus-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 4px 12px rgba(65, 105, 225, 0.15);
+.buses-table {
+  width: 100%;
+  border-collapse: collapse;
 }
 
-.bus-icon {
-  font-size: 60px;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-  width: 100px;
-  height: 100px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
+.buses-table thead {
+  background: #fafafa;
+  border-bottom: 2px solid #f0f0f0;
 }
 
-.bus-details {
-  flex: 1;
+.buses-table th {
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.bus-details h3 {
-  font-size: 20px;
-  margin-bottom: 5px;
+.buses-table tbody tr {
+  border-bottom: 1px solid #f5f5f5;
+  transition: background 0.2s;
+}
+
+.buses-table tbody tr:hover {
+  background: #fafafa;
+}
+
+.buses-table td {
+  padding: 20px;
   color: var(--text-dark);
-}
-
-.bus-id {
-  color: var(--text-light);
   font-size: 14px;
-  display: block;
-  margin-bottom: 15px;
 }
 
-.bus-specs {
-  margin-bottom: 20px;
+.bus-id-cell {
+  font-weight: 600;
+  color: var(--primary-color);
 }
 
-.spec-item {
+.bus-name-cell {
   display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #F0F0F0;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.spec-label {
-  color: var(--text-light);
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.spec-value {
+.bus-name {
   font-weight: 600;
   color: var(--text-dark);
-  text-transform: capitalize;
 }
 
-.bus-status {
-  padding: 4px 12px;
-  border-radius: 12px;
+.bus-type {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
 }
 
-.bus-status.active {
-  background: #D4EDDA;
+.status-badge.status-active {
+  background: #d4edda;
   color: #155724;
 }
 
-.bus-status.maintenance {
-  background: #FFF3CD;
+.status-badge.status-maintenance {
+  background: #fff3cd;
   color: #856404;
 }
 
-.bus-actions {
-  display: flex;
-  gap: 10px;
+.status-badge.status-standby {
+  background: #e2e3e5;
+  color: #383d41;
 }
 
-.bus-actions button {
-  flex: 1;
+.action-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 6px;
+  color: var(--text-light);
+  transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+}
+
+.btn-icon:hover {
+  background: #f0f0f0;
+  color: var(--primary-color);
 }
 
 @media (max-width: 768px) {
@@ -156,18 +161,11 @@
     padding: 20px;
   }
 
-  .buses-grid {
-    grid-template-columns: 1fr;
+  .buses-table-container {
+    overflow-x: auto;
   }
 
-  .bus-card {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .spec-item {
-    flex-direction: column;
-    gap: 4px;
+  .buses-table {
+    min-width: 800px;
   }
 }
