@@ -34,10 +34,11 @@
 
 /* Filters Section */
 .filters-container {
-  background: white;
+  background: var(--card-bg);
   padding: 24px;
   border-radius: 12px;
   box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
   margin-bottom: 24px;
 }
 
@@ -155,10 +156,11 @@
 }
 
 .customers-table {
-  background: var(--white);
+  background: var(--card-bg);
   padding: 25px;
   border-radius: 12px;
   box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
   overflow-x: auto;
 }
 
@@ -168,7 +170,7 @@
 }
 
 .customers-table thead {
-  background: var(--bg-color);
+  background: var(--table-hover);
 }
 
 .customers-table th {
@@ -181,12 +183,12 @@
 
 .customers-table td {
   padding: 15px;
-  border-bottom: 1px solid #E8E8E8;
+  border-bottom: 1px solid var(--border-color);
   color: var(--text-dark);
 }
 
 .customers-table tbody tr:hover {
-  background: var(--bg-color);
+  background: var(--table-hover);
 }
 
 .customer-id {
@@ -282,21 +284,21 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: white;
-  border: 1px solid #ddd;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   padding: 10px 16px;
   border-radius: 8px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-light);
   cursor: pointer;
   transition: all 0.2s;
   margin-bottom: 20px;
 }
 
 .back-btn:hover {
-  background: #f5f5f5;
-  border-color: #ccc;
-  color: #333;
+  background: var(--table-hover);
+  border-color: var(--primary-color);
+  color: var(--text-dark);
 }
 
 .create-customer-container {
@@ -305,10 +307,11 @@
 }
 
 .create-customer-card {
-  background: white;
+  background: var(--card-bg);
   padding: 40px;
   border-radius: 12px;
   box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
   max-width: 900px;
   width: 100%;
 }
@@ -316,12 +319,12 @@
 .create-customer-card h1 {
   margin: 0 0 8px 0;
   font-size: 28px;
-  color: #333;
+  color: var(--text-dark);
 }
 
 .subtitle {
   margin: 0 0 30px 0;
-  color: #666;
+  color: var(--text-light);
   font-size: 15px;
 }
 
@@ -348,18 +351,18 @@
 .form-group label {
   font-size: 14px;
   font-weight: 600;
-  color: #333;
+  color: var(--text-dark);
   margin-bottom: 8px;
 }
 
 .select-input {
   width: 100%;
   padding: 12px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 14px;
-  color: #333;
-  background: white;
+  color: var(--text-dark);
+  background: var(--input-bg);
   transition: border-color 0.3s;
 }
 
@@ -373,7 +376,7 @@
   gap: 12px;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  border-top: 1px solid var(--border-color);
 }
 
 @media (max-width: 768px) {

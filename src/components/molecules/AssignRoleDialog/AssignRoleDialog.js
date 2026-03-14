@@ -2,9 +2,13 @@ import React, { useState, useEffect } from 'react';
 import Button from '../../atoms/Button/Button';
 import Icon from '../../atoms/Icon/Icon';
 import { apiRequest } from '../../../utils/api';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './AssignRoleDialog.css';
 
 const AssignRoleDialog = ({ isOpen, user, onSave, onCancel }) => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [availableRoles, setAvailableRoles] = useState([]);
   const [selectedRoles, setSelectedRoles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -65,7 +69,7 @@ const AssignRoleDialog = ({ isOpen, user, onSave, onCancel }) => {
     <div className="dialog-overlay">
       <div className="dialog assign-role-dialog">
         <div className="dialog-header">
-          <h2>Assign Roles</h2>
+          <h2>{t('assignRoles')}</h2>
           <button className="close-btn" onClick={onCancel}>
             <Icon name="x" size={24} />
           </button>
@@ -87,10 +91,10 @@ const AssignRoleDialog = ({ isOpen, user, onSave, onCancel }) => {
           {error && <div className="error-message">{error}</div>}
 
           {loading ? (
-            <div className="loading-state">Loading roles...</div>
+            <div className="loading-state">{t('loadingRolesDialog')}</div>
           ) : (
             <div className="roles-selection">
-              <p className="section-label">Select roles for this user:</p>
+              <p className="section-label">{t('selectRolesForUser')}</p>
               <div className="roles-list">
                 {availableRoles.map(role => (
                   <label key={role.id} className="role-checkbox-item">
@@ -117,10 +121,10 @@ const AssignRoleDialog = ({ isOpen, user, onSave, onCancel }) => {
 
         <div className="dialog-footer">
           <Button variant="secondary" onClick={onCancel}>
-            Cancel
+            {t('cancel')}
           </Button>
           <Button variant="primary" onClick={handleSave} disabled={loading}>
-            Save Roles
+            {t('saveRoles')}
           </Button>
         </div>
       </div>

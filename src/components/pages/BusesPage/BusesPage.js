@@ -4,9 +4,13 @@ import Icon from '../../atoms/Icon/Icon';
 import Snackbar from '../../atoms/Snackbar/Snackbar';
 import BusDetailPage from '../BusDetailPage/BusDetailPage';
 import { apiRequest } from '../../../utils/api';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './BusesPage.css';
 
 const BusesPage = () => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [buses, setBuses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -86,7 +90,7 @@ const BusesPage = () => {
   if (loading) {
     return (
       <div className="buses-page">
-        <div className="loading-state">Loading buses...</div>
+        <div className="loading-state">{t('loading')}</div>
       </div>
     );
   }
@@ -95,12 +99,12 @@ const BusesPage = () => {
     <div className="buses-page">
       <div className="page-header">
         <div>
-          <h1>Bus Fleet Management</h1>
-          <p>Manage your bus fleet and assignments</p>
+          <h1>{t('busManagement')}</h1>
+          <p>{t('busManagementDesc')}</p>
         </div>
         <Button variant="primary">
           <Icon name="plus" size={18} />
-          Add New Bus
+          {t('addNewBus')}
         </Button>
       </div>
 
@@ -113,11 +117,11 @@ const BusesPage = () => {
       {buses.length === 0 ? (
         <div className="empty-state">
           <Icon name="bus" size={64} />
-          <h3>No buses found</h3>
-          <p>Start by adding your first bus to the fleet</p>
+          <h3>{t('noBusesFound')}</h3>
+          <p>{t('startByAddingBus')}</p>
           <Button variant="primary">
             <Icon name="plus" size={18} />
-            Add New Bus
+            {t('addNewBus')}
           </Button>
         </div>
       ) : (
@@ -125,12 +129,12 @@ const BusesPage = () => {
           <table className="buses-table">
             <thead>
               <tr>
-                <th>BUS ID</th>
-                <th>NAME/MODEL</th>
-                <th>PLATE NUMBER</th>
-                <th>ROUTE</th>
-                <th>STATUS</th>
-                <th>ACTIONS</th>
+                <th>{t('busId')}</th>
+                <th>{t('name')}</th>
+                <th>{t('plateNumber')}</th>
+                <th>{t('route')}</th>
+                <th>{t('status')}</th>
+                <th>{t('actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -149,19 +153,19 @@ const BusesPage = () => {
                     <td>{getRouteName(bus.routeId)}</td>
                     <td>
                       <span className={`status-badge status-${status.toLowerCase()}`}>
-                        {status}
+                        {t(status.toLowerCase())}
                       </span>
                     </td>
                     <td>
                       <div className="action-buttons">
                         <button 
                           className="btn-icon" 
-                          title="View Details"
+                          title={t('viewDetails')}
                           onClick={() => handleViewDetails(bus.id)}
                         >
                           <Icon name="eye" size={18} />
                         </button>
-                        <button className="btn-icon" title="Delete">
+                        <button className="btn-icon" title={t('delete')}>
                           <Icon name="trash" size={18} />
                         </button>
                       </div>

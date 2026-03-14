@@ -1,9 +1,26 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
+  const [mode, setMode] = useState(() => {
+    return localStorage.getItem('theme') || 'light';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('theme', mode);
+    document.documentElement.setAttribute('data-theme', mode);
+  }, [mode]);
+
+  const toggleTheme = () => {
+    setMode(prev => prev === 'light' ? 'dark' : 'light');
+  };
+
   const theme = {
+    mode,
+    isDark: mode === 'dark',
+    toggleTheme,
+    setMode,
     colors: {
       primary: '#4169E1',
       primaryDark: '#2952CC',

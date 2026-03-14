@@ -1,7 +1,7 @@
 .sidebar {
   width: 260px;
   background: var(--primary-color);
-  color: var(--white);
+  color: #FFFFFF;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
@@ -15,11 +15,13 @@
 .sidebar-header h2 {
   font-size: 24px;
   margin-bottom: 5px;
+  color: #FFFFFF;
 }
 
 .sidebar-header p {
   font-size: 14px;
   opacity: 0.8;
+  color: #FFFFFF;
 }
 
 .sidebar-nav {
@@ -40,6 +42,30 @@
   letter-spacing: 0.5px;
   color: rgba(255, 255, 255, 0.5);
   margin-bottom: 4px;
+}
+
+.settings-nav-btn {
+  width: 100%;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: none;
+  border: none;
+  color: var(--white);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 15px;
+  text-align: left;
+  border-radius: 0;
+}
+
+.settings-nav-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.settings-nav-btn span {
+  font-weight: 500;
 }
 
 .sidebar-footer {
@@ -68,7 +94,7 @@
   justify-content: center;
   font-size: 20px;
   font-weight: bold;
-  color: white;
+  color: #FFFFFF;
   flex-shrink: 0;
 }
 
@@ -80,7 +106,7 @@
 .profile-name {
   font-size: 14px;
   font-weight: 600;
-  color: white;
+  color: #FFFFFF;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -99,7 +125,7 @@
   width: 100%;
   padding: 10px;
   background: #ec142a;
-  color: white;
+  color: #FFFFFF;
   border: none;
   border-radius: 10px;
   font-size: 14px;
@@ -126,7 +152,7 @@
 }
 
 .logout-dialog {
-  background: white;
+  background: var(--card-bg);
   padding: 24px;
   border-radius: 8px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -136,13 +162,13 @@
 
 .logout-dialog h3 {
   margin: 0 0 12px 0;
-  color: #333;
+  color: var(--text-dark);
   font-size: 18px;
 }
 
 .logout-dialog p {
   margin: 0 0 20px 0;
-  color: #666;
+  color: var(--text-light);
   font-size: 14px;
 }
 
@@ -164,7 +190,7 @@
 
 .btn-cancel {
   background: #6c757d;
-  color: white;
+  color: #FFFFFF;
 }
 
 .btn-cancel:hover {
@@ -173,7 +199,7 @@
 
 .btn-confirm {
   background: #dc3545;
-  color: white;
+  color: #FFFFFF;
 }
 
 .btn-confirm:hover {

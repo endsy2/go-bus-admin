@@ -1,23 +1,27 @@
 import React, { useState } from 'react';
 import NavItem from '../../molecules/NavItem/NavItem';
 import Icon from '../../atoms/Icon/Icon';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './Sidebar.css';
 
 const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const { locale } = useLocale();
+  
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
 
   const menuItems = [
-    { id: 'dashboard', icon: <Icon name="dashboard" />, label: 'Dashboard' },
-    { id: 'bookings', icon: <Icon name="calendar" />, label: 'Bookings' },
-    { id: 'buses', icon: <Icon name="bus" />, label: 'Buses' },
-    { id: 'routes', icon: <Icon name="mapPin" />, label: 'Routes' },
-    { id: 'customers', icon: <Icon name="users" />, label: 'Customers' },
-    { id: 'reports', icon: <Icon name="barChart" />, label: 'Reports' },
+    { id: 'dashboard', icon: <Icon name="dashboard" />, label: t('dashboard') },
+    { id: 'bookings', icon: <Icon name="calendar" />, label: t('bookings') },
+    { id: 'buses', icon: <Icon name="bus" />, label: t('buses') },
+    { id: 'routes', icon: <Icon name="mapPin" />, label: t('routes') },
+    { id: 'customers', icon: <Icon name="users" />, label: t('customers') },
+    { id: 'reports', icon: <Icon name="barChart" />, label: t('reports') },
   ];
 
   const teamItems = [
-    { id: 'team', icon: <Icon name="userCheck" />, label: 'Team' },
-    { id: 'settings', icon: <Icon name="settings" />, label: 'Settings' },
+    { id: 'team', icon: <Icon name="userCheck" />, label: t('team') },
   ];
 
   const handleLogoutClick = () => {

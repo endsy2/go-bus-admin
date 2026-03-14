@@ -1,24 +1,29 @@
 import React from 'react';
 import Badge from '../../atoms/Badge/Badge';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './BookingTable.css';
 
 const BookingTable = ({ bookings, loading }) => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
+  
   if (loading) {
-    return <div className="loading">Loading bookings...</div>;
+    return <div className="loading">{t('loadingBookings')}</div>;
   }
 
   return (
     <div className="booking-table">
-      <h2>Recent Bookings</h2>
+      <h2>{t('recentBookings')}</h2>
       <div className="table-container">
         <table>
           <thead>
             <tr>
-              <th>Booking ID</th>
-              <th>Customer</th>
-              <th>Route</th>
-              <th>Date</th>
-              <th>Status</th>
+              <th>{t('bookingId')}</th>
+              <th>{t('customer')}</th>
+              <th>{t('route')}</th>
+              <th>{t('date')}</th>
+              <th>{t('status')}</th>
             </tr>
           </thead>
           <tbody>
@@ -30,7 +35,7 @@ const BookingTable = ({ bookings, loading }) => {
                 <td>{booking.date}</td>
                 <td>
                   <Badge variant={booking.status}>
-                    {booking.status}
+                    {t(booking.status.toLowerCase())}
                   </Badge>
                 </td>
               </tr>

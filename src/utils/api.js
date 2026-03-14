@@ -62,8 +62,15 @@ export const handleApiResponse = async (response, originalRequest) => {
       return new Promise((resolve, reject) => {
         failedQueue.push({ resolve, reject });
       }).then(token => {
-        originalRequest.headers['Authorization'] = `Bearer ${token}`;
-        return fetch(originalRequest.url, originalRequest);
+        // Create new request config with updated token
+        const retryConfig = {
+          ...originalRequest,
+          headers: {
+            ...originalRequest.headers,
+            'Authorization': `Bearer ${token}`
+          }
+        };
+        return fetch(originalRequest.url, retryConfig);
       }).catch(err => {
         return Promise.reject(err);
       });
@@ -77,8 +84,14 @@ export const handleApiResponse = async (response, originalRequest) => {
       isRefreshing = false;
 
       // Retry the original request with new token
-      originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-      return fetch(originalRequest.url, originalRequest);
+      const retryConfig = {
+        ...originalRequest,
+        headers: {
+          ...originalRequest.headers,
+          'Authorization': `Bearer ${newToken}`
+        }
+      };
+      return fetch(originalRequest.url, retryConfig);
     } catch (error) {
       processQueue(error, null);
       isRefreshing = false;

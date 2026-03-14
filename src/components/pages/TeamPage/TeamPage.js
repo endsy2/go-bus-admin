@@ -3,9 +3,13 @@ import Icon from '../../atoms/Icon/Icon';
 import Snackbar from '../../atoms/Snackbar/Snackbar';
 import AssignRoleDialog from '../../molecules/AssignRoleDialog/AssignRoleDialog';
 import { apiRequest } from '../../../utils/api';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './TeamPage.css';
 
 const TeamPage = () => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [activeTab, setActiveTab] = useState('members');
   const [roles, setRoles] = useState([]);
   const [teamMembers, setTeamMembers] = useState([]);

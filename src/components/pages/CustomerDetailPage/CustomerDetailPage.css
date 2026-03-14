@@ -9,21 +9,20 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  background: white;
-  border: 1px solid #ddd;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
   padding: 10px 16px;
   border-radius: 8px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-dark);
   cursor: pointer;
   transition: all 0.2s;
   margin-bottom: 24px;
 }
 
 .back-btn:hover {
-  background: #f5f5f5;
-  border-color: #ccc;
-  color: #333;
+  background: var(--table-hover);
+  border-color: var(--border-color);
 }
 
 .loading-state {
@@ -56,7 +55,7 @@
 
 /* Profile Header Card */
 .profile-header-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   box-shadow: var(--shadow);
   padding: 40px;
@@ -71,7 +70,7 @@
   height: 100px;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-  color: white;
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -88,13 +87,13 @@
 .profile-header-info h1 {
   margin: 0 0 8px 0;
   font-size: 32px;
-  color: #333;
+  color: var(--text-dark);
 }
 
 .username {
   margin: 0 0 16px 0;
   font-size: 18px;
-  color: #666;
+  color: var(--text-light);
 }
 
 .profile-meta {
@@ -109,7 +108,7 @@
   align-items: center;
   gap: 6px;
   font-size: 14px;
-  color: #666;
+  color: var(--text-light);
 }
 
 .status-badge {
@@ -142,7 +141,7 @@
 }
 
 .detail-card {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   box-shadow: var(--shadow);
   overflow: hidden;
@@ -153,14 +152,14 @@
   align-items: center;
   gap: 12px;
   padding: 20px 24px;
-  border-bottom: 1px solid #e0e0e0;
-  background: #fafafa;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--table-hover);
 }
 
 .card-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #333;
+  color: var(--text-dark);
 }
 
 .card-body {
@@ -172,7 +171,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .detail-row:last-child {
@@ -181,13 +180,13 @@
 
 .detail-label {
   font-size: 14px;
-  color: #666;
+  color: var(--text-light);
   font-weight: 500;
 }
 
 .detail-value {
   font-size: 14px;
-  color: #333;
+  color: var(--text-dark);
   font-weight: 600;
   text-align: right;
 }
@@ -205,14 +204,14 @@
 .google-id {
   font-family: monospace;
   font-size: 12px;
-  color: #666;
+  color: var(--text-light);
 }
 
 /* Activity Summary */
 .stat-item {
   text-align: center;
   padding: 16px;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .stat-item:last-child {
@@ -228,7 +227,7 @@
 
 .stat-label {
   font-size: 13px;
-  color: #666;
+  color: var(--text-light);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }

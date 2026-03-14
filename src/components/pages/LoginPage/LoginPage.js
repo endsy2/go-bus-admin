@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import Input from '../../atoms/Input/Input';
 import Button from '../../atoms/Button/Button';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './LoginPage.css';
 
 const LoginPage = ({ onLoginSuccess, onSwitchToRegister }) => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -133,8 +137,8 @@ const LoginPage = ({ onLoginSuccess, onSwitchToRegister }) => {
     <div className="login-page">
       <div className="login-container">
         <div className="login-header">
-          <h1>Bus Booking System</h1>
-          <p>Sign in to your account</p>
+          <h1>{t('busBookingSystem')}</h1>
+          <p>{t('signInToAccount')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
@@ -149,7 +153,7 @@ const LoginPage = ({ onLoginSuccess, onSwitchToRegister }) => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
+            placeholder={t('email')}
             required
             error={errors.email}
           />
@@ -159,7 +163,7 @@ const LoginPage = ({ onLoginSuccess, onSwitchToRegister }) => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            placeholder="Password"
+            placeholder={t('password')}
             required
             error={errors.password}
           />
@@ -168,12 +172,12 @@ const LoginPage = ({ onLoginSuccess, onSwitchToRegister }) => {
             type="submit"
             disabled={loading}
           >
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? t('signingIn') : t('signIn')}
           </Button>
         </form>
 
         <div className="login-footer">
-          <p>Don't have an account? <a href="#register" onClick={onSwitchToRegister}>Register</a></p>
+          <p>{t('dontHaveAccount')} <a href="#register" onClick={onSwitchToRegister}>{t('register')}</a></p>
         </div>
       </div>
     </div>

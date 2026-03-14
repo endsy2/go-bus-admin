@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
 import Input from '../../atoms/Input/Input';
 import Button from '../../atoms/Button/Button';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './RegisterPage.css';
 
 const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [formData, setFormData] = useState({
     userName: '',
     fullName: '',
@@ -161,8 +165,8 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
     <div className="register-page">
       <div className="register-container">
         <div className="register-header">
-          <h1>Create Account</h1>
-          <p>Sign up to get started</p>
+          <h1>{t('createAccount')}</h1>
+          <p>{t('signUpToGetStarted')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="register-form">
@@ -177,7 +181,7 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
             name="userName"
             value={formData.userName}
             onChange={handleChange}
-            placeholder="Username"
+            placeholder={t('username')}
             required
             error={errors.userName}
           />
@@ -187,7 +191,7 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
-            placeholder="Full Name"
+            placeholder={t('fullName')}
             required
             error={errors.fullName}
           />
@@ -197,7 +201,7 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
+            placeholder={t('email')}
             required
             error={errors.email}
           />
@@ -207,7 +211,7 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            placeholder="Phone (e.g., 012-345-6789)"
+            placeholder={t('phoneExample')}
             required
             error={errors.phone}
             prefix={<img src="https://flagcdn.com/w40/kh.png" alt="KH" style={{ width: '24px', height: '16px' }} />}
@@ -220,8 +224,8 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
               onChange={handleChange}
               className="input"
             >
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
+              <option value="MALE">{t('male')}</option>
+              <option value="FEMALE">{t('female')}</option>
             </select>
           </div>
 
@@ -230,7 +234,7 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            placeholder="Password"
+            placeholder={t('password')}
             required
             error={errors.password}
           />
@@ -240,7 +244,7 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
             name="confirmPassword"
             value={formData.confirmPassword}
             onChange={handleChange}
-            placeholder="Confirm Password"
+            placeholder={t('confirmPassword')}
             required
             error={errors.confirmPassword}
           />
@@ -249,12 +253,12 @@ const RegisterPage = ({ onRegisterSuccess, onSwitchToLogin }) => {
             type="submit"
             disabled={loading}
           >
-            {loading ? 'Creating Account...' : 'Sign Up'}
+            {loading ? t('creatingAccount') : t('signUp')}
           </Button>
         </form>
 
         <div className="register-footer">
-          <p>Already have an account? <a href="#login" onClick={(e) => { e.preventDefault(); onSwitchToLogin(); }}>Sign In</a></p>
+          <p>{t('alreadyHaveAccount')} <a href="#login" onClick={(e) => { e.preventDefault(); onSwitchToLogin(); }}>{t('signIn')}</a></p>
         </div>
       </div>
     </div>

@@ -1,4 +1,6 @@
 import React from 'react';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './ConfirmDialog.css';
 
 const ConfirmDialog = ({ 
@@ -11,6 +13,9 @@ const ConfirmDialog = ({
   cancelText = 'Cancel',
   type = 'danger' // 'danger', 'warning', 'info'
 }) => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
+  
   if (!isOpen) return null;
 
   return (
@@ -18,7 +23,7 @@ const ConfirmDialog = ({
       <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
         <h3>{title}</h3>
         <p>{message}</p>
-        <p className="confirm-dialog-warning">This action cannot be undone.</p>
+        <p className="confirm-dialog-warning">{t('actionCannotBeUndone')}</p>
         <div className="confirm-dialog-actions">
           <button className="btn-cancel" onClick={onCancel}>
             {cancelText}

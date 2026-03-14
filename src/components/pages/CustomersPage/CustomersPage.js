@@ -7,9 +7,13 @@ import ConfirmDialog from '../../molecules/ConfirmDialog/ConfirmDialog';
 import EditCustomerDialog from '../../molecules/EditCustomerDialog/EditCustomerDialog';
 import CustomerDetailPage from '../CustomerDetailPage/CustomerDetailPage';
 import { apiRequest } from '../../../utils/api';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './CustomersPage.css';
 
 const CustomersPage = () => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -103,6 +107,13 @@ const CustomersPage = () => {
   };
 
   const handleApplyFilters = () => {
+    // Check if at least one filter has a value
+    const hasFilters = Object.values(filters).some(value => value.trim() !== '');
+    
+    if (!hasFilters) {
+      return;
+    }
+    
     fetchCustomers(filters);
   };
 
@@ -121,14 +132,14 @@ const CustomersPage = () => {
     navigator.clipboard.writeText(text).then(() => {
       setSnackbar({
         isOpen: true,
-        message: `${label} copied to clipboard!`,
+        message: `${label} ${t('copiedToClipboard')}`,
         type: 'success'
       });
     }).catch(err => {
       console.error('Failed to copy:', err);
       setSnackbar({
         isOpen: true,
-        message: 'Failed to copy to clipboard',
+        message: t('failedToCopy'),
         type: 'error'
       });
     });
@@ -354,79 +365,79 @@ const CustomersPage = () => {
       <div className="customers-page">
         <div className="page-header">
           <div>
-            <h1>Customer Management</h1>
-            <p>View and manage customer information</p>
+            <h1>{t('customerManagement')}</h1>
+            <p>{t('customerManagementDesc')}</p>
           </div>
           <Button variant="primary" disabled>
             <Icon name="plus" size={18} />
-            Add Customer
+            {t('addCustomer')}
           </Button>
         </div>
 
         <div className="filters-container">
           <div className="filters-grid">
             <div className="filter-group">
-              <label>User ID</label>
+              <label>{t('userId')}</label>
               <Input
                 type="text"
                 name="userId"
                 value={filters.userId}
                 onChange={handleFilterChange}
-                placeholder="Enter user ID"
+                placeholder={t('userId')}
                 disabled
               />
             </div>
             <div className="filter-group">
-              <label>Username</label>
+              <label>{t('username')}</label>
               <Input
                 type="text"
                 name="username"
                 value={filters.username}
                 onChange={handleFilterChange}
-                placeholder="Enter username"
+                placeholder={t('username')}
                 disabled
               />
             </div>
             <div className="filter-group">
-              <label>Email</label>
+              <label>{t('email')}</label>
               <Input
                 type="text"
                 name="email"
                 value={filters.email}
                 onChange={handleFilterChange}
-                placeholder="Enter email"
+                placeholder={t('email')}
                 disabled
               />
             </div>
             <div className="filter-group">
-              <label>Phone</label>
+              <label>{t('phone')}</label>
               <Input
                 type="text"
                 name="phone"
                 value={filters.phone}
                 onChange={handleFilterChange}
-                placeholder="Enter phone"
+                placeholder={t('phone')}
                 disabled
               />
             </div>
             <div className="filter-group">
-              <label>Google ID</label>
+              <label>{t('googleId')}</label>
               <Input
                 type="text"
                 name="googleId"
                 value={filters.googleId}
                 onChange={handleFilterChange}
-                placeholder="Enter Google ID"
+                placeholder={t('googleId')}
                 disabled
               />
             </div>
           </div>
           <div className="filter-actions">
             <Button variant="secondary" disabled>
-              Clear Filters
+              {t('clearFilters')}
             </Button>
             <Button variant="primary" disabled>
-              Apply Filters
+              {t('applyFilters')}
             </Button>
           </div>
         </div>
@@ -435,13 +446,13 @@ const CustomersPage = () => {
           <table>
             <thead>
               <tr>
-                <th>Customer ID</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Gender</th>
-                <th>Joined Date</th>
-                <th>Actions</th>
+                <th>{t('customerId')}</th>
+                <th>{t('name')}</th>
+                <th>{t('email')}</th>
+                <th>{t('phone')}</th>
+                <th>{t('gender')}</th>
+                <th>{t('joinedDate')}</th>
+                <th>{t('actions')}</th>
               </tr>
             </thead>
             <tbody>
@@ -493,14 +504,14 @@ const CustomersPage = () => {
         <div className="page-header">
           <button className="back-btn" onClick={handleCancelCreate}>
             <Icon name="arrowLeft" size={20} />
-            Back to Customers
+            {t('backToCustomers')}
           </button>
         </div>
 
         <div className="create-customer-container">
           <div className="create-customer-card">
-            <h1>Create New Customer</h1>
-            <p className="subtitle">Add a new customer to the system</p>
+            <h1>{t('createNewCustomer')}</h1>
+            <p className="subtitle">{t('addNewCustomerToSystem')}</p>
 
             {error && (
               <div className="error-message">
@@ -511,91 +522,91 @@ const CustomersPage = () => {
             <form onSubmit={handleSubmitCreate} className="create-customer-form">
               <div className="form-grid">
                 <div className="form-group">
-                  <label>Username *</label>
+                  <label>{t('username')} *</label>
                   <Input
                     type="text"
                     name="userName"
                     value={createFormData.userName}
                     onChange={handleCreateChange}
-                    placeholder="Enter username"
+                    placeholder={t('enterUsername')}
                     required
                     error={createErrors.userName}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Full Name *</label>
+                  <label>{t('fullName')} *</label>
                   <Input
                     type="text"
                     name="fullName"
                     value={createFormData.fullName}
                     onChange={handleCreateChange}
-                    placeholder="Enter full name"
+                    placeholder={t('enterFullName')}
                     required
                     error={createErrors.fullName}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Email *</label>
+                  <label>{t('email')} *</label>
                   <Input
                     type="email"
                     name="email"
                     value={createFormData.email}
                     onChange={handleCreateChange}
-                    placeholder="Enter email address"
+                    placeholder={t('enterEmailAddress')}
                     required
                     error={createErrors.email}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Phone *</label>
+                  <label>{t('phone')} *</label>
                   <Input
                     type="tel"
                     name="phone"
                     value={createFormData.phone}
                     onChange={handleCreateChange}
-                    placeholder="Enter phone number"
+                    placeholder={t('enterPhoneNumber')}
                     required
                     error={createErrors.phone}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Gender *</label>
+                  <label>{t('gender')} *</label>
                   <select
                     name="gender"
                     value={createFormData.gender}
                     onChange={handleCreateChange}
                     className="select-input"
                   >
-                    <option value="MALE">Male</option>
-                    <option value="FEMALE">Female</option>
+                    <option value="MALE">{t('male')}</option>
+                    <option value="FEMALE">{t('female')}</option>
                   </select>
                 </div>
 
                 <div className="form-group">
-                  <label>Password *</label>
+                  <label>{t('password')} *</label>
                   <Input
                     type="password"
                     name="password"
                     value={createFormData.password}
                     onChange={handleCreateChange}
-                    placeholder="Enter password"
+                    placeholder={t('enterPassword')}
                     required
                     error={createErrors.password}
                   />
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Confirm Password *</label>
+                  <label>{t('confirmPassword')} *</label>
                   <Input
                     type="password"
                     name="confirmPassword"
                     value={createFormData.confirmPassword}
                     onChange={handleCreateChange}
-                    placeholder="Confirm password"
+                    placeholder={t('confirmPasswordPlaceholder')}
                     required
                     error={createErrors.confirmPassword}
                   />
@@ -604,10 +615,10 @@ const CustomersPage = () => {
 
               <div className="form-actions">
                 <Button type="button" variant="secondary" onClick={handleCancelCreate}>
-                  Cancel
+                  {t('cancel')}
                 </Button>
                 <Button type="submit" variant="primary" disabled={createLoading}>
-                  {createLoading ? 'Creating...' : 'Create Customer'}
+                  {createLoading ? t('creating') : t('createCustomer')}
                 </Button>
               </div>
             </form>
@@ -622,12 +633,12 @@ const CustomersPage = () => {
     <div className="customers-page">
       <div className="page-header">
         <div>
-          <h1>Customer Management</h1>
-          <p>View and manage customer information</p>
+          <h1>{t('customerManagement')}</h1>
+          <p>{t('customerManagementDesc')}</p>
         </div>
         <Button variant="primary" onClick={handleCreateClick}>
           <Icon name="plus" size={18} />
-          Add Customer
+          {t('addCustomer')}
         </Button>
       </div>
 
@@ -640,62 +651,62 @@ const CustomersPage = () => {
       <div className="filters-container">
         <div className="filters-grid">
           <div className="filter-group">
-            <label>User ID</label>
+            <label>{t('userId')}</label>
             <Input
               type="text"
               name="userId"
               value={filters.userId}
               onChange={handleFilterChange}
-              placeholder="Enter user ID"
+              placeholder={t('userId')}
             />
           </div>
           <div className="filter-group">
-            <label>Username</label>
+            <label>{t('username')}</label>
             <Input
               type="text"
               name="username"
               value={filters.username}
               onChange={handleFilterChange}
-              placeholder="Enter username"
+              placeholder={t('username')}
             />
           </div>
           <div className="filter-group">
-            <label>Email</label>
+            <label>{t('email')}</label>
             <Input
               type="text"
               name="email"
               value={filters.email}
               onChange={handleFilterChange}
-              placeholder="Enter email"
+              placeholder={t('email')}
             />
           </div>
           <div className="filter-group">
-            <label>Phone</label>
+            <label>{t('phone')}</label>
             <Input
               type="text"
               name="phone"
               value={filters.phone}
               onChange={handleFilterChange}
-              placeholder="Enter phone"
+              placeholder={t('phone')}
             />
           </div>
           <div className="filter-group">
-            <label>Google ID</label>
+            <label>{t('googleId')}</label>
             <Input
               type="text"
               name="googleId"
               value={filters.googleId}
               onChange={handleFilterChange}
-              placeholder="Enter Google ID"
+              placeholder={t('googleId')}
             />
           </div>
         </div>
         <div className="filter-actions">
           <Button variant="secondary" onClick={handleClearFilters}>
-            Clear Filters
+            {t('clearFilters')}
           </Button>
           <Button variant="primary" onClick={handleApplyFilters}>
-            Apply Filters
+            {t('Search')}
           </Button>
         </div>
       </div>
@@ -704,20 +715,20 @@ const CustomersPage = () => {
         <table>
           <thead>
             <tr>
-              <th>Customer ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Gender</th>
-              <th>Joined Date</th>
-              <th>Actions</th>
+              <th>{t('customerId')}</th>
+              <th>{t('name')}</th>
+              <th>{t('email')}</th>
+              <th>{t('phone')}</th>
+              <th>{t('gender')}</th>
+              <th>{t('joinedDate')}</th>
+              <th>{t('actions')}</th>
             </tr>
           </thead>
           <tbody>
             {customers.length === 0 ? (
               <tr>
                 <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>
-                  No customers found
+                  {t('noCustomersFound')}
                 </td>
               </tr>
             ) : (
@@ -795,10 +806,10 @@ const CustomersPage = () => {
         isOpen={showDeleteDialog}
         onConfirm={confirmDelete}
         onCancel={cancelDelete}
-        title="Confirm Delete"
-        message="Are you sure you want to delete this?"
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('confirmDelete')}
+        message={t('confirmDeleteMessage')}
+        confirmText={t('delete')}
+        cancelText={t('cancel')}
         type="danger"
       />
 

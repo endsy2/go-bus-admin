@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import Input from '../../atoms/Input/Input';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './EditCustomerDialog.css';
 
 const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [formData, setFormData] = useState({
     userName: '',
     fullName: '',
@@ -83,14 +87,14 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
   return (
     <div className="edit-dialog-overlay" onClick={onCancel}>
       <div className="edit-dialog" onClick={(e) => e.stopPropagation()}>
-        <h3>Edit Customer</h3>
+        <h3>{t('editCustomer')}</h3>
         <form onSubmit={handleSubmit} className="edit-form">
           <Input
             type="text"
             name="userName"
             value={formData.userName}
             onChange={handleChange}
-            placeholder="Username"
+            placeholder={t('username')}
             required
             error={errors.userName}
           />
@@ -100,7 +104,7 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
-            placeholder="Full Name"
+            placeholder={t('fullName')}
             required
             error={errors.fullName}
           />
@@ -110,7 +114,7 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
             name="email"
             value={formData.email}
             onChange={handleChange}
-            placeholder="Email"
+            placeholder={t('email')}
             required
             error={errors.email}
           />
@@ -120,7 +124,7 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
             name="phone"
             value={formData.phone}
             onChange={handleChange}
-            placeholder="Phone"
+            placeholder={t('phone')}
             required
             error={errors.phone}
           />
@@ -132,8 +136,8 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
               onChange={handleChange}
               className="input"
             >
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
+              <option value="MALE">{t('male')}</option>
+              <option value="FEMALE">{t('female')}</option>
             </select>
           </div>
 
@@ -142,16 +146,16 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
             name="password"
             value={formData.password}
             onChange={handleChange}
-            placeholder="New Password (leave empty to keep current)"
+            placeholder={t('newPasswordLeaveEmpty')}
             error={errors.password}
           />
 
           <div className="edit-dialog-actions">
             <button type="button" className="btn-cancel" onClick={onCancel} disabled={loading}>
-              Cancel
+              {t('cancel')}
             </button>
             <button type="submit" className="btn-save" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
+              {loading ? t('saving') : t('saveChanges')}
             </button>
           </div>
         </form>

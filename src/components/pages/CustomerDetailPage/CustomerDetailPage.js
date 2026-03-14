@@ -4,9 +4,13 @@ import Button from '../../atoms/Button/Button';
 import Snackbar from '../../atoms/Snackbar/Snackbar';
 import EditCustomerDialog from '../../molecules/EditCustomerDialog/EditCustomerDialog';
 import { apiRequest } from '../../../utils/api';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './CustomerDetailPage.css';
 
 const CustomerDetailPage = ({ customerId, onBack }) => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [customer, setCustomer] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -81,16 +85,16 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
         // Show success snackbar
         setSnackbar({
           isOpen: true,
-          message: 'Customer updated successfully!',
+          message: t('customerUpdatedSuccess'),
           type: 'success'
         });
       } else {
         const result = await response.json();
         const errorData = result.data || result;
-        setError(errorData.message || 'Failed to update customer');
+        setError(errorData.message || t('error'));
       }
     } catch (err) {
-      setError('Network error. Failed to update customer.');
+      setError(t('error'));
       console.error('Error updating customer:', err);
     }
   };
@@ -102,7 +106,7 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
   if (loading) {
     return (
       <div className="customer-detail-page">
-        <div className="loading-state">Loading customer details...</div>
+        <div className="loading-state">{t('loadingCustomerDetails')}</div>
       </div>
     );
   }
@@ -113,7 +117,7 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
         <div className="page-header">
           <button className="back-btn" onClick={onBack}>
             <Icon name="arrowLeft" size={20} />
-            Back to Customers
+            {t('backToCustomers')}
           </button>
         </div>
         <div className="error-message">{error}</div>
@@ -127,10 +131,10 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
         <div className="page-header">
           <button className="back-btn" onClick={onBack}>
             <Icon name="arrowLeft" size={20} />
-            Back to Customers
+            {t('backToCustomers')}
           </button>
         </div>
-        <div className="empty-state">Customer not found</div>
+        <div className="empty-state">{t('customerNotFound')}</div>
       </div>
     );
   }
@@ -140,7 +144,7 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
       <div className="page-header">
         <button className="back-btn" onClick={onBack}>
           <Icon name="arrowLeft" size={20} />
-          Back to Customers
+          {t('backToCustomers')}
         </button>
       </div>
 
@@ -156,17 +160,17 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
             <div className="profile-meta">
               <span className="meta-item">
                 <Icon name="calendar" size={16} />
-                Joined {formatDate(customer.createdAt)}
+                {t('joined')} {formatDate(customer.createdAt)}
               </span>
               <span className={`status-badge ${customer.googleId ? 'google' : 'local'}`}>
-                {customer.googleId ? 'Google Account' : 'Local Account'}
+                {customer.googleId ? t('googleAccount') : t('localAccount')}
               </span>
             </div>
           </div>
           <div className="profile-actions">
             <Button variant="primary" onClick={handleEditClick}>
               <Icon name="edit" size={18} />
-              Edit Profile
+              {t('editProfile')}
             </Button>
           </div>
         </div>
@@ -177,25 +181,25 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
           <div className="detail-card">
             <div className="card-header">
               <Icon name="users" size={20} />
-              <h3>Personal Information</h3>
+              <h3>{t('personalInformation')}</h3>
             </div>
             <div className="card-body">
               <div className="detail-row">
-                <span className="detail-label">Full Name</span>
+                <span className="detail-label">{t('fullName')}</span>
                 <span className="detail-value">{customer.fullName}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Username</span>
+                <span className="detail-label">{t('username')}</span>
                 <span className="detail-value">@{customer.userName}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Gender</span>
+                <span className="detail-label">{t('gender')}</span>
                 <span className="detail-value">
                   <span className="gender-badge">{customer.gender}</span>
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Customer ID</span>
+                <span className="detail-label">{t('customerId')}</span>
                 <span className="detail-value">#{customer.id}</span>
               </div>
             </div>
@@ -205,20 +209,20 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
           <div className="detail-card">
             <div className="card-header">
               <Icon name="users" size={20} />
-              <h3>Contact Information</h3>
+              <h3>{t('contactInformation')}</h3>
             </div>
             <div className="card-body">
               <div className="detail-row">
-                <span className="detail-label">Email Address</span>
+                <span className="detail-label">{t('emailAddress')}</span>
                 <span className="detail-value">{customer.email}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Phone Number</span>
+                <span className="detail-label">{t('phoneNumber')}</span>
                 <span className="detail-value">{customer.phone}</span>
               </div>
               {customer.googleId && (
                 <div className="detail-row">
-                  <span className="detail-label">Google ID</span>
+                  <span className="detail-label">{t('googleId')}</span>
                   <span className="detail-value google-id">{customer.googleId}</span>
                 </div>
               )}
@@ -229,26 +233,26 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
           <div className="detail-card">
             <div className="card-header">
               <Icon name="settings" size={20} />
-              <h3>Account Information</h3>
+              <h3>{t('accountInformation')}</h3>
             </div>
             <div className="card-body">
               <div className="detail-row">
-                <span className="detail-label">Account Created</span>
+                <span className="detail-label">{t('accountCreated')}</span>
                 <span className="detail-value">{formatDate(customer.createdAt)}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Account Type</span>
+                <span className="detail-label">{t('accountType')}</span>
                 <span className="detail-value">
-                  {customer.googleId ? 'Google OAuth' : 'Email & Password'}
+                  {customer.googleId ? t('googleOAuth') : t('emailAndPassword')}
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Profile Image</span>
+                <span className="detail-label">{t('profileImage')}</span>
                 <span className="detail-value">
                   {customer.image ? (
-                    <a href={customer.image} target="_blank" rel="noopener noreferrer">View Image</a>
+                    <a href={customer.image} target="_blank" rel="noopener noreferrer">{t('viewImage')}</a>
                   ) : (
-                    'No image'
+                    t('noImage')
                   )}
                 </span>
               </div>
@@ -259,20 +263,20 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
           <div className="detail-card">
             <div className="card-header">
               <Icon name="barChart" size={20} />
-              <h3>Activity Summary</h3>
+              <h3>{t('activitySummary')}</h3>
             </div>
             <div className="card-body">
               <div className="stat-item">
                 <div className="stat-value">0</div>
-                <div className="stat-label">Total Bookings</div>
+                <div className="stat-label">{t('totalBookings')}</div>
               </div>
               <div className="stat-item">
                 <div className="stat-value">$0.00</div>
-                <div className="stat-label">Total Spent</div>
+                <div className="stat-label">{t('totalSpent')}</div>
               </div>
               <div className="stat-item">
                 <div className="stat-value">0</div>
-                <div className="stat-label">Active Tickets</div>
+                <div className="stat-label">{t('activeTickets')}</div>
               </div>
             </div>
           </div>

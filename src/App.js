@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import { ThemeProvider } from './context/ThemeContext';
 import Sidebar from './components/organisms/Sidebar/Sidebar';
+import TopBar from './components/molecules/TopBar/TopBar';
 import DashboardPage from './components/pages/DashboardPage/DashboardPage';
 import BookingsPage from './components/pages/BookingsPage/BookingsPage';
 import BusesPage from './components/pages/BusesPage/BusesPage';
@@ -94,9 +94,11 @@ function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('user');
+    localStorage.setItem('locale', 'en'); // Reset language to English
     setUser(null);
     setIsAuthenticated(false);
     setShowRegister(false);
+    window.location.reload(); // Reload to apply language change
   };
 
   if (!isAuthenticated) {
@@ -138,21 +140,24 @@ function App() {
   };
 
   return (
-    <ThemeProvider>
-      <div className="App">
-        <Sidebar 
-          activeTab={activeTab} 
-          setActiveTab={setActiveTab}
-          user={user}
-          onLogout={handleLogout}
-        />
-        {renderPage()}
+    <div className="App">
+      <Sidebar 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab}
+        user={user}
+        onLogout={handleLogout}
+      />
+      <div className="main-content">
+        <TopBar />
+        <div className="page-content">
+          {renderPage()}
+        </div>
       </div>
       <UnauthorizedDialog 
         isOpen={showUnauthorizedDialog}
         onOk={handleUnauthorizedOk}
       />
-    </ThemeProvider>
+    </div>
   );
 }
 

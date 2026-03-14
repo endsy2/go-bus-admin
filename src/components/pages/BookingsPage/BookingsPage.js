@@ -2,9 +2,13 @@ import React, { useState } from 'react';
 import { useBookings } from '../../../hooks/useBookings';
 import Badge from '../../atoms/Badge/Badge';
 import Button from '../../atoms/Button/Button';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './BookingsPage.css';
 
 const BookingsPage = () => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const { bookings } = useBookings();
   const [filter, setFilter] = useState('all');
 
@@ -16,10 +20,10 @@ const BookingsPage = () => {
     <div className="bookings-page">
       <div className="page-header">
         <div>
-          <h1>Bookings Management</h1>
-          <p>Manage all bus ticket bookings</p>
+          <h1>{t('bookingsManagement')}</h1>
+          <p>{t('manageAllBusTicketBookings')}</p>
         </div>
-        <Button variant="primary">+ New Booking</Button>
+        <Button variant="primary">+ {t('newBooking')}</Button>
       </div>
 
       <div className="filter-bar">
@@ -27,19 +31,19 @@ const BookingsPage = () => {
           className={filter === 'all' ? 'active' : ''} 
           onClick={() => setFilter('all')}
         >
-          All ({bookings.length})
+          {t('all')} ({bookings.length})
         </button>
         <button 
           className={filter === 'confirmed' ? 'active' : ''} 
           onClick={() => setFilter('confirmed')}
         >
-          Confirmed
+          {t('confirmed')}
         </button>
         <button 
           className={filter === 'pending' ? 'active' : ''} 
           onClick={() => setFilter('pending')}
         >
-          Pending
+          {t('pending')}
         </button>
       </div>
 
@@ -48,25 +52,25 @@ const BookingsPage = () => {
           <div key={booking.id} className="booking-card">
             <div className="booking-header">
               <span className="booking-id">{booking.id}</span>
-              <Badge variant={booking.status}>{booking.status}</Badge>
+              <Badge variant={booking.status}>{t(booking.status.toLowerCase())}</Badge>
             </div>
             <div className="booking-info">
               <div className="info-row">
-                <span className="label">👤 Customer:</span>
+                <span className="label">👤 {t('customer')}:</span>
                 <span className="value">{booking.customer}</span>
               </div>
               <div className="info-row">
-                <span className="label">🗺️ Route:</span>
+                <span className="label">🗺️ {t('route')}:</span>
                 <span className="value">{booking.route}</span>
               </div>
               <div className="info-row">
-                <span className="label">📅 Date:</span>
+                <span className="label">📅 {t('date')}:</span>
                 <span className="value">{booking.date}</span>
               </div>
             </div>
             <div className="booking-actions">
-              <Button variant="secondary">View Details</Button>
-              <Button variant="primary">Edit</Button>
+              <Button variant="secondary">{t('viewDetailsBtn')}</Button>
+              <Button variant="primary">{t('edit')}</Button>
             </div>
           </div>
         ))}

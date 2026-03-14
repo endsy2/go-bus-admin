@@ -1,3 +1,67 @@
+/* Base Dialog Styles */
+.dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.dialog {
+  background: var(--card-bg);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 16px 24px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dialog-header h2 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--text-dark);
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  color: var(--text-light);
+  transition: color 0.2s;
+}
+
+.close-btn:hover {
+  color: var(--text-dark);
+}
+
+.dialog-body {
+  padding: 24px;
+}
+
+.dialog-footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding: 16px 24px 24px 24px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Assign Role Dialog Specific */
 .assign-role-dialog {
   width: 500px;
   max-width: 90vw;
@@ -8,7 +72,7 @@
   align-items: center;
   gap: 12px;
   padding: 16px;
-  background: #f8f9fa;
+  background: var(--table-hover);
   border-radius: 8px;
   margin-bottom: 24px;
 }
@@ -18,7 +82,7 @@
   height: 48px;
   border-radius: 50%;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -30,13 +94,13 @@
 .user-name {
   font-weight: 600;
   font-size: 16px;
-  color: #1a1a1a;
+  color: var(--text-dark);
   margin-bottom: 4px;
 }
 
 .user-email {
   font-size: 14px;
-  color: #666;
+  color: var(--text-light);
 }
 
 .roles-selection {
@@ -46,7 +110,7 @@
 .section-label {
   font-size: 14px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-dark);
   margin-bottom: 12px;
 }
 
@@ -63,14 +127,15 @@
   align-items: flex-start;
   gap: 12px;
   padding: 12px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s;
+  background: var(--card-bg);
 }
 
 .role-checkbox-item:hover {
-  background: #f8f9fa;
+  background: var(--table-hover);
   border-color: #667eea;
 }
 
@@ -92,20 +157,20 @@
   gap: 8px;
   font-weight: 600;
   font-size: 14px;
-  color: #1a1a1a;
+  color: var(--text-dark);
   margin-bottom: 4px;
 }
 
 .role-description {
   font-size: 13px;
-  color: #666;
+  color: var(--text-light);
   line-height: 1.4;
 }
 
 .loading-state {
   text-align: center;
   padding: 40px;
-  color: #666;
+  color: var(--text-light);
 }
 
 .error-message {

@@ -2,6 +2,7 @@
   flex: 1;
   padding: 30px;
   overflow-y: auto;
+  background: var(--bg-color);
 }
 
 .loading-state {
@@ -23,14 +24,15 @@
 .empty-state {
   text-align: center;
   padding: 80px 20px;
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
 }
 
 .empty-state svg,
 .empty-state .icon {
-  color: #ccc;
+  color: var(--text-light);
   margin-bottom: 20px;
 }
 
@@ -48,9 +50,10 @@
 
 /* Table Styles */
 .buses-table-container {
-  background: white;
+  background: var(--card-bg);
   border-radius: 12px;
   box-shadow: var(--shadow);
+  border: 1px solid var(--border-color);
   overflow: hidden;
 }
 
@@ -60,8 +63,8 @@
 }
 
 .buses-table thead {
-  background: #fafafa;
-  border-bottom: 2px solid #f0f0f0;
+  background: var(--table-hover);
+  border-bottom: 2px solid var(--border-color);
 }
 
 .buses-table th {
@@ -75,12 +78,12 @@
 }
 
 .buses-table tbody tr {
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--border-color);
   transition: background 0.2s;
 }
 
 .buses-table tbody tr:hover {
-  background: #fafafa;
+  background: var(--table-hover);
 }
 
 .buses-table td {

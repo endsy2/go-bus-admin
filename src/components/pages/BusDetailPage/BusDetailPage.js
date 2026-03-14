@@ -4,9 +4,13 @@ import Button from '../../atoms/Button/Button';
 import Snackbar from '../../atoms/Snackbar/Snackbar';
 import ConfirmDialog from '../../molecules/ConfirmDialog/ConfirmDialog';
 import { apiRequest } from '../../../utils/api';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './BusDetailPage.css';
 
 const BusDetailPage = ({ busId, onBack }) => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [bus, setBus] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -47,7 +51,7 @@ const BusDetailPage = ({ busId, onBack }) => {
   const handleEditClick = () => {
     setSnackbar({
       isOpen: true,
-      message: 'Edit functionality coming soon!',
+      message: t('editFunctionalityComingSoon'),
       type: 'info'
     });
   };
@@ -65,7 +69,7 @@ const BusDetailPage = ({ busId, onBack }) => {
       if (response.ok) {
         setSnackbar({
           isOpen: true,
-          message: 'Bus deleted successfully!',
+          message: t('busDeletedSuccess'),
           type: 'success'
         });
         setShowDeleteDialog(false);
@@ -101,7 +105,7 @@ const BusDetailPage = ({ busId, onBack }) => {
   if (loading) {
     return (
       <div className="bus-detail-page">
-        <div className="loading-state">Loading bus details...</div>
+        <div className="loading-state">{t('loading')}</div>
       </div>
     );
   }
@@ -112,7 +116,7 @@ const BusDetailPage = ({ busId, onBack }) => {
         <div className="page-header">
           <button className="back-btn" onClick={onBack}>
             <Icon name="arrowLeft" size={20} />
-            Back to Buses
+            {t('backToBuses')}
           </button>
         </div>
         <div className="error-message">{error}</div>
@@ -126,10 +130,10 @@ const BusDetailPage = ({ busId, onBack }) => {
         <div className="page-header">
           <button className="back-btn" onClick={onBack}>
             <Icon name="arrowLeft" size={20} />
-            Back to Buses
+            {t('backToBuses')}
           </button>
         </div>
-        <div className="empty-state">Bus not found</div>
+        <div className="empty-state">{t('busNotFound')}</div>
       </div>
     );
   }
@@ -139,7 +143,7 @@ const BusDetailPage = ({ busId, onBack }) => {
       <div className="page-header">
         <button className="back-btn" onClick={onBack}>
           <Icon name="arrowLeft" size={20} />
-          Back to Buses
+          {t('backToBuses')}
         </button>
       </div>
 
@@ -155,22 +159,22 @@ const BusDetailPage = ({ busId, onBack }) => {
             <div className="bus-meta">
               <span className="meta-item">
                 <Icon name="users" size={16} />
-                {bus.totalSeats} Seats
+                {bus.totalSeats} {t('seats')}
               </span>
               <span className="meta-item">
                 <Icon name="hash" size={16} />
-                Bus ID: {bus.id}
+                {t('busId')}: {bus.id}
               </span>
             </div>
           </div>
           <div className="bus-actions">
             <Button variant="primary" onClick={handleEditClick}>
               <Icon name="edit" size={18} />
-              Edit
+              {t('edit')}
             </Button>
             <Button variant="danger" onClick={handleDeleteClick}>
               <Icon name="trash" size={18} />
-              Delete
+              {t('delete')}
             </Button>
           </div>
         </div>
@@ -181,23 +185,23 @@ const BusDetailPage = ({ busId, onBack }) => {
           <div className="detail-card">
             <div className="card-header">
               <Icon name="bus" size={20} />
-              <h3>Bus Information</h3>
+              <h3>{t('busInformation')}</h3>
             </div>
             <div className="card-body">
               <div className="detail-row">
-                <span className="detail-label">Bus Number</span>
+                <span className="detail-label">{t('busNumber')}</span>
                 <span className="detail-value">{bus.busNumber}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Bus Type</span>
+                <span className="detail-label">{t('busType')}</span>
                 <span className="detail-value">{bus.busType}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Total Seats</span>
+                <span className="detail-label">{t('totalSeats')}</span>
                 <span className="detail-value">{bus.totalSeats}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Bus ID</span>
+                <span className="detail-label">{t('busId')}</span>
                 <span className="detail-value">#{bus.id}</span>
               </div>
             </div>
@@ -207,24 +211,24 @@ const BusDetailPage = ({ busId, onBack }) => {
           <div className="detail-card">
             <div className="card-header">
               <Icon name="map" size={20} />
-              <h3>Route & Layout</h3>
+              <h3>{t('routeLayout')}</h3>
             </div>
             <div className="card-body">
               <div className="detail-row">
-                <span className="detail-label">Route ID</span>
+                <span className="detail-label">{t('routeId')}</span>
                 <span className="detail-value">
-                  {bus.routeId ? `#${bus.routeId}` : 'Not Assigned'}
+                  {bus.routeId ? `#${bus.routeId}` : t('notAssigned')}
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Layout ID</span>
+                <span className="detail-label">{t('layoutId')}</span>
                 <span className="detail-value">
-                  {bus.layoutId ? `#${bus.layoutId}` : 'Not Assigned'}
+                  {bus.layoutId ? `#${bus.layoutId}` : t('notAssigned')}
                 </span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">Status</span>
-                <span className="detail-value">Active</span>
+                <span className="detail-label">{t('status')}</span>
+                <span className="detail-value">{t('active')}</span>
               </div>
             </div>
           </div>
@@ -233,20 +237,20 @@ const BusDetailPage = ({ busId, onBack }) => {
           <div className="detail-card">
             <div className="card-header">
               <Icon name="barChart" size={20} />
-              <h3>Statistics</h3>
+              <h3>{t('statistics')}</h3>
             </div>
             <div className="card-body">
               <div className="stat-item">
                 <div className="stat-value">0</div>
-                <div className="stat-label">Total Trips</div>
+                <div className="stat-label">{t('totalTrips')}</div>
               </div>
               <div className="stat-item">
                 <div className="stat-value">0</div>
-                <div className="stat-label">Active Bookings</div>
+                <div className="stat-label">{t('activeBookings')}</div>
               </div>
               <div className="stat-item">
                 <div className="stat-value">$0.00</div>
-                <div className="stat-label">Total Revenue</div>
+                <div className="stat-label">{t('totalRevenue')}</div>
               </div>
             </div>
           </div>
@@ -257,10 +261,10 @@ const BusDetailPage = ({ busId, onBack }) => {
         isOpen={showDeleteDialog}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
-        title="Delete Bus"
-        message={`Are you sure you want to delete bus ${bus?.busNumber}?`}
-        confirmText="Delete"
-        cancelText="Cancel"
+        title={t('deleteBus')}
+        message={`${t('deleteBusConfirm')} ${bus?.busNumber}?`}
+        confirmText={t('delete')}
+        cancelText={t('cancel')}
         type="danger"
       />
 

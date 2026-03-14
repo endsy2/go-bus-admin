@@ -1,10 +1,15 @@
 import React from 'react';
 import StatCard from '../../molecules/StatCard/StatCard';
+import { useLocale } from '../../../context/LocaleContext';
+import { translations } from '../../../locales/translations';
 import './StatsGrid.css';
 
 const StatsGrid = ({ stats, loading }) => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
+  
   if (loading) {
-    return <div className="loading">Loading stats...</div>;
+    return <div className="loading">{t('loadingStats')}</div>;
   }
 
   return (
