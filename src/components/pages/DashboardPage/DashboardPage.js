@@ -13,6 +13,44 @@ const DashboardPage = () => {
   const { stats, loading: statsLoading } = useStats();
   const { bookings, loading: bookingsLoading } = useBookings();
 
+  const isLoading = statsLoading || bookingsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="dashboard-page">
+        <div className="dashboard-header">
+          <div className="shimmer shimmer-header"></div>
+          <div className="shimmer shimmer-subtitle"></div>
+        </div>
+
+        <div className="shimmer-stats-grid">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="shimmer-stat-card">
+              <div className="shimmer shimmer-stat-icon"></div>
+              <div className="shimmer-stat-content">
+                <div className="shimmer shimmer-stat-value"></div>
+                <div className="shimmer shimmer-stat-label"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="shimmer-table">
+          <div className="shimmer shimmer-table-header"></div>
+          {[1, 2, 3, 4, 5].map(i => (
+            <div key={i} className="shimmer-table-row">
+              <div className="shimmer shimmer-table-cell"></div>
+              <div className="shimmer shimmer-table-cell"></div>
+              <div className="shimmer shimmer-table-cell small"></div>
+              <div className="shimmer shimmer-table-cell medium"></div>
+              <div className="shimmer shimmer-table-cell small"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-page">
       <div className="dashboard-header">

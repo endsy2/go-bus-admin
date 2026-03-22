@@ -5,7 +5,7 @@ import { useLocale } from '../../../context/LocaleContext';
 import { translations } from '../../../locales/translations';
 import './LoginPage.css';
 
-const LoginPage = ({ onLoginSuccess, onSwitchToRegister }) => {
+const LoginPage = ({ onLoginSuccess }) => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [formData, setFormData] = useState({
@@ -137,7 +137,13 @@ const LoginPage = ({ onLoginSuccess, onSwitchToRegister }) => {
     <div className="login-page">
       <div className="login-container">
         <div className="login-header">
-          <h1>{t('busBookingSystem')}</h1>
+          <div className="logo-container">
+            <img 
+              src="/go_bus_new_logo.png" 
+              alt="GoBus Admin" 
+              className="login-logo"
+            />
+          </div>
           <p>{t('signInToAccount')}</p>
         </div>
 
@@ -175,10 +181,6 @@ const LoginPage = ({ onLoginSuccess, onSwitchToRegister }) => {
             {loading ? t('signingIn') : t('signIn')}
           </Button>
         </form>
-
-        <div className="login-footer">
-          <p>{t('dontHaveAccount')} <a href="#register" onClick={onSwitchToRegister}>{t('register')}</a></p>
-        </div>
       </div>
     </div>
   );

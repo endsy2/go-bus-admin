@@ -1,5 +1,5 @@
 .stat-card {
-  background: var(--white);
+  background: var(--card-bg, #FFFFFF);
   padding: 25px;
   border-radius: 12px;
   box-shadow: var(--shadow);
@@ -7,6 +7,15 @@
   align-items: center;
   gap: 20px;
   transition: transform 0.3s ease;
+}
+
+/* Ensure light theme styles are applied */
+[data-theme="light"] .stat-card {
+  background: #FFFFFF;
+}
+
+[data-theme="dark"] .stat-card {
+  background: #2d2d2d;
 }
 
 .stat-card:hover {

@@ -1,0 +1,348 @@
+.create-bus-page {
+  padding: 24px;
+  max-width: 100%;
+  width: 100%;
+}
+
+/* ── Top nav ── */
+.create-bus-topbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-light);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.12s;
+}
+.back-link:hover { color: var(--text-dark); }
+
+.create-bus-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-light);
+}
+.create-bus-breadcrumb span:last-child {
+  color: var(--text-dark);
+  font-weight: 500;
+}
+.breadcrumb-sep { color: var(--text-light); }
+
+/* ── Page header ── */
+.create-bus-header {
+  margin-bottom: 20px;
+}
+.create-bus-header h1 {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin: 0 0 4px;
+}
+.create-bus-header p {
+  font-size: 13px;
+  color: var(--text-light);
+  margin: 0;
+}
+
+/* ── Form cards ── */
+.create-bus-form { display: flex; flex-direction: column; gap: 12px; }
+
+.form-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.form-card-title {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* ── Fields ── */
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.field-row:last-child { margin-bottom: 0; }
+.field.full { margin-bottom: 0; }
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.field label {
+  font-size: 12px;
+  color: var(--text-light);
+  font-weight: 500;
+}
+.field input,
+.field select {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--input-bg);
+  color: var(--text-dark);
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+}
+.field input:focus,
+.field select:focus {
+  border-color: #378ADD;
+  box-shadow: 0 0 0 3px rgba(55,138,221,0.12);
+}
+.input-error {
+  border-color: #E24B4A !important;
+}
+.input-error:focus {
+  box-shadow: 0 0 0 3px rgba(226,75,74,0.12) !important;
+}
+.req { color: #E24B4A; }
+.field-error {
+  font-size: 11px;
+  color: #A32D2D;
+}
+
+/* Dark mode override for field errors */
+[data-theme="dark"] .field-error { 
+  color: #F09595; 
+}
+
+/* ── Route info card ── */
+.route-info-card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+  padding: 12px;
+  background: var(--table-hover);
+  border-radius: 8px;
+}
+.route-info-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.route-info-stat span {
+  font-size: 11px;
+  color: var(--text-light);
+}
+.route-info-stat strong {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* ── Tiles (bus type + layout) ── */
+.tile-grid {
+  display: grid;
+  gap: 8px;
+}
+.tile-grid.three { grid-template-columns: repeat(3, 1fr); }
+.tile-grid.two   { grid-template-columns: 1fr 1fr; }
+
+.tile {
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.12s, background 0.12s;
+  background: var(--card-bg);
+  user-select: none;
+}
+.tile:hover {
+  border-color: var(--border-color);
+  background: var(--table-hover);
+}
+.tile.selected {
+  border: 2px solid #378ADD;
+  background: #E6F1FB;
+}
+.tile.selected .tile-name { color: #0C447C; }
+.tile.selected .tile-desc { color: #185FA5; }
+
+/* Dark mode overrides for selected tiles */
+[data-theme="dark"] .tile.selected {
+  background: #042C53;
+  border-color: #378ADD;
+}
+[data-theme="dark"] .tile.selected .tile-name { color: #85B7EB; }
+[data-theme="dark"] .tile.selected .tile-desc { color: #B5D4F4; }
+
+.tile-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 2px;
+}
+.tile-desc {
+  font-size: 11px;
+  color: var(--text-light);
+}
+
+/* ── Seat preview in layout tile ── */
+.seat-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 10px;
+}
+.seat-dot {
+  width: 18px;
+  height: 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  background: var(--table-hover);
+  font-size: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-light);
+}
+.tile.selected .seat-dot {
+  background: #B5D4F4;
+  border-color: #85B7EB;
+  color: #0C447C;
+}
+.seat-dot-more {
+  width: auto;
+  padding: 0 5px;
+  background: var(--table-hover);
+  color: var(--text-light);
+}
+
+/* Dark mode overrides for seat dots */
+[data-theme="dark"] .tile.selected .seat-dot {
+  background: #0C447C;
+  border-color: #185FA5;
+  color: #B5D4F4;
+}
+.no-layouts {
+  font-size: 13px;
+  color: var(--text-light);
+  grid-column: 1 / -1;
+  padding: 12px 0;
+}
+
+/* ── Status tiles ── */
+.status-row {
+  display: flex;
+  gap: 8px;
+}
+.status-tile {
+  flex: 1;
+  padding: 9px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  color: var(--text-light);
+  background: var(--card-bg);
+  transition: 0.12s;
+  user-select: none;
+}
+.status-tile:hover { background: var(--table-hover); }
+
+.status-tile-active.selected     { border: 2px solid #1D9E75; background: #E1F5EE; color: #085041; }
+.status-tile-standby.selected    { border: 2px solid #3B82F6; background: #EFF6FF; color: #1E40AF; }
+.status-tile-maintenance.selected { border: 2px solid #BA7517; background: #FAEEDA; color: #633806; }
+.status-tile-inactive.selected   { border: 2px solid #888780; background: #F1EFE8; color: #444441; }
+.status-tile-inservice.selected  { border: 2px solid #059669; background: #ECFDF5; color: #064E3B; }
+
+/* Dark mode overrides for status tiles */
+[data-theme="dark"] .status-tile-active.selected     { background: #04342C; color: #9FE1CB; border-color: #1D9E75; }
+[data-theme="dark"] .status-tile-standby.selected    { background: #1E3A8A; color: #93C5FD; border-color: #3B82F6; }
+[data-theme="dark"] .status-tile-maintenance.selected { background: #412402; color: #FAC775; border-color: #BA7517; }
+[data-theme="dark"] .status-tile-inactive.selected   { background: #2C2C2A; color: #B4B2A9; border-color: #888780; }
+[data-theme="dark"] .status-tile-inservice.selected  { background: #022C22; color: #A7F3D0; border-color: #059669; }
+
+/* ── Actions ── */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+.btn-cancel {
+  height: 36px;
+  padding: 0 20px;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  font-size: 13px;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.btn-cancel:hover { background: var(--table-hover); }
+.btn-cancel:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* ── Errors ── */
+.submit-error {
+  background: #FCEBEB;
+  color: #A32D2D;
+  border: 1px solid #F7C1C1;
+  border-radius: 8px;
+  padding: 10px 14px;
+  font-size: 13px;
+}
+
+/* Dark mode override for submit error */
+[data-theme="dark"] .submit-error { 
+  background: #501313; 
+  color: #F09595; 
+  border-color: #791F1F; 
+}
+
+/* ── Loading ── */
+.loading-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 60px 0;
+  font-size: 14px;
+  color: var(--text-light);
+}
+.loading-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--border-color);
+  border-top-color: #378ADD;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Responsive ── */
+@media (max-width: 560px) {
+  .field-row { grid-template-columns: 1fr; }
+  .tile-grid.three { grid-template-columns: 1fr; }
+  .tile-grid.two { grid-template-columns: 1fr; }
+  .route-info-card { grid-template-columns: 1fr 1fr; }
+  .status-row { flex-direction: column; }
+}

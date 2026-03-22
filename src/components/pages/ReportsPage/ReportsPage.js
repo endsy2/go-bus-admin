@@ -7,6 +7,13 @@ import './ReportsPage.css';
 const ReportsPage = () => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
+  const [loading, setLoading] = React.useState(true);
+
+  React.useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => setLoading(false), 1500);
+    return () => clearTimeout(timer);
+  }, []);
   
   const reports = [
     { title: t('revenueReport'), period: t('monthly'), lastGenerated: '2026-03-01', icon: '💰' },
@@ -21,6 +28,55 @@ const ReportsPage = () => {
     { label: t('averageTicketPrice'), value: '$37', change: '+5%', trend: 'up' },
     { label: t('cancellationRate'), value: '3.2%', change: '-1.5%', trend: 'down' },
   ];
+
+  if (loading) {
+    return (
+      <div className="reports-page">
+        <div className="page-header">
+          <div>
+            <div className="shimmer shimmer-header"></div>
+            <div className="shimmer shimmer-subtitle"></div>
+          </div>
+          <div className="shimmer shimmer-button"></div>
+        </div>
+
+        <div className="stats-overview">
+          <div className="shimmer shimmer-section-title"></div>
+          <div className="shimmer-metrics-grid">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="shimmer-metric-card">
+                <div className="shimmer shimmer-metric-label"></div>
+                <div className="shimmer shimmer-metric-value"></div>
+                <div className="shimmer shimmer-metric-change"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="reports-section">
+          <div className="shimmer shimmer-section-title"></div>
+          <div className="shimmer-reports-grid">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="shimmer-report-card">
+                <div className="shimmer shimmer-report-icon"></div>
+                <div className="shimmer-report-info">
+                  <div className="shimmer shimmer-report-title"></div>
+                  <div className="shimmer-report-meta">
+                    <div className="shimmer shimmer-report-meta-item"></div>
+                    <div className="shimmer shimmer-report-meta-item"></div>
+                  </div>
+                </div>
+                <div className="shimmer-report-actions">
+                  <div className="shimmer shimmer-report-action-button"></div>
+                  <div className="shimmer shimmer-report-action-button"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="reports-page">

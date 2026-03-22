@@ -10,7 +10,6 @@ import CustomersPage from './components/pages/CustomersPage/CustomersPage';
 import ReportsPage from './components/pages/ReportsPage/ReportsPage';
 import TeamPage from './components/pages/TeamPage/TeamPage';
 import LoginPage from './components/pages/LoginPage/LoginPage';
-import RegisterPage from './components/pages/RegisterPage/RegisterPage';
 import UnauthorizedDialog from './components/molecules/UnauthorizedDialog/UnauthorizedDialog';
 import { setUnauthorizedHandler } from './utils/api';
 
@@ -18,7 +17,6 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [showRegister, setShowRegister] = useState(false);
   const [showUnauthorizedDialog, setShowUnauthorizedDialog] = useState(false);
 
   useEffect(() => {
@@ -41,22 +39,11 @@ function App() {
 
   const fetchProfile = async (userData) => {
     try {
-      const token = userData?.token || userData?.accessToken;
-      if (!token) return;
-
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/profile`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
+      const { apiRequest } = await import('./utils/api');
+      
+      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/profile`, {
+        method: 'GET'
       });
-
-      if (response.status === 401) {
-        // Unauthorized - show dialog
-        setShowUnauthorizedDialog(true);
-        return;
-      }
 
       if (response.ok) {
         const result = await response.json();
@@ -83,13 +70,6 @@ function App() {
   const handleLoginSuccess = (userData) => {
     setUser(userData);
     setIsAuthenticated(true);
-    setShowRegister(false);
-  };
-
-  const handleRegisterSuccess = (userData) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    setShowRegister(false);
   };
 
   const handleLogout = () => {
@@ -97,23 +77,13 @@ function App() {
     localStorage.setItem('locale', 'en'); // Reset language to English
     setUser(null);
     setIsAuthenticated(false);
-    setShowRegister(false);
     window.location.reload(); // Reload to apply language change
   };
 
   if (!isAuthenticated) {
-    if (showRegister) {
-      return (
-        <RegisterPage 
-          onRegisterSuccess={handleRegisterSuccess}
-          onSwitchToLogin={() => setShowRegister(false)}
-        />
-      );
-    }
     return (
       <LoginPage 
         onLoginSuccess={handleLoginSuccess}
-        onSwitchToRegister={() => setShowRegister(true)}
       />
     );
   }

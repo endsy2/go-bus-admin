@@ -5,15 +5,27 @@ import Input from '../../atoms/Input/Input';
 import Snackbar from '../../atoms/Snackbar/Snackbar';
 import ConfirmDialog from '../../molecules/ConfirmDialog/ConfirmDialog';
 import EditCustomerDialog from '../../molecules/EditCustomerDialog/EditCustomerDialog';
+import Pagination from '../../molecules/Pagination/Pagination';
 import CustomerDetailPage from '../CustomerDetailPage/CustomerDetailPage';
 import { apiRequest } from '../../../utils/api';
 import { useLocale } from '../../../context/LocaleContext';
 import { translations } from '../../../locales/translations';
+import { canViewCustomers, canEditCustomers, canDeleteCustomers, canCreateCustomers } from '../../../utils/permissions';
 import './CustomersPage.css';
 
 const CustomersPage = () => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
+  
+  // Get current user from localStorage for permission checks
+  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+  
+  // Permission checks
+  const canView = canViewCustomers(currentUser);
+  const canEdit = canEditCustomers(currentUser);
+  const canDelete = canDeleteCustomers(currentUser);
+  const canCreate = canCreateCustomers(currentUser);
+
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -43,30 +55,43 @@ const CustomersPage = () => {
     username: '',
     googleId: ''
   });
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    pageSize: 15,
+    totalPages: 0,
+    totalElements: 0
+  });
 
   useEffect(() => {
     fetchCustomers();
   }, []);
 
-  const fetchCustomers = async (filterParams = null) => {
+  const fetchCustomers = async (filterParams = null, page = 1, size = 15) => {
     try {
       setLoading(true);
 
-      // Always use the filter endpoint
-      let url = `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/filter/specification`;
+      // Use the new specification endpoint for customers
+      let url = `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/specification`;
+      
+      const queryParams = new URLSearchParams();
+      
+      // Add pagination parameters
+      queryParams.append('pageStart', page);
+      queryParams.append('pageSize', size);
+      queryParams.append('isEmployee', 'false');
       
       // If filters are provided, add them as query parameters
       if (filterParams) {
-        const queryParams = new URLSearchParams();
         Object.keys(filterParams).forEach(key => {
           if (filterParams[key]) {
             queryParams.append(key, filterParams[key]);
           }
         });
-        const queryString = queryParams.toString();
-        if (queryString) {
-          url = `${url}?${queryString}`;
-        }
+      }
+      
+      const queryString = queryParams.toString();
+      if (queryString) {
+        url = `${url}?${queryString}`;
       }
 
       const response = await apiRequest(url, {
@@ -76,9 +101,19 @@ const CustomersPage = () => {
       const result = await response.json();
 
       if (response.ok) {
-        // Handle both direct and nested data structures
-        const users = result.data || result;
+        // Handle paginated response structure
+        const users = result.data?.content || result.content || result.data || result;
         setCustomers(Array.isArray(users) ? users : []);
+        
+        // Update pagination info - adjust for pageStart vs page difference
+        const pageData = result.data || result;
+        setPagination({
+          currentPage: (pageData.number || page - 1),
+          pageSize: pageData.size || size,
+          totalPages: pageData.totalPages || 1,
+          totalElements: pageData.totalElements || 0
+        });
+        
         setError('');
       } else {
         const errorData = result.data || result;
@@ -114,7 +149,7 @@ const CustomersPage = () => {
       return;
     }
     
-    fetchCustomers(filters);
+    fetchCustomers(filters, 1, pagination.pageSize);
   };
 
   const handleClearFilters = () => {
@@ -125,7 +160,15 @@ const CustomersPage = () => {
       username: '',
       googleId: ''
     });
-    fetchCustomers();
+    fetchCustomers(null, 1, pagination.pageSize);
+  };
+
+  const handlePageChange = (newPage) => {
+    fetchCustomers(filters, newPage, pagination.pageSize);
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    fetchCustomers(filters, 1, newSize);
   };
 
   const handleCopyToClipboard = (text, label) => {
@@ -146,11 +189,27 @@ const CustomersPage = () => {
   };
 
   const handleDeleteClick = (customer) => {
+    if (!canDelete) {
+      setSnackbar({
+        isOpen: true,
+        message: 'You do not have permission to delete customers',
+        type: 'error'
+      });
+      return;
+    }
     setCustomerToDelete(customer);
     setShowDeleteDialog(true);
   };
 
   const handleEditClick = (customer) => {
+    if (!canEdit) {
+      setSnackbar({
+        isOpen: true,
+        message: 'You do not have permission to edit customers',
+        type: 'error'
+      });
+      return;
+    }
     setCustomerToEdit(customer);
     setShowEditDialog(true);
   };
@@ -164,7 +223,7 @@ const CustomersPage = () => {
     setShowDetailView(false);
     setSelectedCustomerId(null);
     // Refresh the customer list when coming back from detail
-    fetchCustomers();
+    fetchCustomers(filters, pagination.currentPage, pagination.pageSize);
   };
 
   const handleSaveEdit = async (updateData) => {
@@ -212,6 +271,14 @@ const CustomersPage = () => {
   };
 
   const handleCreateClick = () => {
+    if (!canCreate) {
+      setSnackbar({
+        isOpen: true,
+        message: 'You do not have permission to create customers',
+        type: 'error'
+      });
+      return;
+    }
     setShowCreateForm(true);
   };
 
@@ -360,6 +427,25 @@ const CustomersPage = () => {
     setCustomerToDelete(null);
   };
 
+  // If user doesn't have permission to view customers, show access denied
+  if (!canView) {
+    return (
+      <div className="customers-page">
+        <div className="page-header">
+          <div>
+            <h1>{t('customerManagement')}</h1>
+            <p>{t('customerManagementDesc')}</p>
+          </div>
+        </div>
+        <div className="access-denied">
+          <Icon name="lock" size={48} />
+          <h3>Access Denied</h3>
+          <p>You do not have permission to view customer information. Please contact your administrator.</p>
+        </div>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="customers-page">
@@ -437,7 +523,7 @@ const CustomersPage = () => {
               {t('clearFilters')}
             </Button>
             <Button variant="primary" disabled>
-              {t('applyFilters')}
+              {t('Search')}
             </Button>
           </div>
         </div>
@@ -636,7 +722,7 @@ const CustomersPage = () => {
           <h1>{t('customerManagement')}</h1>
           <p>{t('customerManagementDesc')}</p>
         </div>
-        <Button variant="primary" onClick={handleCreateClick}>
+        <Button variant="primary" onClick={handleCreateClick} disabled={!canCreate}>
           <Icon name="plus" size={18} />
           {t('addCustomer')}
         </Button>
@@ -790,9 +876,11 @@ const CustomersPage = () => {
                       <button className="btn-icon btn-view" title="View" onClick={() => handleViewClick(customer)}>
                         <Icon name="eye" size={18} />
                       </button>
-                      <button className="btn-icon btn-delete" title="Delete" onClick={() => handleDeleteClick(customer)}>
-                        <Icon name="trash" size={18} />
-                      </button>
+                      {canDelete && (
+                        <button className="btn-icon btn-delete" title="Delete" onClick={() => handleDeleteClick(customer)}>
+                          <Icon name="trash" size={18} />
+                        </button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -800,6 +888,17 @@ const CustomersPage = () => {
             )}
           </tbody>
         </table>
+        
+        {customers.length > 0 && (
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            pageSize={pagination.pageSize}
+            totalElements={pagination.totalElements}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+        )}
       </div>
 
       <ConfirmDialog

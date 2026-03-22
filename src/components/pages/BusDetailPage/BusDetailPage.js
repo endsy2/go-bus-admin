@@ -3,6 +3,7 @@ import Icon from '../../atoms/Icon/Icon';
 import Button from '../../atoms/Button/Button';
 import Snackbar from '../../atoms/Snackbar/Snackbar';
 import ConfirmDialog from '../../molecules/ConfirmDialog/ConfirmDialog';
+import EditBusDialog from '../../molecules/EditBusDialog/EditBusDialog';
 import { apiRequest } from '../../../utils/api';
 import { useLocale } from '../../../context/LocaleContext';
 import { translations } from '../../../locales/translations';
@@ -16,6 +17,7 @@ const BusDetailPage = ({ busId, onBack }) => {
   const [error, setError] = useState('');
   const [snackbar, setSnackbar] = useState({ isOpen: false, message: '', type: 'success' });
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   useEffect(() => {
     if (busId) {
@@ -49,11 +51,21 @@ const BusDetailPage = ({ busId, onBack }) => {
   };
 
   const handleEditClick = () => {
+    setShowEditDialog(true);
+  };
+
+  const handleSaveEdit = async (updatedBus) => {
+    setBus(updatedBus);
+    setShowEditDialog(false);
     setSnackbar({
       isOpen: true,
-      message: t('editFunctionalityComingSoon'),
-      type: 'info'
+      message: t('busUpdatedSuccess') || 'Bus updated successfully!',
+      type: 'success'
     });
+  };
+
+  const handleCancelEdit = () => {
+    setShowEditDialog(false);
   };
 
   const handleDeleteClick = () => {
@@ -151,11 +163,13 @@ const BusDetailPage = ({ busId, onBack }) => {
         {/* Bus Header Card */}
         <div className="bus-header-card">
           <div className="bus-icon-large">
-            🚌
+            <Icon name="bus" size={48} />
           </div>
           <div className="bus-header-info">
             <h1>{bus.busNumber}</h1>
-            <span className="bus-type-badge">{bus.busType}</span>
+            <span className={`bus-status-badge status-${(bus.status || bus.busStatus || 'active').toLowerCase()}`}>
+              {bus.status || bus.busStatus || 'Active'}
+            </span>
             <div className="bus-meta">
               <span className="meta-item">
                 <Icon name="users" size={16} />
@@ -164,6 +178,10 @@ const BusDetailPage = ({ busId, onBack }) => {
               <span className="meta-item">
                 <Icon name="hash" size={16} />
                 {t('busId')}: {bus.id}
+              </span>
+              <span className="meta-item">
+                <Icon name="tag" size={16} />
+                {bus.busType}
               </span>
             </div>
           </div>
@@ -201,8 +219,12 @@ const BusDetailPage = ({ busId, onBack }) => {
                 <span className="detail-value">{bus.totalSeats}</span>
               </div>
               <div className="detail-row">
-                <span className="detail-label">{t('busId')}</span>
-                <span className="detail-value">#{bus.id}</span>
+                <span className="detail-label">{t('model')}</span>
+                <span className="detail-value">{bus.model || t('notSpecified')}</span>
+              </div>
+              <div className="detail-row">
+                <span className="detail-label">{t('plateNumber')}</span>
+                <span className="detail-value">{bus.plate || t('notSpecified')}</span>
               </div>
             </div>
           </div>
@@ -228,7 +250,9 @@ const BusDetailPage = ({ busId, onBack }) => {
               </div>
               <div className="detail-row">
                 <span className="detail-label">{t('status')}</span>
-                <span className="detail-value">{t('active')}</span>
+                <span className={`detail-value status-badge status-${(bus.status || bus.busStatus || 'active').toLowerCase()}`}>
+                  {bus.status || bus.busStatus || 'Active'}
+                </span>
               </div>
             </div>
           </div>
@@ -256,6 +280,13 @@ const BusDetailPage = ({ busId, onBack }) => {
           </div>
         </div>
       </div>
+
+      <EditBusDialog
+        isOpen={showEditDialog}
+        bus={bus}
+        onSave={handleSaveEdit}
+        onCancel={handleCancelEdit}
+      />
 
       <ConfirmDialog
         isOpen={showDeleteDialog}

@@ -45,7 +45,6 @@
 }
 
 .bus-icon-large {
-  font-size: 80px;
   background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
   width: 120px;
   height: 120px;
@@ -54,6 +53,68 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  color: white;
+}
+
+.bus-status-badge {
+  display: inline-block;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-transform: capitalize;
+}
+
+.bus-status-badge.status-active {
+  background: #E1F5EE;
+  color: #085041;
+}
+
+.bus-status-badge.status-standby {
+  background: #EFF6FF;
+  color: #1E40AF;
+}
+
+.bus-status-badge.status-maintenance {
+  background: #FAEEDA;
+  color: #633806;
+}
+
+.bus-status-badge.status-inactive {
+  background: #F1EFE8;
+  color: #444441;
+}
+
+.bus-status-badge.status-inservice {
+  background: #ECFDF5;
+  color: #064E3B;
+}
+
+/* Dark mode overrides for status badges */
+[data-theme="dark"] .bus-status-badge.status-active {
+  background: #04342C;
+  color: #9FE1CB;
+}
+
+[data-theme="dark"] .bus-status-badge.status-standby {
+  background: #1E3A8A;
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .bus-status-badge.status-maintenance {
+  background: #412402;
+  color: #FAC775;
+}
+
+[data-theme="dark"] .bus-status-badge.status-inactive {
+  background: #2C2C2A;
+  color: #B4B2A9;
+}
+
+[data-theme="dark"] .bus-status-badge.status-inservice {
+  background: #022C22;
+  color: #A7F3D0;
 }
 
 .bus-header-info {
@@ -66,15 +127,64 @@
   margin: 0 0 8px 0;
 }
 
-.bus-type-badge {
+.status-badge {
   display: inline-block;
-  padding: 6px 16px;
-  background: #e3f2fd;
-  color: #1976d2;
-  border-radius: 20px;
-  font-size: 14px;
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
   font-weight: 600;
-  margin-bottom: 12px;
+  text-transform: capitalize;
+}
+
+.status-badge.status-active {
+  background: #E1F5EE;
+  color: #085041;
+}
+
+.status-badge.status-standby {
+  background: #EFF6FF;
+  color: #1E40AF;
+}
+
+.status-badge.status-maintenance {
+  background: #FAEEDA;
+  color: #633806;
+}
+
+.status-badge.status-inactive {
+  background: #F1EFE8;
+  color: #444441;
+}
+
+.status-badge.status-inservice {
+  background: #ECFDF5;
+  color: #064E3B;
+}
+
+/* Dark mode overrides for small status badges */
+[data-theme="dark"] .status-badge.status-active {
+  background: #04342C;
+  color: #9FE1CB;
+}
+
+[data-theme="dark"] .status-badge.status-standby {
+  background: #1E3A8A;
+  color: #93C5FD;
+}
+
+[data-theme="dark"] .status-badge.status-maintenance {
+  background: #412402;
+  color: #FAC775;
+}
+
+[data-theme="dark"] .status-badge.status-inactive {
+  background: #2C2C2A;
+  color: #B4B2A9;
+}
+
+[data-theme="dark"] .status-badge.status-inservice {
+  background: #022C22;
+  color: #A7F3D0;
 }
 
 .bus-meta {

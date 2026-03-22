@@ -9,12 +9,55 @@ import './BookingsPage.css';
 const BookingsPage = () => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
-  const { bookings } = useBookings();
+  const { bookings, loading } = useBookings();
   const [filter, setFilter] = useState('all');
 
   const filteredBookings = filter === 'all' 
     ? bookings 
     : bookings.filter(b => b.status.toLowerCase() === filter);
+
+  if (loading) {
+    return (
+      <div className="bookings-page">
+        <div className="page-header">
+          <div>
+            <div className="shimmer shimmer-header"></div>
+            <div className="shimmer shimmer-subtitle"></div>
+          </div>
+          <div className="shimmer shimmer-button"></div>
+        </div>
+
+        <div className="shimmer-filter-bar">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="shimmer shimmer-filter-button"></div>
+          ))}
+        </div>
+
+        <div className="shimmer-bookings-grid">
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <div key={i} className="shimmer-booking-card">
+              <div className="shimmer-booking-header">
+                <div className="shimmer shimmer-booking-id"></div>
+                <div className="shimmer shimmer-booking-status"></div>
+              </div>
+              <div className="shimmer-booking-info">
+                {[1, 2, 3].map(j => (
+                  <div key={j} className="shimmer-info-row">
+                    <div className="shimmer shimmer-info-label"></div>
+                    <div className="shimmer shimmer-info-value"></div>
+                  </div>
+                ))}
+              </div>
+              <div className="shimmer-booking-actions">
+                <div className="shimmer shimmer-action-button"></div>
+                <div className="shimmer shimmer-action-button"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bookings-page">

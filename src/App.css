@@ -20,6 +20,20 @@
   --table-hover: #fafafa;
 }
 
+/* Light theme (default) */
+[data-theme="light"] {
+  --bg-color: #F5F7FA;
+  --text-dark: #2C3E50;
+  --text-light: #7F8C8D;
+  --white: #FFFFFF;
+  --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --border-color: #e8e8e8;
+  --card-bg: #FFFFFF;
+  --input-bg: #FFFFFF;
+  --table-hover: #fafafa;
+}
+
 [data-theme="dark"] {
   --bg-color: #1a1a1a;
   --text-dark: #e0e0e0;
@@ -31,6 +45,10 @@
   --card-bg: #2d2d2d;
   --input-bg: #252525;
   --table-hover: #353535;
+}
+
+[data-theme="dark"] .field-error {
+  color: #F09595;
 }
 
 body {
@@ -48,9 +66,10 @@ body {
 
 .main-content {
   flex: 1;
+  margin-left: 260px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: 100vh;
 }
 
 .page-content {
