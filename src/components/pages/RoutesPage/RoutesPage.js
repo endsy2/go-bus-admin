@@ -26,6 +26,7 @@ const RoutesPage = () => {
   const [routeToDelete, setRouteToDelete] = useState(null);
   const [selectedRouteId, setSelectedRouteId] = useState(null);
   const [showCreateRoute, setShowCreateRoute] = useState(false);
+  const [allRoutes, setAllRoutes] = useState([]); // Store all routes for dropdown options
 
   useEffect(() => {
     fetchRoutes();
@@ -38,7 +39,9 @@ const RoutesPage = () => {
       const result = await response.json();
       if (response.ok) {
         const data = result.data || result;
-        setRoutes(Array.isArray(data) ? data : []);
+        const routesArray = Array.isArray(data) ? data : [];
+        setRoutes(routesArray);
+        setAllRoutes(routesArray); // Store all routes for suggestions
         setError('');
       } else {
         setError((result.data || result).message || 'Failed to fetch routes');
@@ -51,17 +54,67 @@ const RoutesPage = () => {
     }
   };
 
-  const handleSearch = () => {
+  const handleSearch = async (origin = null, destination = null) => {
+    // If called from dropdown selection, use provided origin/destination
+    // Otherwise, parse from search input
+    let searchOrigin = origin;
+    let searchDestination = destination;
+    
+    if (!origin && !destination) {
+      if (!search.trim()) {
+        fetchRoutes();
+        return;
+      }
+      
+      const searchTerms = search.trim().split(/\s+/);
+      if (searchTerms.length >= 2) {
+        searchOrigin = searchTerms[0];
+        searchDestination = searchTerms.slice(1).join(' ');
+      } else {
+        searchOrigin = search.trim();
+        searchDestination = search.trim();
+      }
+    }
+
     setSearching(true);
-    setTimeout(() => setSearching(false), 300);
+    
+    try {
+      const searchParams = new URLSearchParams();
+      searchParams.append('origin', searchOrigin);
+      searchParams.append('destination', searchDestination);
+
+      const response = await apiRequest(`${BASE_URL}/api/routes/search?${searchParams.toString()}`, { method: 'GET' });
+      const result = await response.json();
+      
+      if (response.ok) {
+        const data = result.data || result;
+        setRoutes(Array.isArray(data) ? data : []);
+        setError('');
+      } else {
+        setError((result.data || result).message || 'Search failed');
+      }
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+      console.error('Error searching routes:', err);
+    } finally {
+      setSearching(false);
+    }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') handleSearch();
+    if (e.key === 'Enter') {
+      if (search) {
+        const [origin, destination] = search.split(' → ');
+        handleSearch(origin, destination);
+      } else {
+        fetchRoutes();
+      }
+    }
   };
 
   const resetSearch = () => {
     setSearch('');
+    fetchRoutes(); // Reload all routes when clearing search
   };
 
   const handleViewRoute = (routeId) => {
@@ -120,14 +173,7 @@ const RoutesPage = () => {
     return `${h}h ${m}m`;
   };
 
-  const filteredRoutes = routes.filter(route => {
-    if (!search.trim()) return true;
-    const q = search.toLowerCase();
-    return (
-      route.origin?.toLowerCase().includes(q) ||
-      route.destination?.toLowerCase().includes(q)
-    );
-  });
+  const filteredRoutes = routes; // Routes are now filtered server-side
 
   const totalBuses = routes.reduce((sum, r) => sum + (r.busCount || 0), 0);
   const totalDistance = routes.reduce((sum, r) => sum + (r.distanceKm || 0), 0);
@@ -308,27 +354,51 @@ const RoutesPage = () => {
         {/* Search */}
         <div className="filter-section">
           <div className="search-container">
-            <div className="search-input-wrapper">
+            <div className="search-dropdown-wrapper">
               <div className="search-icon-left">
                 <Icon name="search" size={18} />
               </div>
-              <input
-                type="text"
-                placeholder={t('searchRoutes') || 'Search routes by origin or destination...'}
+              <select
                 value={search}
-                onChange={e => setSearch(e.target.value)}
-                onKeyDown={handleKeyDown}
-                className="search-input"
-              />
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  // Don't auto-search, just set the value
+                }}
+                className="search-dropdown-select"
+              >
+                <option value="">{t('selectRoute') || 'Select a route to search...'}</option>
+                {allRoutes.map(route => (
+                  <option 
+                    key={route.id} 
+                    value={`${route.origin} → ${route.destination}`}
+                  >
+                    {route.origin} → {route.destination} ({route.distanceKm?.toFixed(0)}km, {formatDuration(route.durationMinutes)})
+                  </option>
+                ))}
+              </select>
               {search && (
-                <button className="clear-search-btn" onClick={resetSearch}>
+                <button 
+                  className="clear-search-btn" 
+                  onClick={() => {
+                    setSearch('');
+                    // Don't auto-reload, just clear the selection
+                  }}
+                  title={t('clearSelection') || 'Clear Selection'}
+                >
                   <Icon name="x" size={16} />
                 </button>
               )}
             </div>
             <button
               className="search-btn"
-              onClick={handleSearch}
+              onClick={() => {
+                if (search) {
+                  const [origin, destination] = search.split(' → ');
+                  handleSearch(origin, destination);
+                } else {
+                  fetchRoutes(); // Show all routes when no selection
+                }
+              }}
               disabled={searching}
             >
               {searching ? (
@@ -339,10 +409,26 @@ const RoutesPage = () => {
               ) : (
                 <>
                   <Icon name="search" size={16} />
-                  {t('search') || 'Search'}
+                  {search ? (t('search') || 'Search') : (t('showAll') || 'Show All')}
                 </>
               )}
             </button>
+            
+            {/* Clear Button - separate from dropdown */}
+            {search && (
+              <button
+                className="clear-btn"
+                onClick={() => {
+                  setSearch('');
+                  fetchRoutes(); // Reset to show all routes
+                }}
+                disabled={searching}
+                title={t('clearAndShowAll') || 'Clear and Show All Routes'}
+              >
+                <Icon name="x" size={16} />
+                {t('clear') || 'Clear'}
+              </button>
+            )}
           </div>
         </div>
 
@@ -490,7 +576,18 @@ const RoutesPage = () => {
         {/* Footer */}
         <div className="results-footer">
           <span className="results-count">
-            {t('showing') || 'Showing'} <strong>{filteredRoutes.length}</strong> {t('of') || 'of'} <strong>{routes.length}</strong> {t('routes') || 'routes'}
+            {search ? (
+              <>
+                {t('searchResults') || 'Search results'}: <strong>{filteredRoutes.length}</strong> {t('routes') || 'routes'}
+                {filteredRoutes.length > 0 && (
+                  <span className="search-hint"> for "{search}"</span>
+                )}
+              </>
+            ) : (
+              <>
+                {t('showing') || 'Showing'} <strong>{filteredRoutes.length}</strong> {t('routes') || 'routes'}
+              </>
+            )}
           </span>
         </div>
       </div>
