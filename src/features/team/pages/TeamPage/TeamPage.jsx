@@ -1,0 +1,660 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { Users, Shield, UserCheck, Edit, Save, AlertCircle } from 'lucide-react';
+import { Button } from 'shared/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'shared/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
+import { Badge } from 'shared/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from 'shared/components/ui/tabs';
+import { Checkbox } from 'shared/components/ui/checkbox';
+import { Label } from 'shared/components/ui/label';
+import { Skeleton } from 'shared/components/ui/skeleton';
+import { useToast } from 'shared/components/ui/toast';
+import AssignRoleDialog from '../../components/AssignRoleDialog/AssignRoleDialog';
+import { Pagination } from 'shared/components/feedback/Pagination';
+import { apiRequest } from 'shared/utils/api';
+import { useLocale } from 'shared/context/LocaleContext';
+import { translations } from 'shared/locales/translations';
+
+const TeamPage = () => {
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
+  const { addToast } = useToast();
+
+  const [activeTab, setActiveTab] = useState('members');
+
+  // Members state
+  const [teamMembers, setTeamMembers] = useState([]);
+  const [membersLoading, setMembersLoading] = useState(true);
+  const [membersPagination, setMembersPagination] = useState({
+    currentPage: 1,
+    pageSize: 15,
+    totalPages: 0,
+    totalElements: 0
+  });
+
+  // Roles state
+  const [roles, setRoles] = useState([]);
+  const [rolesLoading, setRolesLoading] = useState(true);
+
+  // Permissions state
+  const [allPermissions, setAllPermissions] = useState([]);
+  const [rolePermissions, setRolePermissions] = useState({});
+  const [savingRole, setSavingRole] = useState(null);
+
+  // UI state
+  const [error, setError] = useState('');
+  const [showAssignRoleDialog, setShowAssignRoleDialog] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+
+  const groupCheckboxRefs = useRef({});
+
+  // ─── Data fetching ────────────────────────────────────────────
+
+  useEffect(() => {
+    if (activeTab === 'roles') {
+      fetchRoles();
+    } else {
+      fetchTeamMembers();
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (roles.length > 0) {
+      const initial = {};
+      roles.forEach(role => {
+        initial[role.id] = new Set((role.permissions || []).map(p => p.id));
+      });
+      setRolePermissions(initial);
+      fetchAllPermissions();
+    }
+  }, [roles]);
+
+  useEffect(() => {
+    const grouped = groupPermissions(allPermissions);
+    roles.forEach(role => {
+      const checkedSet = rolePermissions[role.id] || new Set();
+      Object.entries(grouped).forEach(([groupName, perms]) => {
+        const el = groupCheckboxRefs.current[`${role.id}-${groupName}`];
+        if (el) {
+          const allChecked = perms.every(p => checkedSet.has(p.id));
+          const someChecked = perms.some(p => checkedSet.has(p.id));
+          
+          el.checked = allChecked;
+          el.indeterminate = !allChecked && someChecked;
+        }
+      });
+    });
+  }, [rolePermissions, allPermissions, roles]);
+
+  const fetchTeamMembers = async (page = 1, size = 15) => {
+    try {
+      setMembersLoading(true);
+      const response = await apiRequest(
+        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/specification?pageStart=${page}&pageSize=${size}&isEmployee=true`,
+        { method: 'GET' }
+      );
+      const result = await response.json();
+      if (response.ok) {
+        const users = result.data?.content || result.content || result.data || result;
+        setTeamMembers(Array.isArray(users) ? users : []);
+        
+        const pageData = result.data || result;
+        setMembersPagination({
+          currentPage: page,
+          pageSize: pageData.size || size,
+          totalPages: pageData.totalPages || 1,
+          totalElements: pageData.totalElements || 0
+        });
+        
+        setError('');
+      } else {
+        const errorData = result.data || result;
+        setError(errorData.message || 'Failed to fetch team members');
+      }
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+    } finally {
+      setMembersLoading(false);
+    }
+  };
+
+  const fetchRoles = async () => {
+    try {
+      setRolesLoading(true);
+      const response = await apiRequest(
+        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/roles`,
+        { method: 'GET' }
+      );
+      const result = await response.json();
+      if (response.ok) {
+        const rolesData = result.data || result;
+        setRoles(Array.isArray(rolesData) ? rolesData : []);
+        setError('');
+      } else {
+        const errorData = result.data || result;
+        setError(errorData.message || 'Failed to fetch roles');
+      }
+    } catch (err) {
+      setError('Network error. Please check your connection.');
+    } finally {
+      setRolesLoading(false);
+    }
+  };
+
+  const fetchAllPermissions = async () => {
+    try {
+      const response = await apiRequest(
+        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/permissions`,
+        { method: 'GET' }
+      );
+      const result = await response.json();
+      if (response.ok) {
+        const data = result.data || result;
+        setAllPermissions(Array.isArray(data) ? data : []);
+      }
+    } catch (err) {
+      console.error('Error fetching permissions:', err);
+    }
+  };
+
+  // ─── Handlers ─────────────────────────────────────────────────
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '—';
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric', month: 'short', day: 'numeric',
+    });
+  };
+
+  const handleAssignRole = (user) => {
+    setSelectedUser(user);
+    setShowAssignRoleDialog(true);
+  };
+
+  const handleSaveRoles = async (roles) => {
+    if (!selectedUser) return;
+    try {
+      const response = await apiRequest(
+        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/users/${selectedUser.id}/roles`,
+        { method: 'PUT', body: JSON.stringify({ roles }) }
+      );
+      if (response.ok) {
+        setShowAssignRoleDialog(false);
+        addToast({ message: 'Roles updated successfully!', type: 'success' });
+        fetchTeamMembers(membersPagination.currentPage, membersPagination.pageSize);
+      } else {
+        const result = await response.json();
+        const errorData = result.data || result;
+        addToast({ message: errorData.message || 'Failed to update roles', type: 'error' });
+      }
+    } catch (err) {
+      addToast({ message: 'Network error. Failed to update roles.', type: 'error' });
+    }
+  };
+
+  const handleMembersPageChange = (newPage) => {
+    fetchTeamMembers(newPage, membersPagination.pageSize);
+  };
+
+  const handleMembersPageSizeChange = (newSize) => {
+    fetchTeamMembers(1, newSize);
+  };
+
+  const cancelAssignRole = () => {
+    setShowAssignRoleDialog(false);
+    setSelectedUser(null);
+  };
+
+  const togglePermission = (roleId, permissionId) => {
+    setRolePermissions(prev => {
+      const current = new Set(prev[roleId] || []);
+      if (current.has(permissionId)) current.delete(permissionId);
+      else current.add(permissionId);
+      return { ...prev, [roleId]: current };
+    });
+  };
+
+  const togglePermissionGroup = (roleId, perms, allChecked) => {
+    setRolePermissions(prev => {
+      const current = new Set(prev[roleId] || []);
+      if (allChecked) perms.forEach(p => current.delete(p.id));
+      else perms.forEach(p => current.add(p.id));
+      return { ...prev, [roleId]: current };
+    });
+  };
+
+  const handleSaveRolePermissions = async (role) => {
+    setSavingRole(role.id);
+    try {
+      const permissionIds = Array.from(rolePermissions[role.id] || []);
+      const response = await apiRequest(
+        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/roles/${role.id}/permissions`,
+        { method: 'PUT', body: JSON.stringify({ permissionIds }) }
+      );
+      if (response.ok) {
+        addToast({
+          message: `Permissions for ${role.name.replace('ROLE_', '')} updated!`,
+          type: 'success',
+        });
+        fetchRoles();
+      } else {
+        const result = await response.json();
+        addToast({ message: result.message || 'Failed to update permissions', type: 'error' });
+      }
+    } catch (err) {
+      addToast({ message: 'Network error. Failed to update permissions.', type: 'error' });
+    } finally {
+      setSavingRole(null);
+    }
+  };
+
+  // ─── Helpers ──────────────────────────────────────────────────
+
+  const groupPermissions = (permissions) =>
+    permissions.reduce((groups, perm) => {
+      const group = perm.name.includes('_') ? perm.name.split('_')[0] : 'OTHER';
+      if (!groups[group]) groups[group] = [];
+      groups[group].push(perm);
+      return groups;
+    }, {});
+
+  const formatPermissionLabel = (name) =>
+    name.replace(/_/g, ' ').toLowerCase().replace(/^\w/, c => c.toUpperCase());
+
+  const getRoleDisplayName = (role) =>
+    typeof role === 'string' ? role.replace('ROLE_', '') : role.name?.replace('ROLE_', '');
+
+  const avatarGradients = [
+    'from-blue-500 to-indigo-600',
+    'from-emerald-500 to-blue-500',
+    'from-amber-500 to-red-500',
+    'from-purple-500 to-pink-500',
+    'from-cyan-500 to-blue-500',
+  ];
+
+  const getAvatarGradient = (name = '') => {
+    const code = (name.charCodeAt(0) || 0) % avatarGradients.length;
+    return avatarGradients[code];
+  };
+
+  // ─── Render: Team Members ──────────────────────────────────────
+
+  const renderTeamMembers = () => {
+    if (membersLoading) {
+      return (
+        <div className="space-y-6">
+          <div className="flex justify-between items-center">
+            <div className="space-y-2">
+              <Skeleton className="h-7 w-48" />
+              <Skeleton className="h-4 w-64" />
+            </div>
+            <Skeleton className="h-6 w-24" />
+          </div>
+
+          <Card>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Role</TableHead>
+                  <TableHead>Joined</TableHead>
+                  <TableHead>Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...Array(5)].map((_, i) => (
+                  <TableRow key={i}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-11 w-11 rounded-xl" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-24" />
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell><Skeleton className="h-4 w-40" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-32" /></TableCell>
+                    <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                    <TableCell><Skeleton className="h-4 w-28" /></TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Skeleton className="h-9 w-9 rounded-lg" />
+                        <Skeleton className="h-9 w-9 rounded-lg" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </Card>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              {t('teamMembers') || 'Team Members'}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {t('manageTeamMembersDesc') || 'Manage members and their access levels'}
+            </p>
+          </div>
+          {teamMembers.length > 0 && (
+            <Badge variant="secondary" className="gap-1.5">
+              <Users className="h-3.5 w-3.5" />
+              {teamMembers.length} {teamMembers.length === 1 ? 'member' : 'members'}
+            </Badge>
+          )}
+        </div>
+
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800">
+                <TableHead className="font-bold text-xs uppercase">{t('member') || 'Member'}</TableHead>
+                <TableHead className="font-bold text-xs uppercase">{t('email') || 'Email'}</TableHead>
+                <TableHead className="font-bold text-xs uppercase">{t('phone') || 'Phone'}</TableHead>
+                <TableHead className="font-bold text-xs uppercase">{t('role') || 'Role'}</TableHead>
+                <TableHead className="font-bold text-xs uppercase">{t('joined') || 'Joined'}</TableHead>
+                <TableHead className="font-bold text-xs uppercase">{t('actions') || 'Actions'}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {teamMembers.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={6} className="text-center py-20">
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="bg-muted p-6 rounded-full">
+                        <Users className="h-12 w-12 text-muted-foreground" />
+                      </div>
+                      <p className="text-lg font-semibold">{t('noTeamMembersFound') || 'No team members found'}</p>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                teamMembers.map(member => (
+                  <TableRow key={member.id}>
+                    <TableCell>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${getAvatarGradient(member.fullName)} text-white flex items-center justify-center font-bold text-base shadow-lg`}>
+                          {member.fullName ? member.fullName.charAt(0).toUpperCase() : '?'}
+                        </div>
+                        <div>
+                          <div className="font-bold text-sm">{member.fullName || '—'}</div>
+                          <div className="text-xs text-muted-foreground font-medium">@{member.userName}</div>
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm">{member.email || '—'}</TableCell>
+                    <TableCell className="text-sm">{member.phone || '—'}</TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1.5">
+                        {member.roles && member.roles.length > 0 ? (
+                          member.roles.map((role, i) => (
+                            <Badge key={i} className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
+                              {getRoleDisplayName(role)}
+                            </Badge>
+                          ))
+                        ) : (
+                          <Badge variant="secondary">User</Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-sm text-muted-foreground">{formatDate(member.createdAt)}</TableCell>
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => handleAssignRole(member)}
+                          title="Assign Roles"
+                        >
+                          <Shield className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          title="Edit member"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+          
+          {teamMembers.length > 0 && (
+            <div className="p-4">
+              <Pagination
+                currentPage={membersPagination.currentPage}
+                totalPages={membersPagination.totalPages}
+                pageSize={membersPagination.pageSize}
+                totalElements={membersPagination.totalElements}
+                onPageChange={handleMembersPageChange}
+                onPageSizeChange={handleMembersPageSizeChange}
+              />
+            </div>
+          )}
+        </Card>
+      </div>
+    );
+  };
+
+  // ─── Render: Roles & Permissions ──────────────────────────────
+
+  const renderRolesAndPermissions = () => {
+    if (rolesLoading) {
+      return (
+        <div className="space-y-6">
+          <div className="space-y-2">
+            <Skeleton className="h-7 w-56" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <Card key={i}>
+                <CardHeader>
+                  <div className="flex items-start gap-3">
+                    <Skeleton className="h-10 w-10 rounded-lg" />
+                    <div className="flex-1 space-y-2">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-4 w-48" />
+                    </div>
+                    <Skeleton className="h-6 w-16" />
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {[...Array(3)].map((_, j) => (
+                    <div key={j} className="space-y-3">
+                      <Skeleton className="h-5 w-24" />
+                      <div className="space-y-2">
+                        {[...Array(4)].map((_, k) => (
+                          <Skeleton key={k} className="h-5 w-full" />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  <Skeleton className="h-10 w-full" />
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    const grouped = groupPermissions(allPermissions);
+
+    return (
+      <div className="space-y-6">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            {t('rolesAndPermissions') || 'Roles & Permissions'}
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            {t('rolesAndPermissionsDesc') || 'Toggle permissions per role, then save to apply changes.'}
+          </p>
+        </div>
+
+        {roles.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center py-12">
+              <Shield className="h-12 w-12 text-muted-foreground mb-4" />
+              <p className="text-lg font-semibold">{t('noRolesFound') || 'No roles found'}</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {roles.map(role => {
+              const checkedSet = rolePermissions[role.id] || new Set();
+              const checkedCount = checkedSet.size;
+
+              return (
+                <Card key={role.id} className="flex flex-col">
+                  <CardHeader>
+                    <div className="flex items-start gap-3">
+                      <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2.5 rounded-lg text-white">
+                        <Shield className="h-5 w-5" />
+                      </div>
+                      <div className="flex-1">
+                        <CardTitle className="text-lg">{role.name.replace('ROLE_', '')}</CardTitle>
+                        <CardDescription className="text-xs">{role.description || 'No description'}</CardDescription>
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {checkedCount}/{allPermissions.length}
+                      </Badge>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="flex-1 space-y-4">
+                    {allPermissions.length === 0 ? (
+                      <p className="text-sm text-muted-foreground text-center py-4">
+                        {t('noPermissionsAvailable') || 'No permissions available'}
+                      </p>
+                    ) : (
+                      Object.entries(grouped).map(([groupName, perms]) => {
+                        const allChecked = perms.every(p => checkedSet.has(p.id));
+                        const refKey = `${role.id}-${groupName}`;
+
+                        return (
+                          <div key={groupName} className="space-y-3">
+                            <div className="flex items-center justify-between border-b pb-2">
+                              <Label className="flex items-center gap-2 cursor-pointer font-semibold text-sm">
+                                <Checkbox
+                                  checked={allChecked}
+                                  ref={el => { groupCheckboxRefs.current[refKey] = el; }}
+                                  onCheckedChange={() => togglePermissionGroup(role.id, perms, allChecked)}
+                                />
+                                <span>{groupName}</span>
+                              </Label>
+                              <span className="text-xs text-muted-foreground">
+                                {perms.filter(p => checkedSet.has(p.id)).length}/{perms.length}
+                              </span>
+                            </div>
+
+                            <div className="space-y-2 pl-6">
+                              {perms.map(perm => (
+                                <Label key={perm.id} className="flex items-center gap-2 cursor-pointer text-sm font-normal">
+                                  <Checkbox
+                                    checked={checkedSet.has(perm.id)}
+                                    onCheckedChange={() => togglePermission(role.id, perm.id)}
+                                  />
+                                  <span className="text-muted-foreground">{formatPermissionLabel(perm.name)}</span>
+                                </Label>
+                              ))}
+                            </div>
+                          </div>
+                        );
+                      })
+                    )}
+
+                    <Button
+                      className="w-full gap-2"
+                      onClick={() => handleSaveRolePermissions(role)}
+                      disabled={savingRole === role.id}
+                    >
+                      {savingRole === role.id ? (
+                        t('saving') || 'Saving…'
+                      ) : (
+                        <>
+                          <Save className="h-4 w-4" />
+                          {t('savePermissions') || 'Save permissions'}
+                        </>
+                      )}
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // ─── Main Render ──────────────────────────────────────────────
+
+  return (
+    <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+          {t('teamManagement') || 'Team Management'}
+        </h1>
+        <p className="text-muted-foreground">
+          {t('teamManagementDesc') || 'Manage members, roles, and access permissions'}
+        </p>
+      </div>
+
+      {/* Error Message */}
+      {error && (
+        <Card className="mb-6 border-l-4 border-destructive bg-destructive/5">
+          <CardContent className="flex items-start gap-3 pt-6">
+            <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
+            <span className="font-medium text-destructive">{error}</span>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full max-w-md grid-cols-2">
+          <TabsTrigger value="members" className="gap-2">
+            <UserCheck className="h-4 w-4" />
+            {t('teamMembers') || 'Team Members'}
+          </TabsTrigger>
+          <TabsTrigger value="roles" className="gap-2">
+            <Shield className="h-4 w-4" />
+            {t('rolesAndPermissions') || 'Roles & Permissions'}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="members" className="mt-6">
+          {renderTeamMembers()}
+        </TabsContent>
+
+        <TabsContent value="roles" className="mt-6">
+          {renderRolesAndPermissions()}
+        </TabsContent>
+      </Tabs>
+
+      <AssignRoleDialog
+        isOpen={showAssignRoleDialog}
+        user={selectedUser}
+        onSave={handleSaveRoles}
+        onCancel={cancelAssignRole}
+      />
+    </div>
+  );
+};
+
+export default TeamPage;

@@ -1,10 +1,16 @@
-// Export all services from a single entry point
-export { default as authService } from './authService';
-export { default as userService } from './userService';
-export { default as busService } from './busService';
-export { default as routeService } from './routeService';
-export { default as bookingService } from './bookingService';
-export { default as customerService } from './customerService';
-export { default as reportService } from './reportService';
+// Export services from feature folders
+// Import default exports and re-export them
+import authService from '../features/auth/services/authService';
+import userService from '../features/team/services/userService';
+import busService from '../features/buses/services/busService';
+import routeService from '../features/routes/services/routeService';
+import bookingService from '../features/bookings/services/bookingService';
+import customerService from '../features/customers/services/customerService';
+import reportService from '../features/reports/services/reportService';
+
+export { authService, userService, busService, routeService, bookingService, customerService, reportService };
+
+// Export axios configuration
 export { default as axiosInstance } from './axiosConfig';
 export { setUnauthorizedHandler } from './axiosConfig';
+
