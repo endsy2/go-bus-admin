@@ -10,7 +10,7 @@ import { Button } from 'shared/components/ui/button';
 import { Input } from 'shared/components/ui/input';
 import { Label } from 'shared/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
-import { Loader2, X } from 'lucide-react';
+import { Loader2 } from 'lucide-react';
 import { apiRequest } from 'shared/utils/api';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';

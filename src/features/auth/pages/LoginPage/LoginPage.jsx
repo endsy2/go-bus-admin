@@ -3,9 +3,9 @@ import { Input } from 'shared/components/common/Input';
 import { Button } from 'shared/components/common/Button';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import authService from '../../services/authService';
-import { userService } from 'features/team/services/userService';
-import './LoginPage.css';
+import userService from 'features/team/services/userService';
 
 const LoginPage = ({ onLoginSuccess }) => {
   const { locale } = useLocale();
@@ -106,23 +106,26 @@ const LoginPage = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="login-page">
-      <div className="login-container">
-        <div className="login-header">
-          <div className="logo-container">
+    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-5">
+      <div className="bg-white dark:bg-slate-800 p-10 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700">
+        <div className="text-center mb-8">
+          <div className="mb-6 flex justify-center items-center">
             <img 
               src="/go_bus_new_logo.png" 
               alt="GoBus Admin" 
-              className="login-logo"
+              className="max-w-[200px] max-h-20 w-auto h-auto object-contain drop-shadow-md dark:brightness-110"
             />
           </div>
-          <p>{t('signInToAccount')}</p>
+          <p className="text-slate-600 dark:text-slate-400 text-base">
+            {t('signInToAccount')}
+          </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="login-form">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {apiError && (
-            <div className="api-error">
-              {apiError}
+            <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-3 rounded-lg border-l-4 border-red-700 dark:border-red-500 border border-red-200 dark:border-red-800 flex items-start gap-2">
+              <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
+              <span className="text-sm">{apiError}</span>
             </div>
           )}
 
@@ -149,7 +152,9 @@ const LoginPage = ({ onLoginSuccess }) => {
           <Button
             type="submit"
             disabled={loading}
+            className="flex items-center justify-center gap-2"
           >
+            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
             {loading ? t('signingIn') : t('signIn')}
           </Button>
         </form>

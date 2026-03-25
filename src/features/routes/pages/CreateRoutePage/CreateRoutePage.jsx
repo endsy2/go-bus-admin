@@ -5,7 +5,6 @@ import { Snackbar } from 'shared/components/common/Snackbar';
 import { apiRequest } from 'shared/utils/api';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
-import './CreateRoutePage.css';
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
@@ -28,7 +27,6 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
   const [errors, setErrors] = useState({});
   const [touched, setTouched] = useState({});
 
-  // ── Helpers ────────────────────────────────────────────────────────────
   const formatDurationPreview = (minutes) => {
     const m = parseInt(minutes);
     if (!m || isNaN(m) || m <= 0) return null;
@@ -97,7 +95,6 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Touch all fields
     const allTouched = Object.keys(formData).reduce((acc, k) => ({ ...acc, [k]: true }), {});
     setTouched(allTouched);
 
@@ -142,8 +139,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
 
   const durationPreview = formatDurationPreview(formData.durationMinutes);
   const hasCoords = formData.lat && formData.lng;
-  const completedFields = Object.values(formData).filter(v => v.trim() !== '').length;
-  const requiredFields = 4; // origin, destination, distance, duration
+  const requiredFields = 4;
   const progress = Math.min(
     Math.round((Object.entries(formData)
       .filter(([k]) => ['origin', 'destination', 'distanceKm', 'durationMinutes'].includes(k))
@@ -152,55 +148,48 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
   );
 
   return (
-    <div className="create-route-page">
-      {/* Header */}
-      <div className="page-header">
-        <div className="header-content">
-          <div className="header-left">
-            <button className="back-btn" onClick={onBack}>
-              <Icon name="arrow-left" size={18} />
-              {t('backToRoutes') || 'Back to Routes'}
-            </button>
-            <div className="header-text">
-              <h1 className="page-title">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="12" y1="8" x2="12" y2="16"/>
-                  <line x1="8" y1="12" x2="16" y2="12"/>
-                </svg>
-                {t('createRoute') || 'Create New Route'}
-              </h1>
-              <p className="page-subtitle">{t('createRouteDesc') || 'Add a new bus route with origin, destination, and GPS coordinates'}</p>
-            </div>
+    <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="mb-7">
+        <div className="flex flex-col gap-4">
+          <button onClick={onBack} className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all self-start hover:-translate-x-0.5">
+            <Icon name="arrow-left" size={18} />
+            {t('backToRoutes') || 'Back to Routes'}
+          </button>
+          <div>
+            <h1 className="flex items-center gap-3 text-3xl font-bold text-gray-900 dark:text-white mb-1.5">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="16"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+              {t('createRoute') || 'Create New Route'}
+            </h1>
+            <p className="text-base text-gray-600 dark:text-gray-400">{t('createRouteDesc') || 'Add a new bus route with origin, destination, and GPS coordinates'}</p>
           </div>
         </div>
       </div>
 
-      <div className="create-route-layout">
-        {/* ── Left: Form ─────────────────────────────────────────────── */}
-        <div className="form-column">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 items-start">
+        <div className="flex flex-col gap-0">
           <form onSubmit={handleSubmit} noValidate>
-
-            {/* Progress Bar */}
-            <div className="progress-card">
-              <div className="progress-header">
-                <span className="progress-label">{t('formCompletion') || 'Form Completion'}</span>
-                <span className="progress-pct">{progress}%</span>
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-5 mb-5">
+              <div className="flex justify-between items-center mb-2.5">
+                <span className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">{t('formCompletion') || 'Form Completion'}</span>
+                <span className="text-lg font-bold text-blue-600">{progress}%</span>
               </div>
-              <div className="progress-track">
-                <div className="progress-fill" style={{ width: `${progress}%` }}></div>
+              <div className="w-full h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden mb-2.5">
+                <div className="h-full bg-gradient-to-r from-blue-600 to-cyan-500 rounded-full transition-all duration-400" style={{ width: `${progress}%` }}></div>
               </div>
-              <span className="progress-hint">
+              <span className="text-xs text-gray-500 dark:text-gray-400">
                 {progress === 100
                   ? (t('readyToCreate') || '✓ Ready to create route')
                   : (t('fillRequired') || 'Fill in all required fields to continue')}
               </span>
             </div>
 
-            {/* Section: Route Path */}
-            <div className="form-section">
-              <div className="section-header">
-                <div className="section-icon blue">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 mb-5">
+              <div className="flex items-start gap-3.5 mb-5">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <line x1="3" y1="12" x2="21" y2="12"/>
                     <line x1="3" y1="6" x2="21" y2="6"/>
@@ -208,19 +197,18 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   </svg>
                 </div>
                 <div>
-                  <h2 className="section-title">{t('routePath') || 'Route Path'}</h2>
-                  <p className="section-subtitle">{t('routePathDesc') || 'Define the start and end points of this route'}</p>
+                  <h2 className="text-base font-bold text-gray-900 dark:text-white">{t('routePath') || 'Route Path'}</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('routePathDesc') || 'Define the start and end points of this route'}</p>
                 </div>
               </div>
 
-              <div className="path-inputs">
-                {/* Origin */}
-                <div className={`field-group ${touched.origin && errors.origin ? 'has-error' : touched.origin && !errors.origin && formData.origin ? 'is-valid' : ''}`}>
-                  <label className="field-label">
-                    <span className="origin-dot"></span>
-                    {t('origin') || 'Origin'} <span className="required-star">*</span>
+              <div className="flex flex-col gap-0">
+                <div className={`flex flex-col gap-1.5 ${touched.origin && errors.origin ? 'mb-0' : 'mb-3'}`}>
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_0_3px_rgba(59,130,246,0.2)]"></span>
+                    {t('origin') || 'Origin'} <span className="text-red-500 text-base">*</span>
                   </label>
-                  <div className="field-input-wrapper">
+                  <div className="relative">
                     <input
                       type="text"
                       name="origin"
@@ -228,11 +216,11 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder={t('originPlaceholder') || 'e.g. Phnom Penh'}
-                      className="field-input"
+                      className={`w-full px-4 py-3 border-2 rounded-lg text-base bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-all ${touched.origin && errors.origin ? 'border-red-500 focus:ring-red-500/20' : touched.origin && !errors.origin && formData.origin ? 'border-emerald-500 pr-10' : 'border-gray-200 dark:border-gray-700'} focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-800`}
                       autoComplete="off"
                     />
                     {touched.origin && !errors.origin && formData.origin && (
-                      <div className="field-valid-icon">
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="20 6 9 17 4 12"/>
                         </svg>
@@ -240,7 +228,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                     )}
                   </div>
                   {touched.origin && errors.origin && (
-                    <span className="field-error">
+                    <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                       </svg>
@@ -249,23 +237,23 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   )}
                 </div>
 
-                {/* Visual connector */}
-                <div className="path-connector">
-                  <div className="connector-dots">
-                    <span></span><span></span><span></span>
+                <div className="flex flex-col items-start py-1.5 gap-0.5 px-1">
+                  <div className="flex flex-col gap-0.5">
+                    <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                    <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
+                    <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
                   </div>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="connector-arrow">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 ml-0.5">
                     <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
                   </svg>
                 </div>
 
-                {/* Destination */}
-                <div className={`field-group ${touched.destination && errors.destination ? 'has-error' : touched.destination && !errors.destination && formData.destination ? 'is-valid' : ''}`}>
-                  <label className="field-label">
-                    <span className="destination-dot"></span>
-                    {t('destination') || 'Destination'} <span className="required-star">*</span>
+                <div className={`flex flex-col gap-1.5`}>
+                  <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]"></span>
+                    {t('destination') || 'Destination'} <span className="text-red-500 text-base">*</span>
                   </label>
-                  <div className="field-input-wrapper">
+                  <div className="relative">
                     <input
                       type="text"
                       name="destination"
@@ -273,11 +261,11 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder={t('destinationPlaceholder') || 'e.g. Siem Reap'}
-                      className="field-input"
+                      className={`w-full px-4 py-3 border-2 rounded-lg text-base bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-all ${touched.destination && errors.destination ? 'border-red-500 focus:ring-red-500/20' : touched.destination && !errors.destination && formData.destination ? 'border-emerald-500 pr-10' : 'border-gray-200 dark:border-gray-700'} focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-800`}
                       autoComplete="off"
                     />
                     {touched.destination && !errors.destination && formData.destination && (
-                      <div className="field-valid-icon">
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="20 6 9 17 4 12"/>
                         </svg>
@@ -285,7 +273,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                     )}
                   </div>
                   {touched.destination && errors.destination && (
-                    <span className="field-error">
+                    <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                       </svg>
@@ -296,27 +284,25 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
               </div>
             </div>
 
-            {/* Section: Trip Details */}
-            <div className="form-section">
-              <div className="section-header">
-                <div className="section-icon green">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 mb-5">
+              <div className="flex items-start gap-3.5 mb-5">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M3 12h4l3-9 4 18 3-9h4"/>
                   </svg>
                 </div>
                 <div>
-                  <h2 className="section-title">{t('tripDetails') || 'Trip Details'}</h2>
-                  <p className="section-subtitle">{t('tripDetailsDesc') || 'Enter distance and travel time for this route'}</p>
+                  <h2 className="text-base font-bold text-gray-900 dark:text-white">{t('tripDetails') || 'Trip Details'}</h2>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('tripDetailsDesc') || 'Enter distance and travel time for this route'}</p>
                 </div>
               </div>
 
-              <div className="two-col-grid">
-                {/* Distance */}
-                <div className={`field-group ${touched.distanceKm && errors.distanceKm ? 'has-error' : touched.distanceKm && !errors.distanceKm && formData.distanceKm ? 'is-valid' : ''}`}>
-                  <label className="field-label">
-                    {t('distance') || 'Distance'} <span className="required-star">*</span>
+              <div className="grid grid-cols-2 gap-5">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {t('distance') || 'Distance'} <span className="text-red-500 text-base">*</span>
                   </label>
-                  <div className="field-input-wrapper has-suffix">
+                  <div className="relative">
                     <input
                       type="number"
                       name="distanceKm"
@@ -324,14 +310,14 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="e.g. 314"
-                      className="field-input"
+                      className={`w-full px-4 py-3 pr-12 border-2 rounded-lg text-base bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-all ${touched.distanceKm && errors.distanceKm ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 dark:border-gray-700'} focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-800`}
                       min="0.1"
                       step="0.1"
                     />
-                    <span className="field-suffix">km</span>
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded pointer-events-none">km</span>
                   </div>
                   {touched.distanceKm && errors.distanceKm && (
-                    <span className="field-error">
+                    <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                       </svg>
@@ -340,12 +326,11 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   )}
                 </div>
 
-                {/* Duration */}
-                <div className={`field-group ${touched.durationMinutes && errors.durationMinutes ? 'has-error' : touched.durationMinutes && !errors.durationMinutes && formData.durationMinutes ? 'is-valid' : ''}`}>
-                  <label className="field-label">
-                    {t('duration') || 'Duration'} <span className="required-star">*</span>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-gray-900 dark:text-white">
+                    {t('duration') || 'Duration'} <span className="text-red-500 text-base">*</span>
                   </label>
-                  <div className="field-input-wrapper has-suffix">
+                  <div className="relative">
                     <input
                       type="number"
                       name="durationMinutes"
@@ -353,20 +338,20 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="e.g. 360"
-                      className="field-input"
+                      className={`w-full px-4 py-3 pr-14 border-2 rounded-lg text-base bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white transition-all ${touched.durationMinutes && errors.durationMinutes ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 dark:border-gray-700'} focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:bg-white dark:focus:bg-gray-800`}
                       min="1"
                     />
-                    <span className="field-suffix">min</span>
+                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded pointer-events-none">min</span>
                   </div>
                   {touched.durationMinutes && errors.durationMinutes ? (
-                    <span className="field-error">
+                    <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                       </svg>
                       {errors.durationMinutes}
                     </span>
                   ) : durationPreview ? (
-                    <span className="field-hint-ok">
+                    <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                       </svg>
@@ -377,28 +362,27 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
               </div>
             </div>
 
-            {/* Section: GPS Coordinates (optional) */}
-            <div className="form-section">
-              <div className="section-header">
-                <div className="section-icon purple">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl p-6 mb-5">
+              <div className="flex items-start gap-3.5 mb-5">
+                <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
                   </svg>
                 </div>
                 <div>
-                  <h2 className="section-title">
+                  <h2 className="flex items-center gap-2.5 text-base font-bold text-gray-900 dark:text-white">
                     {t('locationCoordinates') || 'GPS Coordinates'}
-                    <span className="optional-badge">{t('optional') || 'Optional'}</span>
+                    <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full uppercase tracking-wide">{t('optional') || 'Optional'}</span>
                   </h2>
-                  <p className="section-subtitle">{t('coordsDesc') || 'Add coordinates to show this route on an interactive map'}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('coordsDesc') || 'Add coordinates to show this route on an interactive map'}</p>
                 </div>
               </div>
 
-              <div className="coords-grid">
-                <div className={`field-group ${touched.lat && errors.lat ? 'has-error' : ''}`}>
-                  <label className="field-label">Latitude</label>
-                  <div className="coord-input-wrapper">
-                    <span className="coord-badge">LAT</span>
+              <div className="grid grid-cols-2 gap-3 mb-4">
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-gray-900 dark:text-white">Latitude</label>
+                  <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-500/10 transition-all">
+                    <span className="px-3 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LAT</span>
                     <input
                       type="number"
                       name="lat"
@@ -406,12 +390,12 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="e.g. 11.5564"
-                      className="coord-input"
                       step="0.0001"
+                      className={`flex-1 px-3 py-3 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${errors.lat ? 'text-red-600' : ''}`}
                     />
                   </div>
                   {touched.lat && errors.lat && (
-                    <span className="field-error">
+                    <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                       </svg>
@@ -420,10 +404,10 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   )}
                 </div>
 
-                <div className={`field-group ${touched.lng && errors.lng ? 'has-error' : ''}`}>
-                  <label className="field-label">Longitude</label>
-                  <div className="coord-input-wrapper">
-                    <span className="coord-badge">LNG</span>
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-sm font-semibold text-gray-900 dark:text-white">Longitude</label>
+                  <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-500/10 transition-all">
+                    <span className="px-3 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LNG</span>
                     <input
                       type="number"
                       name="lng"
@@ -431,12 +415,12 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                       onChange={handleChange}
                       onBlur={handleBlur}
                       placeholder="e.g. 104.9282"
-                      className="coord-input"
                       step="0.0001"
+                      className={`flex-1 px-3 py-3 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${errors.lng ? 'text-red-600' : ''}`}
                     />
                   </div>
                   {touched.lng && errors.lng && (
-                    <span className="field-error">
+                    <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                         <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
                       </svg>
@@ -447,8 +431,8 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
               </div>
 
               {hasCoords && !errors.lat && !errors.lng && (
-                <div className="map-mini-preview">
-                  <div className="map-mini-header">
+                <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden animate-[fadeIn_0.3s_ease]">
+                  <div className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 font-semibold text-sm text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
                     </svg>
@@ -456,7 +440,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   </div>
                   <iframe
                     title="Coordinate Preview"
-                    className="map-mini-frame"
+                    className="w-full h-50 border-0"
                     src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(formData.lng) - 0.1},${parseFloat(formData.lat) - 0.08},${parseFloat(formData.lng) + 0.1},${parseFloat(formData.lat) + 0.08}&layer=mapnik&marker=${formData.lat},${formData.lng}`}
                     loading="lazy"
                   />
@@ -464,19 +448,18 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
               )}
             </div>
 
-            {/* Submit */}
-            <div className="form-actions">
+            <div className="flex justify-end gap-3 pt-1">
               <Button variant="secondary" type="button" onClick={onBack} disabled={submitting}>
                 {t('cancel') || 'Cancel'}
               </Button>
               <button
                 type="submit"
-                className={`submit-btn ${submitting ? 'is-loading' : ''} ${progress === 100 ? 'is-ready' : ''}`}
+                className={`inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-base font-bold transition-all ${submitting ? 'bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed' : progress === 100 ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 hover:-translate-y-0.5 shadow-lg hover:shadow-xl' : 'bg-blue-600 text-white hover:bg-blue-700 hover:-translate-y-0.5 shadow-md hover:shadow-lg'}`}
                 disabled={submitting}
               >
                 {submitting ? (
                   <>
-                    <div className="submit-spinner"></div>
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     {t('creating') || 'Creating...'}
                   </>
                 ) : (
@@ -489,85 +472,88 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                 )}
               </button>
             </div>
-
           </form>
         </div>
 
-        {/* ── Right: Live Preview ────────────────────────────────────── */}
-        <div className="preview-column">
-          <div className="preview-card">
-            <div className="preview-card-header">
+        <div className="lg:sticky lg:top-6">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
+            <div className="flex items-center gap-2 px-5 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
               </svg>
               {t('livePreview') || 'Live Preview'}
             </div>
 
-            <div className="preview-body">
-              {/* Route visual */}
-              <div className="preview-route">
-                <div className="preview-endpoint">
-                  <div className="preview-dot origin"></div>
-                  <div className="preview-city">
-                    {formData.origin || <span className="preview-empty">{t('origin') || 'Origin'}</span>}
-                    <span className="preview-city-label">{t('origin') || 'Origin'}</span>
+            <div className="p-5 flex flex-col gap-5">
+              <div className="flex items-center gap-0 p-4 bg-gray-50 dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700">
+                <div className="flex items-center gap-2.5 flex-shrink-0 max-w-[100px]">
+                  <div className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_0_3px_rgba(59,130,246,0.2)] flex-shrink-0"></div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-bold text-gray-900 dark:text-white overflow-hidden text-ellipsis whitespace-nowrap">
+                      {formData.origin || <span className="text-gray-400 dark:text-gray-500 font-normal italic text-xs">{t('origin') || 'Origin'}</span>}
+                    </div>
+                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t('origin') || 'Origin'}</div>
                   </div>
                 </div>
-                <div className="preview-line">
-                  <div className="preview-track"></div>
-                  <span className="preview-bus">🚌</span>
+
+                <div className="flex-1 flex flex-col items-center gap-2 px-2 min-w-[40px]">
+                  <div className="relative w-full h-6 flex items-center">
+                    <div className="w-full h-0.5 bg-gradient-to-r from-blue-500 to-emerald-500 rounded-full"></div>
+                    <span className="absolute left-1/2 -translate-x-1/2 text-base animate-[busFloat_2.5s_ease-in-out_infinite]">🚌</span>
+                  </div>
                 </div>
-                <div className="preview-endpoint">
-                  <div className="preview-dot destination"></div>
-                  <div className="preview-city">
-                    {formData.destination || <span className="preview-empty">{t('destination') || 'Destination'}</span>}
-                    <span className="preview-city-label">{t('destination') || 'Destination'}</span>
+
+                <div className="flex items-center gap-2.5 flex-shrink-0 max-w-[100px]">
+                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-600 shadow-[0_0_0_3px_rgba(16,185,129,0.2)] flex-shrink-0"></div>
+                  <div className="min-w-0">
+                    <div className="text-sm font-bold text-gray-900 dark:text-white overflow-hidden text-ellipsis whitespace-nowrap">
+                      {formData.destination || <span className="text-gray-400 dark:text-gray-500 font-normal italic text-xs">{t('destination') || 'Destination'}</span>}
+                    </div>
+                    <div className="text-[10px] font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">{t('destination') || 'Destination'}</div>
                   </div>
                 </div>
               </div>
 
-              {/* Stats */}
-              <div className="preview-stats">
-                <div className="preview-stat">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <div className="flex flex-col gap-2.5">
+                <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 flex-shrink-0">
                     <path d="M3 12h4l3-9 4 18 3-9h4"/>
                   </svg>
-                  <span className="preview-stat-label">{t('distance') || 'Distance'}</span>
-                  <span className="preview-stat-value">
-                    {formData.distanceKm ? `${formData.distanceKm} km` : <span className="preview-empty">—</span>}
+                  <span className="text-sm text-gray-600 dark:text-gray-400 font-medium flex-1">{t('distance') || 'Distance'}</span>
+                  <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
+                    {formData.distanceKm ? `${formData.distanceKm} km` : <span className="text-gray-400 dark:text-gray-500">—</span>}
                   </span>
                 </div>
-                <div className="preview-stat">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 flex-shrink-0">
                     <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
                   </svg>
-                  <span className="preview-stat-label">{t('duration') || 'Duration'}</span>
-                  <span className="preview-stat-value">
-                    {durationPreview || <span className="preview-empty">—</span>}
+                  <span className="text-sm text-gray-600 dark:text-gray-400 font-medium flex-1">{t('duration') || 'Duration'}</span>
+                  <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
+                    {durationPreview || <span className="text-gray-400 dark:text-gray-500">—</span>}
                   </span>
                 </div>
-                <div className="preview-stat">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 flex-shrink-0">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
                   </svg>
-                  <span className="preview-stat-label">GPS</span>
-                  <span className="preview-stat-value">
+                  <span className="text-sm text-gray-600 dark:text-gray-400 font-medium flex-1">GPS</span>
+                  <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
                     {hasCoords
                       ? `${parseFloat(formData.lat).toFixed(4)}, ${parseFloat(formData.lng).toFixed(4)}`
-                      : <span className="preview-empty">—</span>}
+                      : <span className="text-gray-400 dark:text-gray-500">—</span>}
                   </span>
                 </div>
               </div>
 
-              {/* JSON payload preview */}
-              <div className="preview-payload">
-                <div className="payload-header">
+              <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
+                <div className="flex items-center gap-1.5 px-3.5 py-2 bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-600 dark:text-gray-400 font-mono tracking-wide border-b border-gray-200 dark:border-gray-600">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
                   </svg>
                   POST /api/routes
                 </div>
-                <pre className="payload-body">{JSON.stringify({
+                <pre className="p-3.5 m-0 text-xs font-mono text-cyan-600 dark:text-cyan-400 bg-gray-50 dark:bg-gray-900 overflow-x-auto leading-relaxed whitespace-pre">{JSON.stringify({
                   origin: formData.origin || '...',
                   destination: formData.destination || '...',
                   distanceKm: formData.distanceKm ? parseFloat(formData.distanceKm) : '...',
@@ -587,6 +573,17 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
         onClose={() => setSnackbar(s => ({ ...s, isOpen: false }))}
         duration={3000}
       />
+
+      <style jsx>{`
+        @keyframes busFloat {
+          0%, 100% { left: 25%; }
+          50% { left: 75%; }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 };
