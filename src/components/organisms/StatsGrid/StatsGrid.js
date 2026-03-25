@@ -2,18 +2,23 @@ import React from 'react';
 import StatCard from '../../molecules/StatCard/StatCard';
 import { useLocale } from '../../../context/LocaleContext';
 import { translations } from '../../../locales/translations';
-import './StatsGrid.css';
+import { Loader2 } from 'lucide-react';
 
 const StatsGrid = ({ stats, loading }) => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   
   if (loading) {
-    return <div className="loading">{t('loadingStats')}</div>;
+    return (
+      <div className="flex items-center justify-center py-10 text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin mr-2" />
+        {t('loadingStats')}
+      </div>
+    );
   }
 
   return (
-    <div className="stats-grid">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
       {stats.map((stat, index) => (
         <StatCard
           key={index}

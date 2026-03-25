@@ -1,10 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import Button from '../../atoms/Button/Button';
-import Icon from '../../atoms/Icon/Icon';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog';
+import { Button } from '../../ui/button';
+import { Avatar, AvatarFallback } from '../../ui/avatar';
+import { Checkbox } from '../../ui/checkbox';
+import { Label } from '../../ui/label';
+import { Shield, Loader2 } from 'lucide-react';
 import { apiRequest } from '../../../utils/api';
 import { useLocale } from '../../../context/LocaleContext';
 import { translations } from '../../../locales/translations';
-import './AssignRoleDialog.css';
+import { cn } from '../../../lib/utils';
 
 const AssignRoleDialog = ({ isOpen, user, onSave, onCancel }) => {
   const { locale } = useLocale();
@@ -17,7 +27,6 @@ const AssignRoleDialog = ({ isOpen, user, onSave, onCancel }) => {
   useEffect(() => {
     if (isOpen) {
       fetchRoles();
-      // Initialize selected roles from user's current roles
       if (user?.roles) {
         setSelectedRoles(user.roles.map(role => role.name || role));
       }
@@ -63,72 +72,84 @@ const AssignRoleDialog = ({ isOpen, user, onSave, onCancel }) => {
     onSave(selectedRoles);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="dialog-overlay">
-      <div className="dialog assign-role-dialog">
-        <div className="dialog-header">
-          <h2>{t('assignRoles')}</h2>
-          <button className="close-btn" onClick={onCancel}>
-            <Icon name="x" size={24} />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={onCancel}>
+      <DialogContent className="max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle>{t('assignRoles')}</DialogTitle>
+        </DialogHeader>
 
-        <div className="dialog-body">
+        <div className="space-y-4">
           {user && (
-            <div className="user-info-section">
-              <div className="user-avatar-small">
-                {user.fullName ? user.fullName.charAt(0).toUpperCase() : '?'}
-              </div>
+            <div className="flex items-center gap-3 p-4 bg-muted rounded-lg">
+              <Avatar className="h-12 w-12">
+                <AvatarFallback className="bg-gradient-to-br from-primary to-purple-600 text-white text-lg font-semibold">
+                  {user.fullName ? user.fullName.charAt(0).toUpperCase() : '?'}
+                </AvatarFallback>
+              </Avatar>
               <div>
-                <div className="user-name">{user.fullName}</div>
-                <div className="user-email">{user.email}</div>
+                <div className="font-semibold">{user.fullName}</div>
+                <div className="text-sm text-muted-foreground">{user.email}</div>
               </div>
             </div>
           )}
 
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-sm text-destructive">
+              {error}
+            </div>
+          )}
 
           {loading ? (
-            <div className="loading-state">{t('loadingRolesDialog')}</div>
+            <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span>{t('loadingRolesDialog')}</span>
+            </div>
           ) : (
-            <div className="roles-selection">
-              <p className="section-label">{t('selectRolesForUser')}</p>
-              <div className="roles-list">
+            <div className="space-y-3">
+              <p className="text-sm font-medium">{t('selectRolesForUser')}</p>
+              <div className="space-y-2 max-h-[400px] overflow-y-auto">
                 {availableRoles.map(role => (
-                  <label key={role.id} className="role-checkbox-item">
-                    <input
-                      type="checkbox"
+                  <Label
+                    key={role.id}
+                    className={cn(
+                      "flex items-start gap-3 p-3 border rounded-lg cursor-pointer transition-all hover:bg-accent hover:border-primary",
+                      selectedRoles.includes(role.name) && "border-primary bg-primary/5"
+                    )}
+                  >
+                    <Checkbox
                       checked={selectedRoles.includes(role.name)}
-                      onChange={() => handleRoleToggle(role.name)}
+                      onCheckedChange={() => handleRoleToggle(role.name)}
+                      className="mt-0.5"
                     />
-                    <div className="role-info">
-                      <div className="role-name">
-                        <Icon name="shield" size={16} />
+                    <div className="flex-1 space-y-1">
+                      <div className="flex items-center gap-2 font-semibold text-sm">
+                        <Shield className="h-4 w-4" />
                         {role.name.replace('ROLE_', '')}
                       </div>
                       {role.description && (
-                        <div className="role-description">{role.description}</div>
+                        <div className="text-xs text-muted-foreground leading-snug">
+                          {role.description}
+                        </div>
                       )}
                     </div>
-                  </label>
+                  </Label>
                 ))}
               </div>
             </div>
           )}
         </div>
 
-        <div className="dialog-footer">
-          <Button variant="secondary" onClick={onCancel}>
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>
             {t('cancel')}
           </Button>
-          <Button variant="primary" onClick={handleSave} disabled={loading}>
+          <Button onClick={handleSave} disabled={loading}>
             {t('saveRoles')}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

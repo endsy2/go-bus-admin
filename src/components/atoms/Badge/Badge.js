@@ -1,11 +1,17 @@
 import React from 'react';
-import './Badge.css';
+import { Badge as ShadcnBadge } from '../../ui/badge';
 
 const Badge = ({ children, variant = 'confirmed' }) => {
+  const variantMap = {
+    confirmed: 'default',
+    pending: 'secondary',
+    cancelled: 'destructive'
+  };
+
   return (
-    <span className={`badge badge-${variant.toLowerCase()}`}>
+    <ShadcnBadge variant={variantMap[variant.toLowerCase()] || 'default'}>
       {children}
-    </span>
+    </ShadcnBadge>
   );
 };
 

@@ -1,24 +1,36 @@
 import React from 'react';
-import Icon from '../../atoms/Icon/Icon';
-import './UnauthorizedDialog.css';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog';
+import { Button } from '../../ui/button';
+import { Lock } from 'lucide-react';
 
 const UnauthorizedDialog = ({ isOpen, onOk }) => {
-  if (!isOpen) return null;
-
   return (
-    <div className="unauthorized-dialog-overlay">
-      <div className="unauthorized-dialog">
-        <div className="unauthorized-icon">
-          <Icon name="lock" size={64} color="#dc3545" />
-        </div>
-        <h3>Unauthorized Access</h3>
-        <p>Your session has expired or you don't have permission to access this resource.</p>
-        <p className="unauthorized-subtitle">Please login again to continue.</p>
-        <button className="btn-ok" onClick={onOk}>
-          OK
-        </button>
-      </div>
-    </div>
+    <Dialog open={isOpen} onOpenChange={onOk}>
+      <DialogContent className="sm:max-w-[450px]">
+        <DialogHeader className="items-center space-y-4">
+          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10">
+            <Lock className="w-8 h-8 text-destructive" />
+          </div>
+          <DialogTitle className="text-2xl text-center">Unauthorized Access</DialogTitle>
+          <DialogDescription className="text-center space-y-2">
+            <p>Your session has expired or you don't have permission to access this resource.</p>
+            <p className="text-sm text-muted-foreground">Please login again to continue.</p>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter className="sm:justify-center">
+          <Button variant="destructive" onClick={onOk} className="px-10">
+            OK
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

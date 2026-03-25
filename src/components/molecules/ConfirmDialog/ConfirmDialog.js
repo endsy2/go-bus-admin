@@ -1,7 +1,15 @@
 import React from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog';
+import { Button } from '../../ui/button';
 import { useLocale } from '../../../context/LocaleContext';
 import { translations } from '../../../locales/translations';
-import './ConfirmDialog.css';
 
 const ConfirmDialog = ({ 
   isOpen, 
@@ -15,25 +23,30 @@ const ConfirmDialog = ({
 }) => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
-  
-  if (!isOpen) return null;
 
   return (
-    <div className="confirm-dialog-overlay" onClick={onCancel}>
-      <div className="confirm-dialog" onClick={(e) => e.stopPropagation()}>
-        <h3>{title}</h3>
-        <p>{message}</p>
-        <p className="confirm-dialog-warning">{t('actionCannotBeUndone')}</p>
-        <div className="confirm-dialog-actions">
-          <button className="btn-cancel" onClick={onCancel}>
+    <Dialog open={isOpen} onOpenChange={onCancel}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
+          <DialogDescription className="space-y-2">
+            <p>{message}</p>
+            <p className="text-sm italic text-muted-foreground">{t('actionCannotBeUndone')}</p>
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={onCancel}>
             {cancelText}
-          </button>
-          <button className={`btn-confirm btn-confirm-${type}`} onClick={onConfirm}>
+          </Button>
+          <Button 
+            variant={type === 'danger' ? 'destructive' : type === 'warning' ? 'default' : 'default'}
+            onClick={onConfirm}
+          >
             {confirmText}
-          </button>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

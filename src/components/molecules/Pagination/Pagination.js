@@ -1,6 +1,7 @@
 import React from 'react';
-import Icon from '../../atoms/Icon/Icon';
-import './Pagination.css';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Button } from '../../ui/button';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const Pagination = ({ 
   currentPage, 
@@ -24,53 +25,53 @@ const Pagination = ({
     }
   };
 
-  const handlePageSizeChange = (e) => {
-    const newSize = parseInt(e.target.value);
-    onPageSizeChange(newSize);
-  };
-
   const startItem = currentPage * pageSize + 1;
   const endItem = Math.min((currentPage + 1) * pageSize, totalElements);
 
   return (
-    <div className="pagination-container">
-      <div className="pagination-info">
-        <span>
-          Showing {startItem} to {endItem} of {totalElements} entries
-        </span>
+    <div className="flex justify-between items-center p-4 border-t bg-card rounded-b-lg">
+      <div className="text-sm text-muted-foreground">
+        Showing {startItem} to {endItem} of {totalElements} entries
       </div>
 
-      <div className="pagination-controls">
-        <div className="page-size-selector">
-          <label>Show</label>
-          <select value={pageSize} onChange={handlePageSizeChange}>
-            {pageSizeOptions.map(size => (
-              <option key={size} value={size}>{size}</option>
-            ))}
-          </select>
-          <label>per page</label>
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-2 text-sm">
+          <span>Show</span>
+          <Select value={String(pageSize)} onValueChange={(val) => onPageSizeChange(Number(val))}>
+            <SelectTrigger className="w-[70px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {pageSizeOptions.map(size => (
+                <SelectItem key={size} value={String(size)}>{size}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <span>per page</span>
         </div>
 
-        <div className="pagination-buttons">
-          <button 
-            className="pagination-btn" 
+        <div className="flex items-center gap-3">
+          <Button 
+            variant="outline"
+            size="icon"
             onClick={handlePrevious}
             disabled={currentPage === 0}
           >
-            <Icon name="chevronLeft" size={16} />
-          </button>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
           
-          <span className="page-indicator">
+          <span className="text-sm min-w-[100px] text-center">
             Page {currentPage + 1} of {totalPages}
           </span>
 
-          <button 
-            className="pagination-btn" 
+          <Button 
+            variant="outline"
+            size="icon"
             onClick={handleNext}
             disabled={currentPage >= totalPages - 1}
           >
-            <Icon name="chevronRight" size={16} />
-          </button>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </div>
       </div>
     </div>

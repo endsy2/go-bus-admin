@@ -1,10 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import Button from '../../atoms/Button/Button';
-import Icon from '../../atoms/Icon/Icon';
+import React, { useState, useEffect, useCallback } from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '../../ui/dialog';
+import { Button } from '../../ui/button';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { Loader2, X } from 'lucide-react';
 import { apiRequest } from '../../../utils/api';
 import { useLocale } from '../../../context/LocaleContext';
 import { translations } from '../../../locales/translations';
-import './EditBusDialog.css';
+import { cn } from '../../../lib/utils';
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
@@ -32,9 +42,34 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
     busStatus: 'Active',
   });
 
+  const fetchRoutes = useCallback(async () => {
+    try {
+      const res = await apiRequest(`${BASE_URL}/api/routes`, { method: 'GET' });
+      const result = await res.json();
+      if (res.ok) setRoutes(result.data || result || []);
+    } catch (err) {
+      console.error('Failed to fetch routes:', err);
+    }
+  }, []);
+
+  const fetchLayouts = useCallback(async () => {
+    try {
+      const res = await apiRequest(`${BASE_URL}/api/layouts`, { method: 'GET' });
+      const result = await res.json();
+      if (res.ok) setLayouts(result.data || result || []);
+    } catch (err) {
+      console.error('Failed to fetch layouts:', err);
+    }
+  }, []);
+
+  const fetchData = useCallback(async () => {
+    setLoadingData(true);
+    await Promise.all([fetchRoutes(), fetchLayouts()]);
+    setLoadingData(false);
+  }, [fetchRoutes, fetchLayouts]);
+
   useEffect(() => {
     if (isOpen && bus) {
-      // Set form with bus data
       setForm({
         routeId: bus.routeId || '',
         busNumber: bus.busNumber || '',
@@ -45,37 +80,9 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
         layoutId: bus.layoutId || '',
         busStatus: bus.status || bus.busStatus || 'Active',
       });
-      
-      // Fetch routes and layouts
       fetchData();
     }
-  }, [isOpen, bus]);
-
-  const fetchData = async () => {
-    setLoadingData(true);
-    await Promise.all([fetchRoutes(), fetchLayouts()]);
-    setLoadingData(false);
-  };
-
-  const fetchRoutes = async () => {
-    try {
-      const res = await apiRequest(`${BASE_URL}/api/routes`, { method: 'GET' });
-      const result = await res.json();
-      if (res.ok) setRoutes(result.data || result || []);
-    } catch (err) {
-      console.error('Failed to fetch routes:', err);
-    }
-  };
-
-  const fetchLayouts = async () => {
-    try {
-      const res = await apiRequest(`${BASE_URL}/api/layouts`, { method: 'GET' });
-      const result = await res.json();
-      if (res.ok) setLayouts(result.data || result || []);
-    } catch (err) {
-      console.error('Failed to fetch layouts:', err);
-    }
-  };
+  }, [isOpen, bus, fetchData]);
 
   const set = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -134,175 +141,181 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
     onCancel();
   };
 
-  if (!isOpen) return null;
-
   const selectedRoute = routes.find(r => String(r.id) === String(form.routeId));
 
   return (
-    <div className="edit-bus-dialog-overlay">
-      <div className="edit-bus-dialog">
-        <div className="dialog-header">
-          <h2>{t('editBus') || 'Edit Bus'}</h2>
-          <button className="close-btn" onClick={handleCancel}>
-            <Icon name="x" size={20} />
-          </button>
-        </div>
+    <Dialog open={isOpen} onOpenChange={handleCancel}>
+      <DialogContent className="max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{t('editBus') || 'Edit Bus'}</DialogTitle>
+        </DialogHeader>
 
-        <div className="dialog-body">
-          {loadingData ? (
-            <div className="loading-state">
-              <div className="loading-spinner" />
-              <span>{t('loading')}</span>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="edit-bus-form" noValidate>
-              {/* Route */}
-              <div className="form-section">
-                <h3>{t('routeAssignment') || 'Route Assignment'}</h3>
-                <div className="field">
-                  <label>{t('route') || 'Route'} <span className="req">*</span></label>
-                  <select
-                    value={form.routeId}
-                    onChange={e => set('routeId', e.target.value)}
-                    className={errors.routeId ? 'input-error' : ''}
-                  >
-                    <option value="">{t('selectRoute') || 'Select a route...'}</option>
+        {loadingData ? (
+          <div className="flex items-center justify-center gap-2 py-10 text-muted-foreground">
+            <Loader2 className="h-5 w-5 animate-spin" />
+            <span>{t('loading')}</span>
+          </div>
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {/* Route */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold pb-2 border-b">{t('routeAssignment') || 'Route Assignment'}</h3>
+              <div className="space-y-2">
+                <Label>{t('route') || 'Route'} <span className="text-destructive">*</span></Label>
+                <Select value={String(form.routeId)} onValueChange={(val) => set('routeId', val)}>
+                  <SelectTrigger className={errors.routeId ? 'border-destructive' : ''}>
+                    <SelectValue placeholder={t('selectRoute') || 'Select a route...'} />
+                  </SelectTrigger>
+                  <SelectContent>
                     {routes.map(r => (
-                      <option key={r.id} value={r.id}>
+                      <SelectItem key={r.id} value={String(r.id)}>
                         {r.origin} → {r.destination}
-                      </option>
+                      </SelectItem>
                     ))}
-                  </select>
-                  {errors.routeId && <span className="field-error">{errors.routeId}</span>}
-                </div>
-
-                {selectedRoute && (
-                  <div className="route-info">
-                    <span>{selectedRoute.origin} → {selectedRoute.destination}</span>
-                    <span>{selectedRoute.distanceKm} km</span>
-                  </div>
-                )}
+                  </SelectContent>
+                </Select>
+                {errors.routeId && <p className="text-sm text-destructive">{errors.routeId}</p>}
               </div>
-
-              {/* Bus Details */}
-              <div className="form-section">
-                <h3>{t('busDetails') || 'Bus Details'}</h3>
-                <div className="field-row">
-                  <div className="field">
-                    <label>{t('busNumber') || 'Bus Number'} <span className="req">*</span></label>
-                    <input
-                      value={form.busNumber}
-                      onChange={e => set('busNumber', e.target.value)}
-                      placeholder="e.g. SR-001"
-                      className={errors.busNumber ? 'input-error' : ''}
-                    />
-                    {errors.busNumber && <span className="field-error">{errors.busNumber}</span>}
-                  </div>
-                  <div className="field">
-                    <label>{t('model') || 'Model'}</label>
-                    <input
-                      value={form.model}
-                      onChange={e => set('model', e.target.value)}
-                      placeholder="e.g. BYD, Yutong"
-                    />
-                  </div>
+              {selectedRoute && (
+                <div className="flex items-center gap-3 p-2 bg-muted rounded-md text-xs text-muted-foreground">
+                  <span>{selectedRoute.origin} → {selectedRoute.destination}</span>
+                  <span>{selectedRoute.distanceKm} km</span>
                 </div>
-                <div className="field-row">
-                  <div className="field">
-                    <label>{t('plateNumber') || 'Plate Number'} <span className="req">*</span></label>
-                    <input
-                      value={form.plate}
-                      onChange={e => set('plate', e.target.value)}
-                      placeholder="e.g. 1KY-XXXX"
-                      className={errors.plate ? 'input-error' : ''}
-                    />
-                    {errors.plate && <span className="field-error">{errors.plate}</span>}
-                  </div>
-                  <div className="field">
-                    <label>{t('totalSeats') || 'Total Seats'}</label>
-                    <input
-                      type="number"
-                      value={form.totalSeats}
-                      onChange={e => set('totalSeats', e.target.value)}
-                      placeholder="e.g. 40"
-                      min="1"
-                      className={errors.totalSeats ? 'input-error' : ''}
-                    />
-                    {errors.totalSeats && <span className="field-error">{errors.totalSeats}</span>}
-                  </div>
-                </div>
-              </div>
-
-              {/* Bus Type */}
-              <div className="form-section">
-                <h3>{t('busType') || 'Bus Type'}</h3>
-                <div className="type-grid">
-                  {BUS_TYPES.map(type => (
-                    <div
-                      key={type}
-                      className={`type-tile${form.busType === type ? ' selected' : ''}`}
-                      onClick={() => set('busType', type)}
-                    >
-                      {type.replace('_', ' ')}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Layout */}
-              <div className="form-section">
-                <h3>{t('seatLayout') || 'Seat Layout'} <span className="req">*</span></h3>
-                {errors.layoutId && <span className="field-error" style={{display:'block',marginBottom:8}}>{errors.layoutId}</span>}
-                <div className="field">
-                  <label>{t('layout') || 'Layout'}</label>
-                  <select
-                    value={form.layoutId}
-                    onChange={e => set('layoutId', e.target.value)}
-                    className={errors.layoutId ? 'input-error' : ''}
-                  >
-                    <option value="">{t('selectLayout') || 'Select a layout...'}</option>
-                    {layouts.map(layout => (
-                      <option key={layout.id} value={layout.id}>
-                        {layout.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Status */}
-              <div className="form-section">
-                <h3>{t('status') || 'Status'}</h3>
-                <div className="status-grid">
-                  {STATUS_OPTIONS.map(s => (
-                    <div
-                      key={s}
-                      className={`status-tile status-tile-${s.toLowerCase()}${form.busStatus === s ? ' selected' : ''}`}
-                      onClick={() => set('busStatus', s)}
-                    >
-                      {s}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {errors.submit && (
-                <div className="submit-error">{errors.submit}</div>
               )}
-            </form>
-          )}
-        </div>
+            </div>
 
-        <div className="dialog-footer">
-          <Button type="button" variant="secondary" onClick={handleCancel} disabled={submitting}>
+            {/* Bus Details */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold pb-2 border-b">{t('busDetails') || 'Bus Details'}</h3>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>{t('busNumber') || 'Bus Number'} <span className="text-destructive">*</span></Label>
+                  <Input
+                    value={form.busNumber}
+                    onChange={(e) => set('busNumber', e.target.value)}
+                    placeholder="e.g. SR-001"
+                    className={errors.busNumber ? 'border-destructive' : ''}
+                  />
+                  {errors.busNumber && <p className="text-sm text-destructive">{errors.busNumber}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('model') || 'Model'}</Label>
+                  <Input
+                    value={form.model}
+                    onChange={(e) => set('model', e.target.value)}
+                    placeholder="e.g. BYD, Yutong"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-2">
+                  <Label>{t('plateNumber') || 'Plate Number'} <span className="text-destructive">*</span></Label>
+                  <Input
+                    value={form.plate}
+                    onChange={(e) => set('plate', e.target.value)}
+                    placeholder="e.g. 1KY-XXXX"
+                    className={errors.plate ? 'border-destructive' : ''}
+                  />
+                  {errors.plate && <p className="text-sm text-destructive">{errors.plate}</p>}
+                </div>
+                <div className="space-y-2">
+                  <Label>{t('totalSeats') || 'Total Seats'}</Label>
+                  <Input
+                    type="number"
+                    value={form.totalSeats}
+                    onChange={(e) => set('totalSeats', e.target.value)}
+                    placeholder="e.g. 40"
+                    min="1"
+                    className={errors.totalSeats ? 'border-destructive' : ''}
+                  />
+                  {errors.totalSeats && <p className="text-sm text-destructive">{errors.totalSeats}</p>}
+                </div>
+              </div>
+            </div>
+
+            {/* Bus Type */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold pb-2 border-b">{t('busType') || 'Bus Type'}</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {BUS_TYPES.map(type => (
+                  <button
+                    key={type}
+                    type="button"
+                    className={cn(
+                      "p-3 border rounded-lg text-xs font-medium text-center cursor-pointer transition-all",
+                      form.busType === type 
+                        ? "border-2 border-primary bg-primary/10 text-primary" 
+                        : "border-border bg-background text-muted-foreground hover:bg-accent hover:border-primary"
+                    )}
+                    onClick={() => set('busType', type)}
+                  >
+                    {type.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Layout */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold pb-2 border-b">{t('seatLayout') || 'Seat Layout'} <span className="text-destructive">*</span></h3>
+              {errors.layoutId && <p className="text-sm text-destructive mb-2">{errors.layoutId}</p>}
+              <div className="space-y-2">
+                <Label>{t('layout') || 'Layout'}</Label>
+                <Select value={String(form.layoutId)} onValueChange={(val) => set('layoutId', val)}>
+                  <SelectTrigger className={errors.layoutId ? 'border-destructive' : ''}>
+                    <SelectValue placeholder={t('selectLayout') || 'Select a layout...'} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {layouts.map(layout => (
+                      <SelectItem key={layout.id} value={String(layout.id)}>
+                        {layout.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Status */}
+            <div className="space-y-3">
+              <h3 className="text-sm font-semibold pb-2 border-b">{t('status') || 'Status'}</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {STATUS_OPTIONS.map(s => (
+                  <button
+                    key={s}
+                    type="button"
+                    className={cn(
+                      "p-3 border rounded-lg text-xs font-medium text-center cursor-pointer transition-all",
+                      form.busStatus === s 
+                        ? "border-2 border-primary bg-primary/10 text-primary" 
+                        : "border-border bg-background text-muted-foreground hover:bg-accent hover:border-primary"
+                    )}
+                    onClick={() => set('busStatus', s)}
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {errors.submit && (
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md text-sm text-destructive">
+                {errors.submit}
+              </div>
+            )}
+          </form>
+        )}
+
+        <DialogFooter>
+          <Button type="button" variant="outline" onClick={handleCancel} disabled={submitting}>
             {t('cancel') || 'Cancel'}
           </Button>
-          <Button type="submit" variant="primary" onClick={handleSubmit} disabled={submitting || loadingData}>
+          <Button type="submit" onClick={handleSubmit} disabled={submitting || loadingData}>
             {submitting ? (t('updating') || 'Updating...') : (t('updateBus') || 'Update Bus')}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 

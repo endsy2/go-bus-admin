@@ -11,6 +11,7 @@ import ReportsPage from './components/pages/ReportsPage/ReportsPage';
 import TeamPage from './components/pages/TeamPage/TeamPage';
 import LoginPage from './components/pages/LoginPage/LoginPage';
 import UnauthorizedDialog from './components/molecules/UnauthorizedDialog/UnauthorizedDialog';
+import { ToastProvider } from './components/ui/toast';
 import { setUnauthorizedHandler, userService } from './services';
 
 function App() {
@@ -102,24 +103,26 @@ function App() {
   };
 
   return (
-    <div className="App">
-      <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab}
-        user={user}
-        onLogout={handleLogout}
-      />
-      <div className="main-content">
-        <TopBar />
-        <div className="page-content">
-          {renderPage()}
+    <ToastProvider>
+      <div className="App">
+        <Sidebar 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab}
+          user={user}
+          onLogout={handleLogout}
+        />
+        <div className="main-content">
+          <TopBar />
+          <div className="page-content">
+            {renderPage()}
+          </div>
         </div>
+        <UnauthorizedDialog 
+          isOpen={showUnauthorizedDialog}
+          onOk={handleUnauthorizedOk}
+        />
       </div>
-      <UnauthorizedDialog 
-        isOpen={showUnauthorizedDialog}
-        onOk={handleUnauthorizedOk}
-      />
-    </div>
+    </ToastProvider>
   );
 }
 

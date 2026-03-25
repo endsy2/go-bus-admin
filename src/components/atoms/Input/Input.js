@@ -1,5 +1,7 @@
 import React from 'react';
-import './Input.css';
+import { Input as ShadcnInput } from '../../ui/input';
+import { Label } from '../../ui/label';
+import { cn } from '../../../lib/utils';
 
 const Input = ({ 
   type = 'text', 
@@ -9,23 +11,33 @@ const Input = ({
   placeholder, 
   required = false,
   error,
-  prefix 
+  prefix,
+  label
 }) => {
   return (
-    <div className="input-wrapper">
-      <div className={`input-container ${prefix ? 'with-prefix' : ''}`}>
-        {prefix && <span className="input-prefix">{prefix}</span>}
-        <input
+    <div className="space-y-2">
+      {label && <Label htmlFor={name}>{label}</Label>}
+      <div className={cn("relative flex items-center", prefix && "border rounded-md")}>
+        {prefix && (
+          <span className="flex items-center justify-center px-3 bg-muted border-r min-w-[50px] text-muted-foreground">
+            {prefix}
+          </span>
+        )}
+        <ShadcnInput
+          id={name}
           type={type}
           name={name}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className={`input ${error ? 'input-error' : ''} ${prefix ? 'has-prefix' : ''}`}
+          className={cn(
+            error && "border-destructive focus-visible:ring-destructive",
+            prefix && "border-0 rounded-l-none"
+          )}
         />
       </div>
-      {error && <span className="error-message">{error}</span>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
     </div>
   );
 };

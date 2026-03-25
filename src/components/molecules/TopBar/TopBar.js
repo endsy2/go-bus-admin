@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../../../context/ThemeContext';
 import { useLocale } from '../../../context/LocaleContext';
-import Icon from '../../atoms/Icon/Icon';
-import './TopBar.css';
+import { Button } from '../../ui/button';
+import { Sun, Moon, Check, ChevronDown } from 'lucide-react';
+import { cn } from '../../../lib/utils';
 
 const USFlag = () => (
   <svg
@@ -12,25 +13,20 @@ const USFlag = () => (
     xmlns="http://www.w3.org/2000/svg"
   >
     <rect width="28" height="20" rx="2" fill="white" />
-
     <path
       fill="#D02F44"
       d="M28 0H0V1.33H28V0ZM28 2.66H0V4H28V2.66ZM0 5.33H28V6.66H0V5.33ZM28 8H0V9.33H28V8ZM0 10.66H28V12H0V10.66ZM28 13.33H0V14.66H28V13.33ZM0 16H28V17.33H0V16ZM28 18.66H0V20H28V18.66Z"
     />
-
     <rect width="12" height="9.33" fill="#46467F" />
-
     <circle cx="2" cy="2" r="0.5" fill="white" />
     <circle cx="4" cy="2" r="0.5" fill="white" />
     <circle cx="6" cy="2" r="0.5" fill="white" />
     <circle cx="8" cy="2" r="0.5" fill="white" />
     <circle cx="10" cy="2" r="0.5" fill="white" />
-
     <circle cx="3" cy="4" r="0.5" fill="white" />
     <circle cx="5" cy="4" r="0.5" fill="white" />
     <circle cx="7" cy="4" r="0.5" fill="white" />
     <circle cx="9" cy="4" r="0.5" fill="white" />
-
     <circle cx="2" cy="6" r="0.5" fill="white" />
     <circle cx="4" cy="6" r="0.5" fill="white" />
     <circle cx="6" cy="6" r="0.5" fill="white" />
@@ -84,54 +80,66 @@ const TopBar = () => {
   };
 
   return (
-    <div className="top-bar">
-      <div className="top-bar-left">
-        {/* Placeholder for breadcrumbs or page title if needed */}
-      </div>
+    <div className="h-[60px] bg-background border-b flex items-center justify-between px-8 shadow-sm sticky top-0 z-[100]">
+      <div className="flex-1" />
       
-      <div className="top-bar-right">
+      <div className="flex items-center gap-5">
         {/* Language Dropdown */}
-        <div className="language-dropdown" ref={dropdownRef}>
-          <button 
-            className="lang-select-btn"
+        <div className="relative" ref={dropdownRef}>
+          <Button
+            variant="outline"
+            className="flex items-center gap-2.5 min-w-[140px]"
             onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
           >
-            <div className="lang-flag">{currentLanguage?.flag}</div>
-            <span className="lang-name">{currentLanguage?.name}</span>
-            <Icon name="chevronDown" size={14} className={`lang-arrow ${isLangDropdownOpen ? 'open' : ''}`} />
-          </button>
+            <div className="flex items-center flex-shrink-0">{currentLanguage?.flag}</div>
+            <span className="flex-1 text-left">{currentLanguage?.name}</span>
+            <ChevronDown className={cn(
+              "h-3.5 w-3.5 transition-transform",
+              isLangDropdownOpen && "rotate-180"
+            )} />
+          </Button>
           
           {isLangDropdownOpen && (
-            <div className="lang-dropdown-menu">
+            <div className="absolute top-[calc(100%+8px)] right-0 bg-background border rounded-lg shadow-lg min-w-[160px] overflow-hidden z-[1000]">
               {languages.map(lang => (
                 <button
                   key={lang.code}
-                  className={`lang-option ${locale === lang.code ? 'active' : ''}`}
+                  className={cn(
+                    "flex items-center gap-3 w-full px-4 py-3 text-sm font-medium transition-colors hover:bg-accent",
+                    locale === lang.code && "bg-primary/10 text-primary"
+                  )}
                   onClick={() => handleLanguageSelect(lang.code)}
                 >
-                  <div className="lang-flag">{lang.flag}</div>
-                  <span>{lang.name}</span>
-                  {locale === lang.code && (
-                    <Icon name="check" size={16} className="check-icon" />
-                  )}
+                  <div className="flex items-center flex-shrink-0">{lang.flag}</div>
+                  <span className="flex-1 text-left">{lang.name}</span>
+                  {locale === lang.code && <Check className="h-4 w-4" />}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Theme Toggle Switch */}
-        <div className="theme-toggle">
-          <Icon name="sun" size={16} />
-          <label className="switch">
+        {/* Theme Toggle */}
+        <div className="flex items-center gap-2.5 text-muted-foreground">
+          <Sun className={cn("h-4 w-4 transition-opacity", isDark ? "opacity-40" : "opacity-100 text-orange-500")} />
+          <label className="relative inline-block w-11 h-6 cursor-pointer">
             <input 
               type="checkbox" 
               checked={isDark} 
               onChange={toggleTheme}
+              className="opacity-0 w-0 h-0"
             />
-            <span className="slider"></span>
+            <span className={cn(
+              "absolute inset-0 rounded-full transition-colors",
+              isDark ? "bg-primary" : "bg-gray-300"
+            )}>
+              <span className={cn(
+                "absolute h-[18px] w-[18px] left-[3px] bottom-[3px] bg-white rounded-full transition-transform shadow-sm",
+                isDark && "translate-x-5"
+              )} />
+            </span>
           </label>
-          <Icon name="moon" size={16} />
+          <Moon className={cn("h-4 w-4 transition-opacity", isDark ? "opacity-100 text-yellow-400" : "opacity-40")} />
         </div>
       </div>
     </div>

@@ -1,17 +1,25 @@
 import React from 'react';
-import './Button.css';
+import { Button as ShadcnButton } from '../../ui/button';
+import { cn } from '../../../lib/utils';
 
 const Button = ({ children, variant = 'primary', onClick, className = '', type = 'button', disabled = false, ...props }) => {
+  const variantMap = {
+    primary: 'default',
+    secondary: 'secondary',
+    danger: 'destructive'
+  };
+
   return (
-    <button 
+    <ShadcnButton 
       type={type}
-      className={`btn btn-${variant} ${className}`}
+      variant={variantMap[variant] || 'default'}
       onClick={onClick}
       disabled={disabled}
+      className={cn(className)}
       {...props}
     >
       {children}
-    </button>
+    </ShadcnButton>
   );
 };
 
