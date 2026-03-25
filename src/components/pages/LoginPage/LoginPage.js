@@ -3,6 +3,7 @@ import Input from '../../atoms/Input/Input';
 import Button from '../../atoms/Button/Button';
 import { useLocale } from '../../../context/LocaleContext';
 import { translations } from '../../../locales/translations';
+import { authService, userService } from '../../../services';
 import './LoginPage.css';
 
 const LoginPage = ({ onLoginSuccess }) => {
@@ -55,79 +56,49 @@ const LoginPage = ({ onLoginSuccess }) => {
 
     try {
       // Step 1: Login to get token
-      const response = await fetch(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData)
-      });
-
-      const responseData = await response.json();
-
-      if (response.ok) {
-        // Extract data from response (handle both direct and nested data structures)
-        const data = responseData.data || responseData;
+      const responseData = await authService.login(formData);
+      const data = responseData.data || responseData;
+      
+      // Step 2: Fetch user profile with the token
+      const token = data.token || data.accessToken;
+      
+      console.log('Login response data:', data);
+      console.log('Extracted token:', token);
+      
+      // Store token temporarily for profile fetch
+      localStorage.setItem('user', JSON.stringify(data));
+      
+      try {
+        const profileResult = await userService.getProfile();
+        const profileData = profileResult.data || profileResult;
         
-        // Step 2: Fetch user profile with the token
-        const token = data.token || data.accessToken;
+        console.log('Profile response data:', profileData);
         
-        console.log('Login response data:', data);
-        console.log('Extracted token:', token);
+        // Combine login data (token) with profile data
+        const userProfile = {
+          ...data,
+          ...profileData,
+          fullName: profileData.fullName || profileData.name || data.fullName || 'User',
+          userName: profileData.userName || profileData.username || data.userName || formData.email.split('@')[0]
+        };
         
-        try {
-          const profileResponse = await fetch(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/profile`, {
-            method: 'GET',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            }
-          });
-
-          if (profileResponse.ok) {
-            const profileResult = await profileResponse.json();
-            const profileData = profileResult.data || profileResult;
-            
-            console.log('Profile response data:', profileData);
-            
-            // Combine login data (token) with profile data
-            const userProfile = {
-              ...data,
-              ...profileData,
-              fullName: profileData.fullName || profileData.name || data.fullName || 'User',
-              userName: profileData.userName || profileData.username || data.userName || formData.email.split('@')[0]
-            };
-            
-            console.log('Saving user profile to localStorage:', userProfile);
-            localStorage.setItem('user', JSON.stringify(userProfile));
-            onLoginSuccess(userProfile);
-          } else {
-            // If profile fetch fails, use login data with fallbacks
-            const userProfile = {
-              ...data,
-              fullName: data.fullName || data.name || 'User',
-              userName: data.userName || data.username || formData.email.split('@')[0]
-            };
-            localStorage.setItem('user', JSON.stringify(userProfile));
-            onLoginSuccess(userProfile);
-          }
-        } catch (profileError) {
-          // If profile API fails, proceed with login data
-          console.warn('Profile fetch failed:', profileError);
-          const userProfile = {
-            ...data,
-            fullName: data.fullName || data.name || 'User',
-            userName: data.userName || data.username || formData.email.split('@')[0]
-          };
-          localStorage.setItem('user', JSON.stringify(userProfile));
-          onLoginSuccess(userProfile);
-        }
-      } else {
-        const data = responseData.data || responseData;
-        setApiError(data.message || 'Login failed. Please try again.');
+        console.log('Saving user profile to localStorage:', userProfile);
+        localStorage.setItem('user', JSON.stringify(userProfile));
+        onLoginSuccess(userProfile);
+      } catch (profileError) {
+        // If profile API fails, proceed with login data
+        console.warn('Profile fetch failed:', profileError);
+        const userProfile = {
+          ...data,
+          fullName: data.fullName || data.name || 'User',
+          userName: data.userName || data.username || formData.email.split('@')[0]
+        };
+        localStorage.setItem('user', JSON.stringify(userProfile));
+        onLoginSuccess(userProfile);
       }
     } catch (error) {
-      setApiError('Network error. Please check your connection.');
+      const errorMessage = error.response?.data?.message || error.response?.data?.data?.message || 'Login failed. Please try again.';
+      setApiError(errorMessage);
     } finally {
       setLoading(false);
     }

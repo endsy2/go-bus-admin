@@ -11,7 +11,7 @@ import ReportsPage from './components/pages/ReportsPage/ReportsPage';
 import TeamPage from './components/pages/TeamPage/TeamPage';
 import LoginPage from './components/pages/LoginPage/LoginPage';
 import UnauthorizedDialog from './components/molecules/UnauthorizedDialog/UnauthorizedDialog';
-import { setUnauthorizedHandler } from './utils/api';
+import { setUnauthorizedHandler, userService } from './services';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -39,24 +39,16 @@ function App() {
 
   const fetchProfile = async (userData) => {
     try {
-      const { apiRequest } = await import('./utils/api');
+      const result = await userService.getProfile();
+      const profile = result.data || result;
       
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/profile`, {
-        method: 'GET'
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        const profile = result.data || result;
-        
-        // Update user state with fresh profile
-        const updatedUser = {
-          ...userData,
-          ...profile
-        };
-        setUser(updatedUser);
-        localStorage.setItem('user', JSON.stringify(updatedUser));
-      }
+      // Update user state with fresh profile
+      const updatedUser = {
+        ...userData,
+        ...profile
+      };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
     } catch (error) {
       console.error('Failed to fetch profile on app load:', error);
     }

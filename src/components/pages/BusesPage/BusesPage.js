@@ -5,12 +5,10 @@ import Snackbar from '../../atoms/Snackbar/Snackbar';
 import ConfirmDialog from '../../molecules/ConfirmDialog/ConfirmDialog';
 import BusDetailPage from '../BusDetailPage/BusDetailPage';
 import CreateBusPage from '../CreateBusPage/CreateBusPage';
-import { apiRequest } from '../../../utils/api';
+import { busService, routeService } from '../../../services';
 import { useLocale } from '../../../context/LocaleContext';
 import { translations } from '../../../locales/translations';
 import './BusesPage.css';
-
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
 const BusesPage = () => {
   const { locale } = useLocale();
@@ -46,23 +44,19 @@ const BusesPage = () => {
   // Fetch all buses without filters for initial load
   const fetchAllBuses = async () => {
     try {
-      const params = new URLSearchParams({
-        pageNo: '1',
-        pageSize: '1000'
-      });
+      const params = {
+        pageNo: 1,
+        pageSize: 1000
+      };
 
-      const response = await apiRequest(`${BASE_URL}/api/buses/filter?${params.toString()}`, { method: 'GET' });
-      const result = await response.json();
-      if (response.ok) {
-        const data = result.data || result;
-        const busData = data.content || data;
-        setBuses(Array.isArray(busData) ? busData : []);
-        setError('');
-      } else {
-        setError((result.data || result).message || 'Failed to fetch buses');
-      }
+      const result = await busService.getBuses(params);
+      const data = result.data || result;
+      const busData = data.content || data;
+      setBuses(Array.isArray(busData) ? busData : []);
+      setError('');
     } catch (err) {
-      setError('Network error. Please check your connection.');
+      const errorMessage = err.response?.data?.message || err.response?.data?.data?.message || 'Failed to fetch buses';
+      setError(errorMessage);
       console.error('Error fetching buses:', err);
     }
   };
@@ -96,61 +90,53 @@ const BusesPage = () => {
   const fetchBuses = async () => {
     try {
       // Build query parameters for API filtering
-      const params = new URLSearchParams({
-        pageNo: '1',
-        pageSize: '1000' // Get all buses for now, you can add pagination later
-      });
+      const params = {
+        pageNo: 1,
+        pageSize: 1000
+      };
 
       // Add filters only if they have values
       if (filterRoute !== 'ALL' && filterRoute) {
-        params.append('routeId', filterRoute);
+        params.routeId = filterRoute;
       }
       if (filterType !== 'ALL' && filterType) {
-        params.append('busType', filterType);
+        params.busType = filterType;
       }
       if (filterStatus !== 'ALL' && filterStatus) {
-        params.append('status', filterStatus);
+        params.status = filterStatus;
       }
       if (search.trim()) {
-        // For search, we'll use busNumber parameter only
-        params.append('busNumber', search.trim());
+        params.busNumber = search.trim();
       }
       if (minSeats && !isNaN(minSeats)) {
-        params.append('minSeats', minSeats);
+        params.minSeats = minSeats;
       }
       if (maxSeats && !isNaN(maxSeats)) {
-        params.append('maxSeats', maxSeats);
+        params.maxSeats = maxSeats;
       }
 
-      const response = await apiRequest(`${BASE_URL}/api/buses/filter?${params.toString()}`, { method: 'GET' });
-      const result = await response.json();
-      if (response.ok) {
-        const data = result.data || result;
-        const busData = data.content || data;
-        setBuses(Array.isArray(busData) ? busData : []);
-        setError('');
-      } else {
-        setError((result.data || result).message || 'Failed to fetch buses');
-      }
+      const result = await busService.getBuses(params);
+      const data = result.data || result;
+      const busData = data.content || data;
+      setBuses(Array.isArray(busData) ? busData : []);
+      setError('');
     } catch (err) {
-      setError('Network error. Please check your connection.');
+      const errorMessage = err.response?.data?.message || err.response?.data?.data?.message || 'Failed to fetch buses';
+      setError(errorMessage);
       console.error('Error fetching buses:', err);
     }
   };
 
   const fetchRoutes = async () => {
     try {
-      const response = await apiRequest(`${BASE_URL}/api/routes`, { method: 'GET' });
-      const result = await response.json();
-      if (response.ok) {
-        const data = result.data || result;
-        const routesArray = Array.isArray(data) ? data : [];
-        const map = {};
-        routesArray.forEach(r => {
-          map[r.id] = `${r.origin} → ${r.destination}`;
-        });
-        setRoutes(map);
-      }
+      const result = await routeService.getRoutes();
+      const data = result.data || result;
+      const routesArray = Array.isArray(data) ? data : [];
+      const map = {};
+      routesArray.forEach(r => {
+        map[r.id] = `${r.origin} → ${r.destination}`;
+      });
+      setRoutes(map);
     } catch (err) {
       console.error('Error fetching routes:', err);
     }
@@ -170,19 +156,16 @@ const BusesPage = () => {
     if (!busToDelete) return;
 
     try {
-      const response = await apiRequest(`${BASE_URL}/api/buses/${busToDelete.id}`, { method: 'DELETE' });
-      if (response.ok) {
-        setBuses(prev => prev.filter(b => b.id !== busToDelete.id));
-        setSnackbar({
-          isOpen: true,
-          message: t('busDeleted') || `Bus ${busToDelete.busNumber} deleted successfully`,
-          type: 'success'
-        });
-      } else {
-        setSnackbar({ isOpen: true, message: 'Failed to delete bus', type: 'error' });
-      }
+      await busService.deleteBus(busToDelete.id);
+      setBuses(prev => prev.filter(b => b.id !== busToDelete.id));
+      setSnackbar({
+        isOpen: true,
+        message: t('busDeleted') || `Bus ${busToDelete.busNumber} deleted successfully`,
+        type: 'success'
+      });
     } catch (err) {
-      setSnackbar({ isOpen: true, message: 'Network error', type: 'error' });
+      const errorMessage = err.response?.data?.message || 'Failed to delete bus';
+      setSnackbar({ isOpen: true, message: errorMessage, type: 'error' });
     } finally {
       setShowDeleteDialog(false);
       setBusToDelete(null);
