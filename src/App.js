@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import Sidebar from './components/organisms/Sidebar/Sidebar';
-import TopBar from './components/molecules/TopBar/TopBar';
-import DashboardPage from './components/pages/DashboardPage/DashboardPage';
-import BookingsPage from './components/pages/BookingsPage/BookingsPage';
-import BusesPage from './components/pages/BusesPage/BusesPage';
-import RoutesPage from './components/pages/RoutesPage/RoutesPage';
-import CustomersPage from './components/pages/CustomersPage/CustomersPage';
-import ReportsPage from './components/pages/ReportsPage/ReportsPage';
-import TeamPage from './components/pages/TeamPage/TeamPage';
-import LoginPage from './components/pages/LoginPage/LoginPage';
-import UnauthorizedDialog from './components/molecules/UnauthorizedDialog/UnauthorizedDialog';
-import { ToastProvider } from './components/ui/toast';
-import { setUnauthorizedHandler, userService } from './services';
+import { Sidebar } from './shared/components/layout/Sidebar';
+import { TopBar } from './shared/components/layout/TopBar';
+import { UnauthorizedDialog } from './shared/components/feedback/UnauthorizedDialog';
+import { ToastProvider } from './shared/components/ui/toast';
+
+// Feature imports
+import { LoginPage } from './features/auth';
+import { DashboardPage } from './features/dashboard';
+import { BusesPage } from './features/buses';
+import { RoutesPage } from './features/routes';
+import { CustomersPage } from './features/customers';
+import { BookingsPage } from './features/bookings';
+import { ReportsPage } from './features/reports';
+import { TeamPage, userService } from './features/team';
+
+// Services
+import { setUnauthorizedHandler } from './services';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');

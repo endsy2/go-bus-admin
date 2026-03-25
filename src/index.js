@@ -3,8 +3,8 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
-import { ThemeProvider } from './context/ThemeContext';
-import { LocaleProvider } from './context/LocaleContext';
+import { ThemeProvider } from 'shared/context/ThemeContext';
+import { LocaleProvider } from 'shared/context/LocaleContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
