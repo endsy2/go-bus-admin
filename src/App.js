@@ -14,6 +14,13 @@ import { CustomersPage } from './features/customers';
 import { BookingsPage } from './features/bookings';
 import { ReportsPage } from './features/reports';
 import { TeamPage, userService } from './features/team';
+import { SchedulesPage } from './features/schedules';
+import { LayoutsPage } from './features/layouts';
+import { PromosPage } from './features/promos';
+import { PaymentsPage } from './features/payments';
+import { WalletsPage } from './features/wallets';
+import { NotificationsPage } from './features/notifications';
+import { AdminPage } from './features/admin';
 
 // Services
 import { setUnauthorizedHandler } from './services';
@@ -95,12 +102,26 @@ function App() {
         return <BusesPage />;
       case 'routes':
         return <RoutesPage />;
+      case 'schedules':
+        return <SchedulesPage />;
+      case 'layouts':
+        return <LayoutsPage />;
       case 'customers':
         return <CustomersPage />;
+      case 'promos':
+        return <PromosPage />;
+      case 'payments':
+        return <PaymentsPage />;
+      case 'wallets':
+        return <WalletsPage />;
+      case 'notifications':
+        return <NotificationsPage />;
       case 'reports':
         return <ReportsPage />;
       case 'team':
         return <TeamPage />;
+      case 'admin':
+        return <AdminPage />;
       default:
         return <DashboardPage />;
     }

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, Shield, UserCheck, Edit, Save, AlertCircle } from 'lucide-react';
+import { Users, Shield, UserCheck, Edit, Save, AlertCircle, Trash2 } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
@@ -10,7 +10,9 @@ import { Label } from 'shared/components/ui/label';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { useToast } from 'shared/components/ui/toast';
 import AssignRoleDialog from '../../components/AssignRoleDialog/AssignRoleDialog';
+import CreateTeamMemberPage from '../CreateTeamMemberPage/CreateTeamMemberPage';
 import { Pagination } from 'shared/components/feedback/Pagination';
+import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
 import { apiRequest } from 'shared/utils/api';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
@@ -44,7 +46,10 @@ const TeamPage = () => {
   // UI state
   const [error, setError] = useState('');
   const [showAssignRoleDialog, setShowAssignRoleDialog] = useState(false);
+  const [showCreateMember, setShowCreateMember] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
+  const [deletingUser, setDeletingUser] = useState(false);
 
   const groupCheckboxRefs = useRef({});
 
@@ -205,6 +210,62 @@ const TeamPage = () => {
     setSelectedUser(null);
   };
 
+  const handleCreateMemberSuccess = () => {
+    setShowCreateMember(false);
+    addToast({ message: 'Team member created successfully!', type: 'success' });
+    fetchTeamMembers(membersPagination.currentPage, membersPagination.pageSize);
+  };
+
+  const handleCreateMemberCancel = () => {
+    setShowCreateMember(false);
+  };
+
+  const handleDeleteUser = (user) => {
+    setSelectedUser(user);
+    setShowDeleteDialog(true);
+  };
+
+  const confirmDeleteUser = async () => {
+    if (!selectedUser) return;
+    
+    setDeletingUser(true);
+    try {
+      const response = await apiRequest(
+        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/users/${selectedUser.id}`,
+        { method: 'DELETE' }
+      );
+      
+      if (response.ok) {
+        setShowDeleteDialog(false);
+        addToast({ 
+          message: `${selectedUser.fullName || selectedUser.userName} has been deleted successfully!`, 
+          type: 'success' 
+        });
+        fetchTeamMembers(membersPagination.currentPage, membersPagination.pageSize);
+      } else {
+        const result = await response.json();
+        const errorData = result.data || result;
+        addToast({ 
+          message: errorData.message || 'Failed to delete team member', 
+          type: 'error' 
+        });
+      }
+    } catch (err) {
+      addToast({ 
+        message: 'Network error. Failed to delete team member.', 
+        type: 'error' 
+      });
+    } finally {
+      setDeletingUser(false);
+      setSelectedUser(null);
+    }
+  };
+
+  const cancelDeleteUser = () => {
+    setShowDeleteDialog(false);
+    setSelectedUser(null);
+  };
+
   const togglePermission = (roleId, permissionId) => {
     setRolePermissions(prev => {
       const current = new Set(prev[roleId] || []);
@@ -345,12 +406,21 @@ const TeamPage = () => {
               {t('manageTeamMembersDesc') || 'Manage members and their access levels'}
             </p>
           </div>
-          {teamMembers.length > 0 && (
-            <Badge variant="secondary" className="gap-1.5">
-              <Users className="h-3.5 w-3.5" />
-              {teamMembers.length} {teamMembers.length === 1 ? 'member' : 'members'}
-            </Badge>
-          )}
+          <div className="flex items-center gap-3">
+            {teamMembers.length > 0 && (
+              <Badge variant="secondary" className="gap-1.5">
+                <Users className="h-3.5 w-3.5" />
+                {teamMembers.length} {teamMembers.length === 1 ? 'member' : 'members'}
+              </Badge>
+            )}
+            <Button
+              onClick={() => setShowCreateMember(true)}
+              className="gap-2"
+            >
+              <Users className="h-4 w-4" />
+              {t('createTeamMember') || 'Create Team Member'}
+            </Button>
+          </div>
         </div>
 
         <Card>
@@ -402,7 +472,9 @@ const TeamPage = () => {
                             </Badge>
                           ))
                         ) : (
-                          <Badge variant="secondary">User</Badge>
+                          <Badge variant="outline" className="text-muted-foreground">
+                            {t('noRole') || 'No Role'}
+                          </Badge>
                         )}
                       </div>
                     </TableCell>
@@ -423,6 +495,15 @@ const TeamPage = () => {
                           title="Edit member"
                         >
                           <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          onClick={() => handleDeleteUser(member)}
+                          title="Delete member"
+                          className="hover:bg-destructive hover:text-destructive-foreground"
+                        >
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </TableCell>
@@ -603,6 +684,16 @@ const TeamPage = () => {
 
   // ─── Main Render ──────────────────────────────────────────────
 
+  // Show create member page if active
+  if (showCreateMember) {
+    return (
+      <CreateTeamMemberPage
+        onSuccess={handleCreateMemberSuccess}
+        onCancel={handleCreateMemberCancel}
+      />
+    );
+  }
+
   return (
     <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
       {/* Header */}
@@ -652,6 +743,22 @@ const TeamPage = () => {
         user={selectedUser}
         onSave={handleSaveRoles}
         onCancel={cancelAssignRole}
+      />
+
+      <ConfirmDialog
+        isOpen={showDeleteDialog}
+        title={t('deleteTeamMember') || 'Delete Team Member'}
+        message={
+          selectedUser 
+            ? `${t('confirmDeleteTeamMember') || 'Are you sure you want to delete'} "${selectedUser.fullName || selectedUser.userName}"? ${t('thisActionCannotBeUndone') || 'This action cannot be undone.'}`
+            : ''
+        }
+        onConfirm={confirmDeleteUser}
+        onCancel={cancelDeleteUser}
+        confirmText={t('delete') || 'Delete'}
+        cancelText={t('cancel') || 'Cancel'}
+        isDestructive={true}
+        loading={deletingUser}
       />
     </div>
   );

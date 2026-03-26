@@ -5,6 +5,7 @@ import { Card, CardContent } from 'shared/components/ui/card';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { useToast } from 'shared/components/ui/toast';
 import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
+import { Pagination } from 'shared/components/feedback/Pagination';
 import BusDetailPage from '../BusDetailPage/BusDetailPage';
 import CreateBusPage from '../CreateBusPage/CreateBusPage';
 import busService from '../../services/busService';
@@ -32,11 +33,24 @@ const BusesPage = () => {
   const [maxSeats, setMaxSeats] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [busToDelete, setBusToDelete] = useState(null);
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    pageSize: 15,
+    totalPages: 0,
+    totalElements: 0
+  });
 
   useEffect(() => {
     fetchAll();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      fetchBuses();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagination.currentPage, pagination.pageSize]);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -46,11 +60,19 @@ const BusesPage = () => {
 
   const fetchAllBuses = async () => {
     try {
-      const params = { pageNo: 1, pageSize: 1000 };
+      const params = { pageNo: pagination.currentPage + 1, pageSize: pagination.pageSize };
       const result = await busService.getBuses(params);
       const data = result.data || result;
       const busData = data.content || data;
       setBuses(Array.isArray(busData) ? busData : []);
+      
+      // Update pagination info
+      setPagination(prev => ({
+        ...prev,
+        totalPages: data.totalPages || 1,
+        totalElements: data.totalElements || (Array.isArray(busData) ? busData.length : 0)
+      }));
+      
       setError('');
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.response?.data?.data?.message || 'Failed to fetch buses';
@@ -60,12 +82,14 @@ const BusesPage = () => {
   };
 
   const handleSearch = () => {
+    setPagination(prev => ({ ...prev, currentPage: 0 }));
     setSearching(true);
     fetchBuses().finally(() => setSearching(false));
   };
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') {
+      setPagination(prev => ({ ...prev, currentPage: 0 }));
       setSearching(true);
       fetchBuses().finally(() => setSearching(false));
     }
@@ -78,12 +102,21 @@ const BusesPage = () => {
     setSearch('');
     setMinSeats('');
     setMaxSeats('');
+    setPagination(prev => ({ ...prev, currentPage: 0 }));
     fetchAllBuses();
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, currentPage: newPage }));
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPagination(prev => ({ ...prev, currentPage: 0, pageSize: newSize }));
   };
 
   const fetchBuses = async () => {
     try {
-      const params = { pageNo: 1, pageSize: 1000 };
+      const params = { pageNo: pagination.currentPage + 1, pageSize: pagination.pageSize };
       if (filterRoute !== 'ALL' && filterRoute) params.routeId = filterRoute;
       if (filterType !== 'ALL' && filterType) params.busType = filterType;
       if (filterStatus !== 'ALL' && filterStatus) params.status = filterStatus;
@@ -95,6 +128,14 @@ const BusesPage = () => {
       const data = result.data || result;
       const busData = data.content || data;
       setBuses(Array.isArray(busData) ? busData : []);
+      
+      // Update pagination info
+      setPagination(prev => ({
+        ...prev,
+        totalPages: data.totalPages || 1,
+        totalElements: data.totalElements || (Array.isArray(busData) ? busData.length : 0)
+      }));
+      
       setError('');
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.response?.data?.data?.message || 'Failed to fetch buses';
@@ -591,8 +632,15 @@ const BusesPage = () => {
                 </table>
               </div>
 
-              <div className="mt-6 pt-4 border-t text-center text-sm text-muted-foreground">
-                {t('showing') || 'Showing'} <strong className="text-foreground">{buses.length}</strong> {t('of') || 'of'} <strong className="text-foreground">{buses.length}</strong> {t('buses') || 'buses'}
+              <div className="mt-6 pt-4 border-t">
+                <Pagination
+                  currentPage={pagination.currentPage}
+                  totalPages={pagination.totalPages}
+                  pageSize={pagination.pageSize}
+                  totalElements={pagination.totalElements}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                />
               </div>
             </>
           )}

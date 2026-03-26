@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 's
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { useToast } from 'shared/components/ui/toast';
 import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
+import { Pagination } from 'shared/components/feedback/Pagination';
 import RouteDetailPage from '../RouteDetailPage/RouteDetailPage';
 import CreateRoutePage from '../CreateRoutePage/CreateRoutePage';
 import { apiRequest } from 'shared/utils/api';
@@ -30,22 +31,45 @@ const RoutesPage = () => {
   const [selectedRouteId, setSelectedRouteId] = useState(null);
   const [showCreateRoute, setShowCreateRoute] = useState(false);
   const [allRoutes, setAllRoutes] = useState([]);
+  const [pagination, setPagination] = useState({
+    currentPage: 0,
+    pageSize: 15,
+    totalPages: 0,
+    totalElements: 0
+  });
 
   useEffect(() => {
     fetchRoutes();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagination.currentPage, pagination.pageSize]);
 
   const fetchRoutes = async () => {
     setLoading(true);
     try {
-      const response = await apiRequest(`${BASE_URL}/api/routes`, { method: 'GET' });
+      // Use paginated endpoint
+      const response = await apiRequest(
+        `${BASE_URL}/api/routes/paginate?pageNo=${pagination.currentPage + 1}&pageSize=${pagination.pageSize}`, 
+        { method: 'GET' }
+      );
       const result = await response.json();
+      
       if (response.ok) {
         const data = result.data || result;
-        const routesArray = Array.isArray(data) ? data : [];
-        setRoutes(routesArray);
-        setAllRoutes(routesArray);
+        const routesArray = data.content || data;
+        
+        setRoutes(Array.isArray(routesArray) ? routesArray : []);
+        
+        // Update pagination from API response
+        setPagination(prev => ({
+          ...prev,
+          totalPages: data.totalPages || 1,
+          totalElements: data.totalElements || 0
+        }));
+        
         setError('');
+        
+        // Also fetch all routes for the search dropdown
+        fetchAllRoutesForDropdown();
       } else {
         setError((result.data || result).message || 'Failed to fetch routes');
       }
@@ -57,12 +81,27 @@ const RoutesPage = () => {
     }
   };
 
+  const fetchAllRoutesForDropdown = async () => {
+    try {
+      const response = await apiRequest(`${BASE_URL}/api/routes`, { method: 'GET' });
+      const result = await response.json();
+      if (response.ok) {
+        const data = result.data || result;
+        const routesArray = Array.isArray(data) ? data : [];
+        setAllRoutes(routesArray);
+      }
+    } catch (err) {
+      console.error('Error fetching all routes for dropdown:', err);
+    }
+  };
+
   const handleSearch = async (origin = null, destination = null) => {
     let searchOrigin = origin;
     let searchDestination = destination;
     
     if (!origin && !destination) {
       if (!search.trim()) {
+        setPagination(prev => ({ ...prev, currentPage: 0 }));
         fetchRoutes();
         return;
       }
@@ -78,6 +117,7 @@ const RoutesPage = () => {
     }
 
     setSearching(true);
+    setPagination(prev => ({ ...prev, currentPage: 0 }));
     
     try {
       const searchParams = new URLSearchParams();
@@ -89,7 +129,18 @@ const RoutesPage = () => {
       
       if (response.ok) {
         const data = result.data || result;
-        setRoutes(Array.isArray(data) ? data : []);
+        const routesArray = Array.isArray(data) ? data : [];
+        
+        setRoutes(routesArray);
+        
+        // Update pagination for search results (client-side pagination)
+        setPagination(prev => ({
+          ...prev,
+          currentPage: 0,
+          totalPages: Math.ceil(routesArray.length / prev.pageSize),
+          totalElements: routesArray.length
+        }));
+        
         setError('');
       } else {
         setError((result.data || result).message || 'Search failed');
@@ -105,8 +156,17 @@ const RoutesPage = () => {
   const handleClearFilters = () => {
     if (search) {
       setSearch('');
+      setPagination(prev => ({ ...prev, currentPage: 0 }));
       fetchRoutes();
     }
+  };
+
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, currentPage: newPage }));
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPagination(prev => ({ ...prev, currentPage: 0, pageSize: newSize }));
   };
 
   const handleViewRoute = (routeId) => {
@@ -164,10 +224,10 @@ const RoutesPage = () => {
     return `${h}h ${m}m`;
   };
 
-  const totalBuses = routes.reduce((sum, r) => sum + (r.busCount || 0), 0);
-  const totalDistance = routes.reduce((sum, r) => sum + (r.distanceKm || 0), 0);
-  const avgDuration = routes.length
-    ? Math.round(routes.reduce((sum, r) => sum + (r.durationMinutes || 0), 0) / routes.length)
+  const totalBuses = allRoutes.reduce((sum, r) => sum + (r.busCount || 0), 0);
+  const totalDistance = allRoutes.reduce((sum, r) => sum + (r.distanceKm || 0), 0);
+  const avgDuration = allRoutes.length
+    ? Math.round(allRoutes.reduce((sum, r) => sum + (r.durationMinutes || 0), 0) / allRoutes.length)
     : 0;
 
   if (showCreateRoute) {
@@ -268,7 +328,7 @@ const RoutesPage = () => {
                 <MapPin className="h-6 w-6" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{routes.length}</div>
+                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{pagination.totalElements}</div>
                 <div className="text-sm text-muted-foreground">{t('totalRoutes') || 'Total Routes'}</div>
               </div>
             </div>
@@ -476,21 +536,17 @@ const RoutesPage = () => {
             </div>
           )}
 
-          {/* Footer */}
+          {/* Pagination */}
           {routes.length > 0 && (
-            <div className="mt-6 pt-4 border-t text-sm text-muted-foreground">
-              {search ? (
-                <>
-                  {t('searchResults') || 'Search results'}: <strong>{routes.length}</strong> {t('routes') || 'routes'}
-                  {routes.length > 0 && (
-                    <span> for "{search}"</span>
-                  )}
-                </>
-              ) : (
-                <>
-                  {t('showing') || 'Showing'} <strong>{routes.length}</strong> {t('routes') || 'routes'}
-                </>
-              )}
+            <div className="mt-6 pt-4 border-t">
+              <Pagination
+                currentPage={pagination.currentPage}
+                totalPages={pagination.totalPages}
+                pageSize={pagination.pageSize}
+                totalElements={pagination.totalElements}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
             </div>
           )}
         </CardContent>

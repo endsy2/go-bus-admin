@@ -47,10 +47,46 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
       requiresPermission: 'BUS_READ'
     },
     { 
+      id: 'schedules', 
+      icon: <Icon name="calendar" />, 
+      label: 'Schedules',
+      requiresPermission: 'BUS_READ'
+    },
+    { 
+      id: 'layouts', 
+      icon: <Icon name="grid" />, 
+      label: 'Seat Layouts',
+      requiresPermission: 'BUS_READ'
+    },
+    { 
       id: 'customers', 
       icon: <Icon name="users" />, 
       label: t('customers'),
       requiresPermission: 'USER_READ'
+    },
+    { 
+      id: 'promos', 
+      icon: <Icon name="ticket" />, 
+      label: 'Promos',
+      requiresPermission: 'ADMIN_ACCESS'
+    },
+    { 
+      id: 'payments', 
+      icon: <Icon name="dollarSign" />, 
+      label: 'Payments',
+      requiresPermission: 'BOOKING_READ'
+    },
+    { 
+      id: 'wallets', 
+      icon: <Icon name="dollarSign" />, 
+      label: 'Wallets',
+      requiresPermission: 'ADMIN_ACCESS'
+    },
+    { 
+      id: 'notifications', 
+      icon: <Icon name="bell" />, 
+      label: 'Notifications',
+      requiresPermission: null
     },
     { 
       id: 'reports', 
@@ -65,6 +101,12 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
       id: 'team', 
       icon: <Icon name="userCheck" />, 
       label: t('team'),
+      requiresPermission: 'ADMIN_ACCESS'
+    },
+    { 
+      id: 'admin', 
+      icon: <Icon name="shield" />, 
+      label: 'Admin Panel',
       requiresPermission: 'ADMIN_ACCESS'
     },
   ];
