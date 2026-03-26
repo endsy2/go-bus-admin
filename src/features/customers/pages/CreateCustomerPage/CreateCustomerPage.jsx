@@ -9,7 +9,7 @@ import { apiRequest } from 'shared/utils/api';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 
-const CreateCustomerPage = ({ onCancel, onSuccess }) => {
+const CreateCustomerPage = ({ onCancel, onSuccess, isEmployee = false }) => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   
@@ -20,7 +20,8 @@ const CreateCustomerPage = ({ onCancel, onSuccess }) => {
     phone: '',
     password: '',
     confirmPassword: '',
-    gender: 'MALE'
+    gender: 'MALE',
+    isEmployee: isEmployee
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -86,10 +87,21 @@ const CreateCustomerPage = ({ onCancel, onSuccess }) => {
 
     try {
       const { confirmPassword, ...createData } = formData;
+      
+      // Ensure isEmployee is included in the payload
+      const payload = {
+        userName: createData.userName,
+        fullName: createData.fullName,
+        email: createData.email,
+        phone: createData.phone,
+        password: createData.password,
+        gender: createData.gender,
+        isEmployee: isEmployee
+      };
 
       const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users`, {
         method: 'POST',
-        body: JSON.stringify(createData)
+        body: JSON.stringify(payload)
       });
 
       if (response.ok) {
@@ -133,10 +145,16 @@ const CreateCustomerPage = ({ onCancel, onSuccess }) => {
         <Card className="w-full max-w-4xl">
           <CardHeader>
             <CardTitle className="text-3xl">
-              {t('createNewCustomer') || 'Create New Customer'}
+              {isEmployee 
+                ? (t('createNewTeamMember') || 'Create New Team Member')
+                : (t('createNewCustomer') || 'Create New Customer')
+              }
             </CardTitle>
             <CardDescription>
-              {t('addNewCustomerToSystem') || 'Add a new customer to the system'}
+              {isEmployee
+                ? (t('addNewTeamMemberToSystem') || 'Add a new team member to the system')
+                : (t('addNewCustomerToSystem') || 'Add a new customer to the system')
+              }
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -302,7 +320,12 @@ const CreateCustomerPage = ({ onCancel, onSuccess }) => {
                   {t('cancel') || 'Cancel'}
                 </Button>
                 <Button type="submit" disabled={loading}>
-                  {loading ? (t('creating') || 'Creating...') : (t('createCustomer') || 'Create Customer')}
+                  {loading 
+                    ? (t('creating') || 'Creating...') 
+                    : isEmployee 
+                      ? (t('createTeamMember') || 'Create Team Member')
+                      : (t('createCustomer') || 'Create Customer')
+                  }
                 </Button>
               </div>
             </form>

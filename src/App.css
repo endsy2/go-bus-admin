@@ -8,30 +8,30 @@
   --primary-color: #4169E1;
   --primary-dark: #2952CC;
   --primary-light: #6B8EF5;
-  --bg-color: #F5F7FA;
+  --bg-color: #E8EBF0;
   --text-dark: #2C3E50;
   --text-light: #7F8C8D;
-  --white: #FFFFFF;
+  --white: #F0F2F5;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
-  --border-color: #e8e8e8;
-  --card-bg: #FFFFFF;
-  --input-bg: #FFFFFF;
-  --table-hover: #fafafa;
+  --border-color: #d1d5db;
+  --card-bg: #F0F2F5;
+  --input-bg: #F0F2F5;
+  --table-hover: #e5e7eb;
 }
 
 /* Light theme (default) */
 [data-theme="light"] {
-  --bg-color: #F5F7FA;
+  --bg-color: #E8EBF0;
   --text-dark: #2C3E50;
   --text-light: #7F8C8D;
-  --white: #FFFFFF;
+  --white: #F0F2F5;
   --shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.12);
-  --border-color: #e8e8e8;
-  --card-bg: #FFFFFF;
-  --input-bg: #FFFFFF;
-  --table-hover: #fafafa;
+  --border-color: #d1d5db;
+  --card-bg: #F0F2F5;
+  --input-bg: #F0F2F5;
+  --table-hover: #e5e7eb;
 }
 
 [data-theme="dark"] {

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Button } from 'shared/components/common/Button';
 import { Icon } from 'shared/components/common/Icon';
 import { Snackbar } from 'shared/components/common/Snackbar';
 import { apiRequest } from 'shared/utils/api';
@@ -449,9 +448,14 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
             </div>
 
             <div className="flex justify-end gap-3 pt-1">
-              <Button variant="secondary" type="button" onClick={onBack} disabled={submitting}>
+              <button
+                type="button"
+                onClick={onBack}
+                disabled={submitting}
+                className="inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-base font-bold transition-all bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
                 {t('cancel') || 'Cancel'}
-              </Button>
+              </button>
               <button
                 type="submit"
                 className={`inline-flex items-center gap-2 px-7 py-3.5 rounded-xl text-base font-bold transition-all ${submitting ? 'bg-gray-300 dark:bg-gray-700 text-gray-600 dark:text-gray-400 cursor-not-allowed' : progress === 100 ? 'bg-gradient-to-r from-blue-600 to-cyan-500 text-white hover:from-blue-700 hover:to-cyan-600 hover:-translate-y-0.5 shadow-lg hover:shadow-xl' : 'bg-blue-600 text-white hover:bg-blue-700 hover:-translate-y-0.5 shadow-md hover:shadow-lg'}`}

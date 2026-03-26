@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, X, Eye, Trash2, AlertCircle, MapPin, Clock, Activity, Bus, RefreshCw } from 'lucide-react';
+import { Plus, Search, X, Eye, Trash2, AlertCircle, MapPin, Clock, Activity, Bus } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent } from 'shared/components/ui/card';
 import { Badge } from 'shared/components/ui/badge';
@@ -102,9 +102,11 @@ const RoutesPage = () => {
     }
   };
 
-  const resetSearch = () => {
-    setSearch('');
-    fetchRoutes();
+  const handleClearFilters = () => {
+    if (search) {
+      setSearch('');
+      fetchRoutes();
+    }
   };
 
   const handleViewRoute = (routeId) => {
@@ -346,11 +348,9 @@ const RoutesPage = () => {
                 if (search) {
                   const [origin, destination] = search.split(' → ');
                   handleSearch(origin, destination);
-                } else {
-                  fetchRoutes();
                 }
               }}
-              disabled={searching}
+              disabled={searching || !search}
               className="gap-2"
             >
               {searching ? (
@@ -361,21 +361,19 @@ const RoutesPage = () => {
               ) : (
                 <>
                   <Search className="h-4 w-4" />
-                  {search ? (t('search') || 'Search') : (t('showAll') || 'Show All')}
+                  {t('search') || 'Search'}
                 </>
               )}
             </Button>
-            {search && (
-              <Button
-                variant="outline"
-                onClick={resetSearch}
-                disabled={searching}
-                className="gap-2"
-              >
-                <X className="h-4 w-4" />
-                {t('clear') || 'Clear'}
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              onClick={handleClearFilters}
+              disabled={searching}
+              className="gap-2"
+            >
+              <X className="h-4 w-4" />
+              {t('clearFilters') || 'Clear Filters'}
+            </Button>
           </div>
 
           {/* Routes List */}
@@ -391,9 +389,9 @@ const RoutesPage = () => {
                   : t('startByAddingRoute') || 'Start by adding your first route'}
               </p>
               {search && (
-                <Button variant="outline" onClick={resetSearch} className="gap-2">
-                  <RefreshCw className="h-4 w-4" />
-                  {t('clearSearch') || 'Clear Search'}
+                <Button variant="outline" onClick={handleClearFilters} className="gap-2">
+                  <X className="h-4 w-4" />
+                  {t('clearFilters') || 'Clear Filters'}
                 </Button>
               )}
             </div>

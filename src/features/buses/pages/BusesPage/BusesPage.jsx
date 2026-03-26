@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Search, X, Eye, Trash2, AlertCircle, Bus as BusIcon, Users, MapPin, RefreshCw } from 'lucide-react';
+import { Plus, Search, X, Eye, Trash2, AlertCircle, Bus as BusIcon, Users, MapPin } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent } from 'shared/components/ui/card';
 import { Skeleton } from 'shared/components/ui/skeleton';
@@ -71,17 +71,14 @@ const BusesPage = () => {
     }
   };
 
-  const resetFilters = () => {
+  const handleClearFilters = () => {
     setFilterStatus('ALL');
     setFilterType('ALL');
     setFilterRoute('ALL');
     setSearch('');
     setMinSeats('');
     setMaxSeats('');
-    setSearching(true);
-    setTimeout(() => {
-      fetchAllBuses().finally(() => setSearching(false));
-    }, 0);
+    fetchAllBuses();
   };
 
   const fetchBuses = async () => {
@@ -456,14 +453,14 @@ const BusesPage = () => {
             </div>
 
             <div className="flex flex-col gap-2">
-              <label className="text-sm font-medium opacity-0">Reset</label>
+              <label className="text-sm font-medium opacity-0">Clear</label>
               <Button
                 variant="outline"
-                onClick={resetFilters}
+                onClick={handleClearFilters}
                 className="gap-2"
               >
-                <RefreshCw className="h-4 w-4" />
-                {t('reset') || 'Reset'}
+                <X className="h-4 w-4" />
+                {t('clearFilters') || 'Clear Filters'}
               </Button>
             </div>
           </div>
@@ -483,9 +480,9 @@ const BusesPage = () => {
               <p className="text-muted-foreground mb-6">
                 {t('tryAdjustingFilters') || "Try adjusting your search or filters to find what you're looking for"}
               </p>
-              <Button variant="outline" onClick={resetFilters} className="gap-2">
-                <RefreshCw className="h-4 w-4" />
-                {t('resetFilters') || 'Reset Filters'}
+              <Button variant="outline" onClick={handleClearFilters} className="gap-2">
+                <X className="h-4 w-4" />
+                {t('clearFilters') || 'Clear Filters'}
               </Button>
             </div>
           ) : (

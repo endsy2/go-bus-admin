@@ -12,6 +12,7 @@ import { useToast } from 'shared/components/ui/toast';
 import EditCustomerDialog from '../../components/EditCustomerDialog/EditCustomerDialog';
 import { Pagination } from 'shared/components/feedback/Pagination';
 import CustomerDetailPage from '../CustomerDetailPage/CustomerDetailPage';
+import CreateCustomerPage from '../CreateCustomerPage/CreateCustomerPage';
 import { apiRequest } from 'shared/utils/api';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
@@ -39,17 +40,6 @@ const CustomersPage = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showDetailView, setShowDetailView] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
-  const [createFormData, setCreateFormData] = useState({
-    userName: '',
-    fullName: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
-    gender: 'MALE'
-  });
-  const [createErrors, setCreateErrors] = useState({});
-  const [createLoading, setCreateLoading] = useState(false);
   const [filters, setFilters] = useState({
     userId: '',
     email: '',
@@ -259,113 +249,15 @@ const CustomersPage = () => {
     setShowCreateForm(true);
   };
 
-  const handleCreateChange = (e) => {
-    const { name, value } = e.target;
-    setCreateFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-    if (createErrors[name]) {
-      setCreateErrors(prev => ({ ...prev, [name]: '' }));
-    }
-    setError('');
-  };
-
-  const validateCreate = () => {
-    const newErrors = {};
-    if (!createFormData.userName.trim()) {
-      newErrors.userName = 'Username is required';
-    }
-    if (!createFormData.fullName.trim()) {
-      newErrors.fullName = 'Full name is required';
-    }
-    if (!createFormData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(createFormData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
-    if (!createFormData.phone.trim()) {
-      newErrors.phone = 'Phone is required';
-    }
-    if (!createFormData.password) {
-      newErrors.password = 'Password is required';
-    } else if (createFormData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
-    }
-    if (createFormData.password !== createFormData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match';
-    }
-    return newErrors;
-  };
-
-  const handleSubmitCreate = async (e) => {
-    e.preventDefault();
-    setError('');
-
-    const newErrors = validateCreate();
-    if (Object.keys(newErrors).length > 0) {
-      setCreateErrors(newErrors);
-      return;
-    }
-
-    setCreateLoading(true);
-
-    try {
-      const { confirmPassword, ...createData } = createFormData;
-
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users`, {
-        method: 'POST',
-        body: JSON.stringify(createData)
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        const newCustomer = result.data || result;
-        
-        // Add new customer to list
-        setCustomers([newCustomer, ...customers]);
-        
-        // Reset form and go back to list
-        setCreateFormData({
-          userName: '',
-          fullName: '',
-          email: '',
-          phone: '',
-          password: '',
-          confirmPassword: '',
-          gender: 'MALE'
-        });
-        setCreateErrors({});
-        setShowCreateForm(false);
-        setError('');
-        
-        addToast({ message: 'Customer created successfully!', type: 'success' });
-      } else {
-        const result = await response.json();
-        const errorData = result.data || result;
-        setError(errorData.message || 'Failed to create customer');
-      }
-    } catch (err) {
-      setError('Network error. Failed to create customer.');
-      console.error('Error creating customer:', err);
-    } finally {
-      setCreateLoading(false);
-    }
-  };
-
   const handleCancelCreate = () => {
-    setCreateFormData({
-      userName: '',
-      fullName: '',
-      email: '',
-      phone: '',
-      password: '',
-      confirmPassword: '',
-      gender: 'MALE'
-    });
-    setCreateErrors({});
     setShowCreateForm(false);
-    setError('');
+  };
+
+  const handleCreateSuccess = () => {
+    setShowCreateForm(false);
+    addToast({ message: 'Customer created successfully!', type: 'success' });
+    // Refresh the customer list
+    fetchCustomers(filters, pagination.currentPage, pagination.pageSize);
   };
 
   const confirmDelete = async () => {
@@ -516,158 +408,10 @@ const CustomersPage = () => {
   // Show create form
   if (showCreateForm) {
     return (
-      <div className="flex-1 p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
-        <Button variant="outline" onClick={handleCancelCreate} className="mb-6">
-          <ArrowLeft className="h-4 w-4" />
-          {t('backToCustomers')}
-        </Button>
-
-        <Card className="max-w-4xl mx-auto">
-          <CardHeader>
-            <CardTitle className="text-3xl">{t('createNewCustomer')}</CardTitle>
-            <CardDescription>{t('addNewCustomerToSystem')}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {error && (
-              <Card className="mb-6 border-l-4 border-destructive">
-                <CardContent className="flex items-start gap-3 pt-6">
-                  <AlertCircle className="h-5 w-5 text-destructive flex-shrink-0 mt-0.5" />
-                  <span className="font-medium text-destructive">{error}</span>
-                </CardContent>
-              </Card>
-            )}
-
-            <form onSubmit={handleSubmitCreate} className="space-y-6">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <Label htmlFor="userName">{t('username')} *</Label>
-                  <Input
-                    id="userName"
-                    name="userName"
-                    value={createFormData.userName}
-                    onChange={handleCreateChange}
-                    placeholder={t('enterUsername')}
-                    required
-                    error={createErrors.userName}
-                  />
-                  {createErrors.userName && (
-                    <p className="text-sm text-destructive">{createErrors.userName}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">{t('fullName')} *</Label>
-                  <Input
-                    id="fullName"
-                    name="fullName"
-                    value={createFormData.fullName}
-                    onChange={handleCreateChange}
-                    placeholder={t('enterFullName')}
-                    required
-                    error={createErrors.fullName}
-                  />
-                  {createErrors.fullName && (
-                    <p className="text-sm text-destructive">{createErrors.fullName}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="email">{t('email')} *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    name="email"
-                    value={createFormData.email}
-                    onChange={handleCreateChange}
-                    placeholder={t('enterEmailAddress')}
-                    required
-                    error={createErrors.email}
-                  />
-                  {createErrors.email && (
-                    <p className="text-sm text-destructive">{createErrors.email}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">{t('phone')} *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    name="phone"
-                    value={createFormData.phone}
-                    onChange={handleCreateChange}
-                    placeholder={t('enterPhoneNumber')}
-                    required
-                    error={createErrors.phone}
-                  />
-                  {createErrors.phone && (
-                    <p className="text-sm text-destructive">{createErrors.phone}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="gender">{t('gender')} *</Label>
-                  <Select
-                    value={createFormData.gender}
-                    onValueChange={(value) => handleCreateChange({ target: { name: 'gender', value } })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="MALE">{t('male')}</SelectItem>
-                      <SelectItem value="FEMALE">{t('female')}</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="password">{t('password')} *</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    name="password"
-                    value={createFormData.password}
-                    onChange={handleCreateChange}
-                    placeholder={t('enterPassword')}
-                    required
-                    error={createErrors.password}
-                  />
-                  {createErrors.password && (
-                    <p className="text-sm text-destructive">{createErrors.password}</p>
-                  )}
-                </div>
-
-                <div className="space-y-2 col-span-2">
-                  <Label htmlFor="confirmPassword">{t('confirmPassword')} *</Label>
-                  <Input
-                    id="confirmPassword"
-                    type="password"
-                    name="confirmPassword"
-                    value={createFormData.confirmPassword}
-                    onChange={handleCreateChange}
-                    placeholder={t('confirmPasswordPlaceholder')}
-                    required
-                    error={createErrors.confirmPassword}
-                  />
-                  {createErrors.confirmPassword && (
-                    <p className="text-sm text-destructive">{createErrors.confirmPassword}</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex gap-3 justify-end pt-5 border-t">
-                <Button type="button" variant="outline" onClick={handleCancelCreate}>
-                  {t('cancel')}
-                </Button>
-                <Button type="submit" disabled={createLoading}>
-                  {createLoading ? t('creating') : t('createCustomer')}
-                </Button>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+      <CreateCustomerPage
+        onCancel={handleCancelCreate}
+        onSuccess={handleCreateSuccess}
+      />
     );
   }
 
