@@ -1,32 +1,38 @@
 import axiosInstance from 'services/axiosConfig';
 
 const promoService = {
-  getAll: async () => {
+  // Get all promo codes
+  getAllPromos: async () => {
     const response = await axiosInstance.get('/api/promos');
     return response.data;
   },
 
-  getById: async (id) => {
+  // Get promo code by ID
+  getPromoById: async (id) => {
     const response = await axiosInstance.get(`/api/promos/${id}`);
     return response.data;
   },
 
-  getByCode: async (code) => {
+  // Get promo code by code
+  getPromoByCode: async (code) => {
     const response = await axiosInstance.get(`/api/promos/code/${code}`);
     return response.data;
   },
 
-  create: async (data) => {
-    const response = await axiosInstance.post('/api/promos', data);
+  // Create promo code
+  createPromo: async (promoData) => {
+    const response = await axiosInstance.post('/api/promos', promoData);
     return response.data;
   },
 
-  update: async (id, data) => {
-    const response = await axiosInstance.put(`/api/promos/${id}`, data);
+  // Update promo code
+  updatePromo: async (id, promoData) => {
+    const response = await axiosInstance.put(`/api/promos/${id}`, promoData);
     return response.data;
   },
 
-  delete: async (id) => {
+  // Delete promo code
+  deletePromo: async (id) => {
     const response = await axiosInstance.delete(`/api/promos/${id}`);
     return response.data;
   },
