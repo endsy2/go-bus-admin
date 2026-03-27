@@ -1,116 +1,304 @@
-import React, { useState, useEffect } from 'react';
-import { Card } from 'shared/components/ui/card';
-import { Button } from 'shared/components/ui/button';
-import { Badge } from 'shared/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
-import promoService from '../../services/promoService';
+import React, { useState } from 'react';
+import { usePromos } from '../../hooks/usePromos';
+import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
+import { Badge } from 'shared/components/common/Badge';
+import { Button } from 'shared/components/common/Button';
+import { Skeleton } from 'shared/components/ui/skeleton';
+import { useLocale } from 'shared/context/LocaleContext';
+import { translations } from 'shared/locales/translations';
+import { useToast } from 'shared/components/ui/toast';
+import { 
+  Tag, 
+  Plus,
+  Edit, 
+  Trash2,
+  Percent,
+  DollarSign,
+  Calendar,
+  Users,
+  TrendingUp
+} from 'lucide-react';
 import CreatePromoDialog from '../../components/CreatePromoDialog/CreatePromoDialog';
 import EditPromoDialog from '../../components/EditPromoDialog/EditPromoDialog';
+import ConfirmDialog from 'shared/components/feedback/ConfirmDialog';
+import promoService from '../../services/promoService';
 
 const PromosPage = () => {
-  const [promos, setPromos] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingPromo, setEditingPromo] = useState(null);
+  const { locale } = useLocale();
+  const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
+  const { addToast } = useToast();
+  const { promos, loading, refetch } = usePromos();
+  
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [selectedPromo, setSelectedPromo] = useState(null);
 
-  useEffect(() => {
-    fetchPromos();
-  }, []);
+  const handleCreateSuccess = () => {
+    setCreateDialogOpen(false);
+    refetch();
+  };
 
-  const fetchPromos = async () => {
+  const handleEditClick = (promo) => {
+    setSelectedPromo(promo);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSuccess = () => {
+    setEditDialogOpen(false);
+    setSelectedPromo(null);
+    refetch();
+  };
+
+  const handleDeleteClick = (promo) => {
+    setSelectedPromo(promo);
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
     try {
-      setLoading(true);
-      const result = await promoService.getAll();
-      const promoData = result.data || result;
-      setPromos(Array.isArray(promoData) ? promoData : []);
+      await promoService.deletePromo(selectedPromo.id);
+      setDeleteDialogOpen(false);
+      setSelectedPromo(null);
+      refetch();
+      addToast({ message: t('promoDeletedSuccess') || 'Promo code deleted successfully', type: 'success' });
     } catch (error) {
-      console.error('Failed to fetch promos:', error);
-      setPromos([]);
-    } finally {
-      setLoading(false);
+      addToast({ message: error.response?.data?.message || 'Failed to delete promo code', type: 'error' });
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Delete this promo code?')) {
-      try {
-        await promoService.delete(id);
-        fetchPromos();
-      } catch (error) {
-        console.error('Failed to delete promo:', error);
-      }
+  const getStatusBadge = (promo) => {
+    const now = new Date();
+    const validFrom = new Date(promo.validFrom);
+    const validUntil = new Date(promo.validUntil);
+    
+    if (now < validFrom) {
+      return <Badge variant="info">UPCOMING</Badge>;
+    } else if (now > validUntil) {
+      return <Badge variant="default">EXPIRED</Badge>;
+    } else if (promo.currentUsage >= promo.maxUsage) {
+      return <Badge variant="danger">EXHAUSTED</Badge>;
+    } else {
+      return <Badge variant="success">ACTIVE</Badge>;
     }
   };
+
+  const getDiscountDisplay = (promo) => {
+    if (promo.discountType === 'PERCENTAGE') {
+      return `${promo.discountValue}%`;
+    } else {
+      return `$${promo.discountValue.toFixed(2)}`;
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex-1 p-8 overflow-y-auto bg-slate-950 min-h-screen">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <Skeleton className="h-10 w-80 mb-2" />
+            <Skeleton className="h-5 w-96" />
+          </div>
+          <Skeleton className="h-10 w-40" />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {[1, 2, 3, 4].map(i => (
+            <Card key={i} className="bg-slate-900 border-slate-800">
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-3/4" />
+                <div className="flex gap-2 pt-2">
+                  <Skeleton className="h-9 flex-1" />
+                  <Skeleton className="h-9 w-9" />
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Promo Codes</h1>
-        <Button onClick={() => setShowCreateDialog(true)}>Create Promo</Button>
+    <div className="flex-1 p-8 overflow-y-auto bg-slate-950 min-h-screen">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
+            <Tag className="w-7 h-7 text-blue-500" />
+            {t('promoManagement') || 'Promo Code Management'}
+          </h1>
+          <p className="text-slate-400 text-base">
+            {t('managePromoCodes') || 'Manage promotional codes and discounts'}
+          </p>
+        </div>
+        <Button 
+          variant="primary" 
+          onClick={() => setCreateDialogOpen(true)}
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          <Plus className="w-5 h-5" />
+          {t('newPromo') || 'New Promo'}
+        </Button>
       </div>
 
-      <Card>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Code</TableHead>
-              <TableHead>Discount</TableHead>
-              <TableHead>Type</TableHead>
-              <TableHead>Valid Until</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">Loading...</TableCell>
-              </TableRow>
-            ) : promos.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center">No promo codes found</TableCell>
-              </TableRow>
-            ) : (
-              promos.map((promo) => (
-                <TableRow key={promo.id}>
-                  <TableCell className="font-mono font-bold">{promo.code}</TableCell>
-                  <TableCell>{promo.discountType === 'PERCENTAGE' ? `${promo.discountValue}%` : `$${promo.discountValue}`}</TableCell>
-                  <TableCell>{promo.discountType}</TableCell>
-                  <TableCell>{new Date(promo.validUntil).toLocaleDateString()}</TableCell>
-                  <TableCell>
-                    <Badge variant={promo.isActive ? 'default' : 'secondary'}>
-                      {promo.isActive ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      <Button size="sm" onClick={() => setEditingPromo(promo)}>Edit</Button>
-                      <Button size="sm" variant="destructive" onClick={() => handleDelete(promo.id)}>Delete</Button>
+      {promos.length === 0 ? (
+        <div className="text-center py-20 bg-slate-900 rounded-xl border border-slate-800">
+          <div className="bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Tag className="w-10 h-10 text-slate-500" />
+          </div>
+          <h3 className="text-xl font-semibold text-white mb-2">
+            {t('noPromosFound') || 'No promo codes found'}
+          </h3>
+          <p className="text-slate-400 mb-6">
+            {t('createFirstPromo') || 'Create your first promo code to get started'}
+          </p>
+          <Button 
+            variant="primary" 
+            onClick={() => setCreateDialogOpen(true)}
+            className="bg-blue-500 hover:bg-blue-600 text-white"
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            {t('createPromo') || 'Create Promo'}
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+          {promos.map(promo => (
+            <Card 
+              key={promo.id}
+              className="bg-slate-900 border-slate-800 transition-all duration-300 hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10"
+            >
+              <CardHeader className="pb-4">
+                <div className="flex items-start justify-between gap-2 mb-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="bg-blue-500/10 p-2.5 rounded-lg">
+                      <Tag className="w-5 h-5 text-blue-500" />
                     </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </Card>
+                    <div className="flex-1 min-w-0">
+                      <CardTitle className="text-lg font-bold text-white truncate">
+                        {promo.code}
+                      </CardTitle>
+                    </div>
+                  </div>
+                </div>
+                {getStatusBadge(promo)}
+              </CardHeader>
+              
+              <CardContent className="space-y-3">
+                {/* Description */}
+                {promo.description && (
+                  <p className="text-sm text-slate-400 line-clamp-2 min-h-[40px]">
+                    {promo.description}
+                  </p>
+                )}
 
-      {showCreateDialog && (
-        <CreatePromoDialog
-          open={showCreateDialog}
-          onClose={() => setShowCreateDialog(false)}
-          onSuccess={fetchPromos}
-        />
+                {/* Discount */}
+                <div className="flex items-center gap-3 p-2.5 bg-green-500/10 rounded-lg border border-green-500/20">
+                  <div className="bg-green-500/20 p-2 rounded-lg">
+                    {promo.discountType === 'PERCENTAGE' ? (
+                      <Percent className="w-4 h-4 text-green-400" />
+                    ) : (
+                      <DollarSign className="w-4 h-4 text-green-400" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-green-400">
+                      {t('discount') || 'Discount'}
+                    </p>
+                    <p className="font-bold text-xl text-green-400">
+                      {getDiscountDisplay(promo)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Usage Stats */}
+                <div className="flex items-center gap-3 p-2.5 bg-slate-800/50 rounded-lg border border-slate-800">
+                  <div className="bg-purple-500/10 p-2 rounded-lg">
+                    <Users className="w-4 h-4 text-purple-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-slate-500">
+                      {t('usage') || 'Usage'}
+                    </p>
+                    <p className="font-medium text-white text-sm">
+                      {promo.currentUsage || 0} / {promo.maxUsage || '∞'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Min Purchase */}
+                {promo.minPurchaseAmount && (
+                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                    <TrendingUp className="w-3 h-3" />
+                    <span>Min: ${promo.minPurchaseAmount.toFixed(2)}</span>
+                  </div>
+                )}
+
+                {/* Valid Period */}
+                <div className="flex items-center gap-2 text-xs text-slate-500 pt-2 border-t border-slate-800">
+                  <Calendar className="w-3 h-3" />
+                  <span>
+                    {new Date(promo.validFrom).toLocaleDateString()} - {new Date(promo.validUntil).toLocaleDateString()}
+                  </span>
+                </div>
+
+                {/* Actions */}
+                <div className="flex gap-2 pt-3 border-t border-slate-800">
+                  <Button 
+                    variant="secondary" 
+                    className="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+                    onClick={() => handleEditClick(promo)}
+                  >
+                    <Edit className="w-4 h-4" />
+                    {t('edit') || 'Edit'}
+                  </Button>
+                  <Button 
+                    variant="danger"
+                    className="w-11 h-11 p-0 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                    onClick={() => handleDeleteClick(promo)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       )}
 
-      {editingPromo && (
+      <CreatePromoDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        onSuccess={handleCreateSuccess}
+      />
+
+      {selectedPromo && (
         <EditPromoDialog
-          open={!!editingPromo}
-          promo={editingPromo}
-          onClose={() => setEditingPromo(null)}
-          onSuccess={fetchPromos}
+          open={editDialogOpen}
+          onClose={() => {
+            setEditDialogOpen(false);
+            setSelectedPromo(null);
+          }}
+          promo={selectedPromo}
+          onSuccess={handleEditSuccess}
         />
       )}
+
+      <ConfirmDialog
+        isOpen={deleteDialogOpen}
+        onCancel={() => {
+          setDeleteDialogOpen(false);
+          setSelectedPromo(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        title={t('deletePromo') || 'Delete Promo Code'}
+        message={`${t('confirmDeletePromo') || 'Are you sure you want to delete promo code'} "${selectedPromo?.code}"?`}
+        type="danger"
+      />
     </div>
   );
 };

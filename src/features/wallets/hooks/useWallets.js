@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import bookingService from '../services/bookingService';
+import walletService from '../services/walletService';
 
-export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 10) => {
-  const [bookings, setBookings] = useState([]);
+export const useWallets = (initialFilters = {}, initialPage = 0, initialSize = 10) => {
+  const [wallets, setWallets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
@@ -13,14 +13,13 @@ export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 
   });
   const [filters, setFilters] = useState(initialFilters);
 
-  const fetchBookings = useCallback(async (page = pagination.currentPage, size = pagination.size) => {
+  const fetchWallets = useCallback(async (page = pagination.currentPage, size = pagination.size) => {
     try {
       setLoading(true);
       setError(null);
-      const response = await bookingService.filterBookings(filters, page, size);
+      const response = await walletService.getWallets(filters, page, size);
       
-      // Handle PagedResponse structure
-      setBookings(response.data || []);
+      setWallets(response.data || []);
       setPagination({
         currentPage: response.currentPage || page,
         totalPages: response.totalPages || 0,
@@ -28,34 +27,34 @@ export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 
         size: response.size || size,
       });
     } catch (err) {
-      setError(err.message || 'Failed to fetch bookings');
-      setBookings([]);
+      setError(err.message || 'Failed to fetch wallets');
+      setWallets([]);
     } finally {
       setLoading(false);
     }
   }, [filters, pagination.currentPage, pagination.size]);
 
   useEffect(() => {
-    fetchBookings();
+    fetchWallets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filters]);
 
   const updateFilters = (newFilters) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setPagination(prev => ({ ...prev, currentPage: 0 })); // Reset to first page
+    setPagination(prev => ({ ...prev, currentPage: 0 }));
   };
 
   const goToPage = (page) => {
-    fetchBookings(page, pagination.size);
+    fetchWallets(page, pagination.size);
   };
 
   const changePageSize = (size) => {
     setPagination(prev => ({ ...prev, size, currentPage: 0 }));
-    fetchBookings(0, size);
+    fetchWallets(0, size);
   };
 
   return {
-    bookings,
+    wallets,
     loading,
     error,
     pagination,
@@ -63,6 +62,6 @@ export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 
     updateFilters,
     goToPage,
     changePageSize,
-    refetch: fetchBookings,
+    refetch: fetchWallets,
   };
 };
