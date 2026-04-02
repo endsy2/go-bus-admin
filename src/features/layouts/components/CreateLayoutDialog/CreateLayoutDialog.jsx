@@ -126,12 +126,12 @@ const CreateLayoutDialog = ({ open, onClose, onSuccess }) => {
     try {
       const availableSeats = getAvailableSeatsCount();
       
-      // Prepare seat data
+      // Prepare seat data - remove isAvailable field
+      // For blocked seats, send null to maintain 2D structure
       const seats = seatLayout.map(row => 
-        row.map(seat => ({
-          seatNumber: seat.seatNumber,
-          isAvailable: seat.isAvailable
-        }))
+        row.map(seat => 
+          seat.isAvailable ? { seatNumber: seat.seatNumber } : null
+        )
       );
       
       const payload = {

@@ -1,48 +1,64 @@
 import axiosInstance from 'services/axiosConfig';
 
 const scheduleService = {
-  getAll: async () => {
-    const response = await axiosInstance.get('/api/schedules');
+  // Get all schedules with pagination
+  getSchedules: async (pageNo = 1, pageSize = 10) => {
+    const response = await axiosInstance.get('/api/schedules', {
+      params: { pageNo, pageSize }
+    });
     return response.data;
   },
 
-  getById: async (id) => {
+  // Get schedule by ID
+  getScheduleById: async (id) => {
     const response = await axiosInstance.get(`/api/schedules/${id}`);
     return response.data;
   },
 
-  getByBus: async (busId) => {
-    const response = await axiosInstance.get(`/api/schedules/bus/${busId}`);
+  // Create new schedule
+  createSchedule: async (scheduleData) => {
+    const response = await axiosInstance.post('/api/schedules', scheduleData);
     return response.data;
   },
 
-  getByDateRange: async (params) => {
-    const response = await axiosInstance.get('/api/schedules/date-range', { params });
+  // Update schedule
+  updateSchedule: async (id, scheduleData) => {
+    const response = await axiosInstance.put(`/api/schedules/${id}`, scheduleData);
     return response.data;
   },
 
-  getByBusAndDateRange: async (busId, params) => {
-    const response = await axiosInstance.get(`/api/schedules/bus/${busId}/date-range`, { params });
-    return response.data;
-  },
-
-  getByPrice: async (params) => {
-    const response = await axiosInstance.get('/api/schedules/price', { params });
-    return response.data;
-  },
-
-  create: async (data) => {
-    const response = await axiosInstance.post('/api/schedules', data);
-    return response.data;
-  },
-
-  update: async (id, data) => {
-    const response = await axiosInstance.put(`/api/schedules/${id}`, data);
-    return response.data;
-  },
-
-  delete: async (id) => {
+  // Delete schedule
+  deleteSchedule: async (id) => {
     const response = await axiosInstance.delete(`/api/schedules/${id}`);
+    return response.data;
+  },
+
+  // Get schedules with filters and pagination
+  // All filter parameters are now optional
+  filterSchedules: async (routeId = null, fromDate = null, toDate = null, maxPrice = null, pageNo = 1, pageSize = 10) => {
+    const params = new URLSearchParams();
+    
+    // Only add parameters if they have values
+    if (routeId) params.append('routeId', routeId);
+    if (fromDate) params.append('fromDate', fromDate);
+    if (toDate) params.append('toDate', toDate);
+    if (maxPrice) params.append('maxPrice', maxPrice);
+    params.append('pageNo', pageNo);
+    params.append('pageSize', pageSize);
+
+    const response = await axiosInstance.get(`/api/schedules/filter/specification?${params.toString()}`);
+    return response.data;
+  },
+
+  // Get schedule seats by schedule ID
+  getScheduleSeats: async (scheduleId) => {
+    const response = await axiosInstance.get(`/api/schedule-seats/schedule/${scheduleId}`);
+    return response.data;
+  },
+
+  // Get bus details by schedule ID (legacy - if still needed)
+  getBusBySchedule: async (scheduleId) => {
+    const response = await axiosInstance.get(`/api/buses/schedule/${scheduleId}`);
     return response.data;
   },
 };

@@ -26,7 +26,6 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
     busNumber: '',
     model: '',
     plate: '',
-    totalSeats: '',
     busType: 'AC',
     layoutId: '',
     busStatus: 'Active',
@@ -65,15 +64,28 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
 
   const parseLayout = (raw) => {
     try {
-      return typeof raw === 'string' ? JSON.parse(raw) : raw;
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      
+      // The layout structure from DB is:
+      // { rows: number, columns: number, totalSeats: number, seats: [...], driverColumn: number, aisleColumns: [...] }
+      if (parsed && typeof parsed === 'object') {
+        return parsed;
+      }
+      return { rows: 0, columns: 0, totalSeats: 0, seats: [] };
     } catch {
-      return [];
+      return { rows: 0, columns: 0, totalSeats: 0, seats: [] };
     }
   };
 
   const countSeats = (layout) => {
-    const rows = parseLayout(layout);
-    return rows.reduce((acc, row) => acc + (row.seats?.length || 0), 0);
+    const parsed = parseLayout(layout);
+    // Use totalSeats from layout or count seats array
+    return parsed.totalSeats || parsed.seats?.length || 0;
+  };
+
+  const getRowCount = (layout) => {
+    const parsed = parseLayout(layout);
+    return parsed.rows || 0;
   };
 
   const set = (field, value) => {
@@ -85,9 +97,8 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
     const e = {};
     if (!form.routeId) e.routeId = 'Route is required';
     if (!form.busNumber.trim()) e.busNumber = 'Bus number is required';
-    if (!form.plate.trim()) e.plate = 'Plate number is required';
+    if (!form.busType) e.busType = 'Bus type is required';
     if (!form.layoutId) e.layoutId = 'Layout is required';
-    if (form.totalSeats && isNaN(Number(form.totalSeats))) e.totalSeats = 'Must be a number';
     return e;
   };
 
@@ -101,12 +112,11 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
       const payload = {
         routeId: Number(form.routeId),
         busNumber: form.busNumber.trim(),
-        model: form.model.trim() || undefined,
-        plate: form.plate.trim(),
-        totalSeats: form.totalSeats ? Number(form.totalSeats) : undefined,
         busType: form.busType,
-        layoutId: Number(form.layoutId),
-        busStatus: form.busStatus,
+        layoutId: form.layoutId ? Number(form.layoutId) : null,
+        plate: form.plate.trim() || null,
+        model: form.model.trim() || null,
+        busStatus: form.busStatus || null,
       };
 
       const res = await apiRequest(`${BASE_URL}/api/buses`, {
@@ -237,30 +247,18 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium mb-2">
-                  {t('plateNumber') || 'Plate Number'} <span className="text-red-500">*</span>
-                </label>
+                <label className="block text-sm font-medium mb-2">{t('plateNumber') || 'Plate Number'}</label>
                 <input
                   value={form.plate}
                   onChange={e => set('plate', e.target.value)}
                   placeholder="e.g. 1KY-XXXX"
-                  className={`w-full px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${errors.plate ? 'border-red-500' : 'border-input'}`}
+                  className="w-full px-3 py-2 border border-input rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring"
                 />
-                {errors.plate && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.plate}</p>}
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-2">{t('totalSeats') || 'Total Seats'}</label>
-                <input
-                  type="number"
-                  value={form.totalSeats}
-                  onChange={e => set('totalSeats', e.target.value)}
-                  placeholder="e.g. 40"
-                  min="1"
-                  className={`w-full px-3 py-2 border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-ring ${errors.totalSeats ? 'border-red-500' : 'border-input'}`}
-                />
-                {errors.totalSeats && <p className="text-xs text-red-600 dark:text-red-400 mt-1">{errors.totalSeats}</p>}
               </div>
             </div>
+            <p className="text-xs text-muted-foreground mt-3">
+              {t('totalSeatsAutoCalculated') || 'Total seats will be automatically calculated from the selected layout'}
+            </p>
           </CardContent>
         </Card>
 
@@ -306,9 +304,11 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
             {errors.layoutId && <p className="text-xs text-red-600 dark:text-red-400 mb-3">{errors.layoutId}</p>}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {layouts.map(layout => {
-                const rows = parseLayout(layout.layout);
+                const parsed = parseLayout(layout.layout);
                 const totalSeats = countSeats(layout.layout);
-                const allSeats = rows.flatMap(r => r.seats || []);
+                const rowCount = getRowCount(layout.layout);
+                const allSeats = parsed.seats || [];
+                
                 return (
                   <button
                     key={layout.id}
@@ -321,15 +321,30 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
                     }`}
                   >
                     <div className="font-semibold mb-1">{layout.name}</div>
-                    <div className="text-xs text-muted-foreground mb-3">{totalSeats} seats · {rows.length} rows</div>
+                    <div className="text-xs text-muted-foreground mb-3">
+                      {totalSeats} seats · {rowCount} rows · {parsed.columns || 0} columns
+                    </div>
+                    {layout.description && (
+                      <div className="text-xs text-muted-foreground mb-3 italic">
+                        {layout.description}
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-1">
-                      {allSeats.slice(0, 20).map((seat, i) => (
-                        <div key={i} className="w-5 h-4 border border-border rounded text-[8px] flex items-center justify-center bg-muted/50" title={seat}>
-                          {seat.replace(/[A-Z]/,'')}
-                        </div>
-                      ))}
+                      {allSeats.slice(0, 20).map((seat, i) => {
+                        // Handle both object {seatNumber, isAvailable} and string formats
+                        const seatNumber = typeof seat === 'object' ? seat.seatNumber : seat;
+                        return (
+                          <div 
+                            key={i} 
+                            className="w-6 h-5 border border-border rounded text-[9px] flex items-center justify-center bg-muted/50 font-mono" 
+                            title={`Seat ${seatNumber}`}
+                          >
+                            {seatNumber}
+                          </div>
+                        );
+                      })}
                       {allSeats.length > 20 && (
-                        <div className="px-2 h-4 border border-border rounded text-[8px] flex items-center justify-center bg-muted/50">
+                        <div className="px-2 h-5 border border-border rounded text-[9px] flex items-center justify-center bg-muted/50">
                           +{allSeats.length - 20}
                         </div>
                       )}

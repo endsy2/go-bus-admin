@@ -3,7 +3,7 @@ import { Input } from 'shared/components/common/Input';
 import { Button } from 'shared/components/common/Button';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
-import { AlertCircle, Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2, Eye, EyeOff, Mail, Lock, Bus } from 'lucide-react';
 import authService from '../../services/authService';
 import userService from 'features/team/services/userService';
 
@@ -17,6 +17,7 @@ const LoginPage = ({ onLoginSuccess }) => {
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -106,58 +107,138 @@ const LoginPage = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-5">
-      <div className="bg-white dark:bg-slate-800 p-10 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700">
+    <div className="flex justify-center items-center min-h-screen bg-slate-950 p-5 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-indigo-500/5 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="relative bg-slate-900 p-10 rounded-2xl shadow-2xl w-full max-w-md border border-slate-800 backdrop-blur-sm">
+        {/* Logo and Title */}
         <div className="text-center mb-8">
           <div className="mb-6 flex justify-center items-center">
-            <img 
-              src="/go_bus_new_logo.png" 
-              alt="GoBus Admin" 
-              className="max-w-[200px] max-h-20 w-auto h-auto object-contain drop-shadow-md dark:brightness-110"
-            />
+            <div className="relative">
+              <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
+              <img 
+                src="/go_bus_new_logo.png" 
+                alt="GoBus Admin" 
+                className="relative max-w-[200px] max-h-20 w-auto h-auto object-contain drop-shadow-2xl"
+              />
+            </div>
           </div>
-          <p className="text-slate-600 dark:text-slate-400 text-base">
-            {t('signInToAccount')}
+          <h1 className="text-2xl font-bold text-white mb-2">
+            {t('busBookingSystem') || 'Bus Booking System'}
+          </h1>
+          <p className="text-slate-400 text-sm">
+            {t('signInToAccount') || 'Sign in to your account'}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           {apiError && (
-            <div className="bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 p-3 rounded-lg border-l-4 border-red-700 dark:border-red-500 border border-red-200 dark:border-red-800 flex items-start gap-2">
+            <div className="bg-red-500/10 text-red-400 p-4 rounded-lg border border-red-500/20 flex items-start gap-3 animate-shake">
               <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
               <span className="text-sm">{apiError}</span>
             </div>
           )}
 
-          <Input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            placeholder={t('email')}
-            required
-            error={errors.email}
-          />
+          {/* Email Input */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              {t('email') || 'Email'}
+            </label>
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                <Mail className="w-5 h-5" />
+              </div>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="admin@example.com"
+                className={`w-full pl-11 pr-4 py-3 bg-slate-800 border ${
+                  errors.email ? 'border-red-500' : 'border-slate-700'
+                } rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                required
+              />
+            </div>
+            {errors.email && (
+              <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors.email}
+              </p>
+            )}
+          </div>
 
-          <Input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            placeholder={t('password')}
-            required
-            error={errors.password}
-          />
+          {/* Password Input */}
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">
+              {t('password') || 'Password'}
+            </label>
+            <div className="relative">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500">
+                <Lock className="w-5 h-5" />
+              </div>
+              <input
+                type={showPassword ? 'text' : 'password'}
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="••••••••"
+                className={`w-full pl-11 pr-12 py-3 bg-slate-800 border ${
+                  errors.password ? 'border-red-500' : 'border-slate-700'
+                } rounded-lg text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all`}
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                {showPassword ? (
+                  <EyeOff className="w-5 h-5" />
+                ) : (
+                  <Eye className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+            {errors.password && (
+              <p className="text-red-400 text-xs mt-1 flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                {errors.password}
+              </p>
+            )}
+          </div>
 
+          {/* Submit Button */}
           <Button
             type="submit"
             disabled={loading}
-            className="flex items-center justify-center gap-2"
+            className="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-lg flex items-center justify-center gap-2 transition-all duration-200 shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 disabled:opacity-50 disabled:cursor-not-allowed mt-2"
           >
-            {loading && <Loader2 className="w-4 h-4 animate-spin" />}
-            {loading ? t('signingIn') : t('signIn')}
+            {loading ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                {t('signingIn') || 'Signing in...'}
+              </>
+            ) : (
+              <>
+                <Bus className="w-5 h-5" />
+                {t('signIn') || 'Sign In'}
+              </>
+            )}
           </Button>
         </form>
+
+        {/* Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-slate-500 text-xs">
+            © 2024 GoBus. All rights reserved.
+          </p>
+        </div>
       </div>
     </div>
   );
