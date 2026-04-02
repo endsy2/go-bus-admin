@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Edit, Trash2, Bus as BusIcon, Users, Hash, Tag, MapPin, BarChart3 } from 'lucide-react';
+import { ArrowLeft, Edit, Trash2, Bus as BusIcon, Users, Hash, Tag, MapPin, BarChart3, Layout } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent } from 'shared/components/ui/card';
 import { useToast } from 'shared/components/ui/toast';
 import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
 import EditBusDialog from '../../components/EditBusDialog/EditBusDialog';
-import { apiRequest } from 'shared/utils/api';
+import busService from '../../services/busService';
+import layoutService from '../../../layouts/services/layoutService';
+import routeService from '../../../routes/services/routeService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 
@@ -15,6 +17,8 @@ const BusDetailPage = ({ busId, onBack }) => {
   const { addToast } = useToast();
   
   const [bus, setBus] = useState(null);
+  const [layout, setLayout] = useState(null);
+  const [route, setRoute] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
@@ -30,22 +34,47 @@ const BusDetailPage = ({ busId, onBack }) => {
   const fetchBusDetail = async () => {
     try {
       setLoading(true);
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/buses/${busId}`, {
-        method: 'GET'
-      });
+      setError('');
+      
+      // Fetch bus details
+      const busResponse = await busService.getBusById(busId);
+      const busData = busResponse.data || busResponse;
+      console.log('Bus data:', busData); // Debug log
+      setBus(busData);
 
-      const result = await response.json();
-
-      if (response.ok) {
-        const busData = result.data || result;
-        setBus(busData);
-        setError('');
+      // Fetch layout details if layoutId exists
+      if (busData.layout.id) {
+        console.log('Fetching layout for ID:', busData.layout.id); // Debug log
+        try {
+          const layoutResponse = await layoutService.getLayoutById( busData.layout.id);
+          const layoutData = layoutResponse.data || layoutResponse;
+          console.log('Layout data:', layoutData); // Debug log
+          setLayout(layoutData);
+        } catch (layoutErr) {
+          console.error('Error fetching layout:', layoutErr);
+          // Don't fail the whole page if layout fetch fails
+        }
       } else {
-        const errorData = result.data || result;
-        setError(errorData.message || 'Failed to fetch bus details');
+        console.log('No layoutId found in bus data'); // Debug log
+      }
+
+      // Fetch route details if routeId exists
+      if (busData.route.id) {
+        console.log('Fetching route for ID:', busData.route.id); // Debug log
+        try {
+          const routeResponse = await routeService.getRouteById( busData.route.id);
+          const routeData = routeResponse.data || routeResponse;
+          console.log('Route data:', routeData); // Debug log
+          setRoute(routeData);
+        } catch (routeErr) {
+          console.error('Error fetching route:', routeErr);
+          // Don't fail the whole page if route fetch fails
+        }
+      } else {
+        console.log('No routeId found in bus data'); // Debug log
       }
     } catch (err) {
-      setError('Network error. Please check your connection.');
+      setError(err.response?.data?.message || 'Failed to fetch bus details');
       console.error('Error fetching bus details:', err);
     } finally {
       setLoading(false);
@@ -63,31 +92,18 @@ const BusDetailPage = ({ busId, onBack }) => {
 
   const handleConfirmDelete = async () => {
     try {
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/buses/${busId}`, {
-        method: 'DELETE'
+      await busService.deleteBus(busId);
+      addToast({
+        message: t('busDeletedSuccess') || 'Bus deleted successfully',
+        type: 'success'
       });
-
-      if (response.ok) {
-        addToast({
-          message: t('busDeletedSuccess') || 'Bus deleted successfully',
-          type: 'success'
-        });
-        setShowDeleteDialog(false);
-        setTimeout(() => {
-          onBack();
-        }, 1500);
-      } else {
-        const result = await response.json();
-        const errorData = result.data || result;
-        addToast({
-          message: errorData.message || 'Failed to delete bus',
-          type: 'error'
-        });
-        setShowDeleteDialog(false);
-      }
+      setShowDeleteDialog(false);
+      setTimeout(() => {
+        onBack();
+      }, 1500);
     } catch (err) {
       addToast({
-        message: 'Network error. Failed to delete bus.',
+        message: err.response?.data?.message || 'Failed to delete bus',
         type: 'error'
       });
       setShowDeleteDialog(false);
@@ -213,7 +229,7 @@ const BusDetailPage = ({ busId, onBack }) => {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card className="hover:shadow-lg transition-shadow">
           <CardContent className="p-6">
             <div className="flex items-center gap-3 mb-4 pb-4 border-b">
@@ -256,18 +272,46 @@ const BusDetailPage = ({ busId, onBack }) => {
               <h3 className="font-bold text-lg">{t('routeLayout') || 'Route & Layout'}</h3>
             </div>
             <div className="space-y-3">
-              <div className="flex justify-between items-center py-2 border-b border-border/50">
-                <span className="text-sm text-muted-foreground">{t('routeId') || 'Route ID'}</span>
-                <span className="font-semibold">
-                  {bus.routeId ? `#${bus.routeId}` : t('notAssigned') || 'Not Assigned'}
-                </span>
+              <div className="py-2 border-b border-border/50">
+                <span className="text-sm text-muted-foreground block mb-1">{t('route') || 'Route'}</span>
+                {route ? (
+                  <div className="font-semibold">
+                    <div className="flex items-center gap-2">
+                      <MapPin className="h-4 w-4 text-emerald-600" />
+                      {route.origin} → {route.destination}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-1">
+                      {route.distanceKm} km · {Math.floor(route.durationMinutes / 60)}h {route.durationMinutes % 60}m
+                    </div>
+                  </div>
+                ) : (
+                  <span className="font-semibold text-muted-foreground">
+                    {bus.routeId ? `#${bus.routeId}` : t('notAssigned') || 'Not Assigned'}
+                  </span>
+                )}
               </div>
-              <div className="flex justify-between items-center py-2 border-b border-border/50">
-                <span className="text-sm text-muted-foreground">{t('layoutId') || 'Layout ID'}</span>
-                <span className="font-semibold">
-                  {bus.layoutId ? `#${bus.layoutId}` : t('notAssigned') || 'Not Assigned'}
-                </span>
+              
+              <div className="py-2 border-b border-border/50">
+                <span className="text-sm text-muted-foreground block mb-1">{t('layout') || 'Layout'}</span>
+                {layout ? (
+                  <div className="font-semibold">
+                    <div className="flex items-center gap-2">
+                      <Layout className="h-4 w-4 text-purple-600" />
+                      {layout.name}
+                    </div>
+                    {layout.description && (
+                      <div className="text-xs text-muted-foreground mt-1 italic">
+                        {layout.description}
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <span className="font-semibold text-muted-foreground">
+                    {bus.layoutId ? `#${bus.layoutId}` : t('notAssigned') || 'Not Assigned'}
+                  </span>
+                )}
               </div>
+              
               <div className="flex justify-between items-center py-2">
                 <span className="text-sm text-muted-foreground">{t('status') || 'Status'}</span>
                 <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
@@ -279,31 +323,6 @@ const BusDetailPage = ({ busId, onBack }) => {
                 }`}>
                   {status}
                 </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3 mb-4 pb-4 border-b">
-              <div className="bg-purple-100 dark:bg-purple-900/30 p-2 rounded-lg">
-                <BarChart3 className="h-5 w-5 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h3 className="font-bold text-lg">{t('statistics') || 'Statistics'}</h3>
-            </div>
-            <div className="space-y-4">
-              <div className="text-center py-4 border-b border-border/50">
-                <div className="text-4xl font-bold text-purple-600 dark:text-purple-400 mb-1">0</div>
-                <div className="text-sm text-muted-foreground">{t('totalTrips') || 'Total Trips'}</div>
-              </div>
-              <div className="text-center py-4 border-b border-border/50">
-                <div className="text-4xl font-bold text-blue-600 dark:text-blue-400 mb-1">0</div>
-                <div className="text-sm text-muted-foreground">{t('activeBookings') || 'Active Bookings'}</div>
-              </div>
-              <div className="text-center py-4">
-                <div className="text-4xl font-bold text-emerald-600 dark:text-emerald-400 mb-1">$0.00</div>
-                <div className="text-sm text-muted-foreground">{t('totalRevenue') || 'Total Revenue'}</div>
               </div>
             </div>
           </CardContent>

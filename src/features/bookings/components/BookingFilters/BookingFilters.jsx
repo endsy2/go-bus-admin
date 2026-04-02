@@ -12,9 +12,6 @@ const BookingFilters = ({ onFilterChange, onReset }) => {
   const [filters, setFilters] = useState({
     bookingStatus: '',
     paymentStatus: '',
-    paymentMethod: '',
-    minAmount: '',
-    maxAmount: '',
   });
 
   const [showFilters, setShowFilters] = useState(false);
@@ -38,9 +35,6 @@ const BookingFilters = ({ onFilterChange, onReset }) => {
     setFilters({
       bookingStatus: '',
       paymentStatus: '',
-      paymentMethod: '',
-      minAmount: '',
-      maxAmount: '',
     });
     onReset();
   };
@@ -64,7 +58,7 @@ const BookingFilters = ({ onFilterChange, onReset }) => {
 
       {showFilters && (
         <div className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-2">
                 {t('bookingStatus') || 'Booking Status'}
@@ -99,56 +93,6 @@ const BookingFilters = ({ onFilterChange, onReset }) => {
                 <option value="FAILED">FAILED</option>
                 <option value="REFUNDED">REFUNDED</option>
               </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                {t('paymentMethod') || 'Payment Method'}
-              </label>
-              <select
-                name="paymentMethod"
-                value={filters.paymentMethod}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">{t('all') || 'All'}</option>
-                <option value="CREDIT_CARD">CREDIT CARD</option>
-                <option value="DEBIT_CARD">DEBIT CARD</option>
-                <option value="CASH">CASH</option>
-                <option value="BANK_TRANSFER">BANK TRANSFER</option>
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                {t('minAmount') || 'Min Amount'}
-              </label>
-              <Input
-                type="number"
-                name="minAmount"
-                value={filters.minAmount}
-                onChange={handleChange}
-                placeholder="0.00"
-                min="0"
-                step="0.01"
-                className="bg-slate-800 border-slate-700 text-white"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                {t('maxAmount') || 'Max Amount'}
-              </label>
-              <Input
-                type="number"
-                name="maxAmount"
-                value={filters.maxAmount}
-                onChange={handleChange}
-                placeholder="1000.00"
-                min="0"
-                step="0.01"
-                className="bg-slate-800 border-slate-700 text-white"
-              />
             </div>
           </div>
 

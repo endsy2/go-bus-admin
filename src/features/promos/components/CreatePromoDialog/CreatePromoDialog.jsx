@@ -8,6 +8,8 @@ import {
 } from 'shared/components/ui/dialog';
 import { Input } from 'shared/components/common/Input';
 import { Button } from 'shared/components/common/Button';
+import { Label } from 'shared/components/ui/label';
+import { DateTimePicker } from 'shared/components/ui/datetime-picker';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import { useToast } from 'shared/components/ui/toast';
@@ -232,27 +234,25 @@ const CreatePromoDialog = ({ open, onClose, onSuccess }) => {
           />
 
           <div className="grid grid-cols-2 gap-4">
-            <Input
-              label={t('validFrom') || 'Valid From'}
-              name="validFrom"
-              type="datetime-local"
-              value={formData.validFrom}
-              onChange={handleChange}
-              error={errors.validFrom}
-              required
-              className="bg-slate-800 border-slate-700 text-white"
-            />
+            <div>
+              <Label className="text-slate-300">{t('validFrom') || 'Valid From'}</Label>
+              <DateTimePicker
+                value={formData.validFrom}
+                onChange={(value) => setFormData(prev => ({ ...prev, validFrom: value }))}
+                placeholder="Select start date and time"
+              />
+              {errors.validFrom && <p className="text-sm text-red-400 mt-1">{errors.validFrom}</p>}
+            </div>
 
-            <Input
-              label={t('validUntil') || 'Valid Until'}
-              name="validUntil"
-              type="datetime-local"
-              value={formData.validUntil}
-              onChange={handleChange}
-              error={errors.validUntil}
-              required
-              className="bg-slate-800 border-slate-700 text-white"
-            />
+            <div>
+              <Label className="text-slate-300">{t('validUntil') || 'Valid Until'}</Label>
+              <DateTimePicker
+                value={formData.validUntil}
+                onChange={(value) => setFormData(prev => ({ ...prev, validUntil: value }))}
+                placeholder="Select end date and time"
+              />
+              {errors.validUntil && <p className="text-sm text-red-400 mt-1">{errors.validUntil}</p>}
+            </div>
           </div>
 
           <DialogFooter className="gap-2">

@@ -48,13 +48,17 @@ const BookingTable = ({ bookings, loading }) => {
             <TableBody>
               {bookings.map(booking => (
                 <TableRow key={booking.id}>
-                  <TableCell>{booking.id}</TableCell>
-                  <TableCell>{booking.customer}</TableCell>
-                  <TableCell>{booking.route}</TableCell>
-                  <TableCell>{booking.date}</TableCell>
+                  <TableCell>#{booking.id}</TableCell>
+                  <TableCell>{booking.userName || 'N/A'}</TableCell>
+                  <TableCell>{booking.routeName || 'N/A'}</TableCell>
                   <TableCell>
-                    <Badge variant={booking.status}>
-                      {t(booking.status.toLowerCase())}
+                    {booking.departureTime 
+                      ? new Date(booking.departureTime).toLocaleDateString() 
+                      : 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={booking.bookingStatus && typeof booking.bookingStatus === 'string' ? booking.bookingStatus.toLowerCase() : 'default'}>
+                      {booking.bookingStatus || 'N/A'}
                     </Badge>
                   </TableCell>
                 </TableRow>

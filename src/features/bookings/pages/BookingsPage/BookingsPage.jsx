@@ -18,9 +18,13 @@ import {
   ChevronLeft,
   ChevronRight,
   DollarSign,
-  CreditCard
+  CreditCard,
+  CheckCircle,
+  Banknote,
+  Plus
 } from 'lucide-react';
 import BookingDetailsDialog from '../../components/BookingDetailsDialog/BookingDetailsDialog';
+import CreateBookingDialog from '../../components/CreateBookingDialog/CreateBookingDialog';
 import BookingFilters from '../../components/BookingFilters/BookingFilters';
 import ConfirmDialog from 'shared/components/feedback/ConfirmDialog';
 import bookingService from '../../services/bookingService';
@@ -32,9 +36,12 @@ const BookingsPage = () => {
   const { bookings, loading, pagination, updateFilters, goToPage, refetch } = useBookings();
   
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [cancelDialogOpen, setCancelDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [markPaidDialogOpen, setMarkPaidDialogOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
 
   const handleViewDetails = (bookingId) => {
@@ -73,6 +80,40 @@ const BookingsPage = () => {
       addToast({ message: t('bookingDeletedSuccess') || 'Booking deleted successfully', type: 'success' });
     } catch (error) {
       addToast({ message: error.response?.data?.message || 'Failed to delete booking', type: 'error' });
+    }
+  };
+
+  const handleConfirmClick = (booking) => {
+    setSelectedBooking(booking);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmBooking = async () => {
+    try {
+      await bookingService.confirmBooking(selectedBooking.id);
+      setConfirmDialogOpen(false);
+      setSelectedBooking(null);
+      refetch();
+      addToast({ message: t('bookingConfirmedSuccess') || 'Booking confirmed successfully', type: 'success' });
+    } catch (error) {
+      addToast({ message: error.response?.data?.message || 'Failed to confirm booking', type: 'error' });
+    }
+  };
+
+  const handleMarkPaidClick = (booking) => {
+    setSelectedBooking(booking);
+    setMarkPaidDialogOpen(true);
+  };
+
+  const handleMarkPaidConfirm = async () => {
+    try {
+      await bookingService.forceMarkPaid(selectedBooking.id);
+      setMarkPaidDialogOpen(false);
+      setSelectedBooking(null);
+      refetch();
+      addToast({ message: t('bookingMarkedPaidSuccess') || 'Booking marked as paid successfully', type: 'success' });
+    } catch (error) {
+      addToast({ message: error.response?.data?.message || 'Failed to mark booking as paid', type: 'error' });
     }
   };
 
@@ -149,6 +190,14 @@ const BookingsPage = () => {
             {t('manageAllBusTicketBookings') || 'Manage all bus ticket bookings'}
           </p>
         </div>
+        <Button
+          variant="primary"
+          onClick={() => setCreateDialogOpen(true)}
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          <Plus className="w-5 h-5" />
+          {t('createBooking') || 'Create Booking'}
+        </Button>
       </div>
 
       {/* Filters */}
@@ -157,7 +206,7 @@ const BookingsPage = () => {
         onReset={handleResetFilters}
       />
 
-      {/* Bookings Grid */}
+      {/* Bookings Table */}
       {bookings.length === 0 ? (
         <div className="text-center py-20 bg-slate-900 rounded-xl border border-slate-800">
           <div className="bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -172,135 +221,133 @@ const BookingsPage = () => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {bookings.map(booking => (
-              <Card 
-                key={booking.id}
-                className="bg-slate-900 border-slate-800 transition-all duration-300 hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10"
-              >
-                <CardHeader className="pb-4">
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <div className="bg-blue-500/10 p-2 rounded-lg">
-                        <Ticket className="w-5 h-5 text-blue-500" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs text-slate-500 mb-1">
-                          {t('bookingId') || 'Booking ID'}
-                        </p>
-                        <CardTitle className="text-base font-bold text-white truncate">
-                          #{booking.id}
-                        </CardTitle>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex gap-2">
-                    <Badge variant={getStatusColor(booking.bookingStatus)}>
-                      {booking.bookingStatus}
-                    </Badge>
-                    <Badge variant={getPaymentStatusColor(booking.paymentStatus)}>
-                      {booking.paymentStatus}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                
-                <CardContent className="space-y-3">
-                  {/* Customer */}
-                  <div className="flex items-center gap-3 p-2.5 bg-slate-800/50 rounded-lg border border-slate-800">
-                    <div className="bg-purple-500/10 p-2 rounded-lg">
-                      <User className="w-4 h-4 text-purple-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-500">
-                        {t('customer') || 'Customer'}
-                      </p>
-                      <p className="font-medium text-white truncate text-sm">
-                        {booking.userName}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Route */}
-                  <div className="flex items-center gap-3 p-2.5 bg-slate-800/50 rounded-lg border border-slate-800">
-                    <div className="bg-orange-500/10 p-2 rounded-lg">
-                      <MapPin className="w-4 h-4 text-orange-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-500">
-                        {t('route') || 'Route'}
-                      </p>
-                      <p className="font-medium text-white truncate text-sm">
-                        {booking.routeName}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Date */}
-                  <div className="flex items-center gap-3 p-2.5 bg-slate-800/50 rounded-lg border border-slate-800">
-                    <div className="bg-pink-500/10 p-2 rounded-lg">
-                      <Calendar className="w-4 h-4 text-pink-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-slate-500">
-                        {t('departure') || 'Departure'}
-                      </p>
-                      <p className="font-medium text-white text-sm">
-                        {new Date(booking.departureTime).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Amount */}
-                  <div className="flex items-center gap-3 p-2.5 bg-green-500/10 rounded-lg border border-green-500/20">
-                    <div className="bg-green-500/20 p-2 rounded-lg">
-                      <DollarSign className="w-4 h-4 text-green-400" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-xs text-green-400">
-                        {t('totalAmount') || 'Total Amount'}
-                      </p>
-                      <p className="font-bold text-lg text-green-400">
-                        ${booking.totalAmount?.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Payment Method */}
-                  <div className="flex items-center gap-2 text-xs text-slate-500 pt-1">
-                    <CreditCard className="w-3 h-3" />
-                    <span>{booking.paymentMethod}</span>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-2 pt-3 border-t border-slate-800">
-                    <Button 
-                      variant="secondary" 
-                      className="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border-slate-700 text-white transition-all duration-200"
-                      onClick={() => handleViewDetails(booking.id)}
-                    >
-                      <Eye className="w-4 h-4" />
-                      {t('view') || 'View'}
-                    </Button>
-                    {booking.bookingStatus !== 'CANCELLED' && (
-                      <Button 
-                        variant="warning"
-                        className="w-10 h-10 p-0 flex items-center justify-center bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 transition-all duration-200"
-                        onClick={() => handleCancelClick(booking)}
-                      >
-                        <XCircle className="w-4 h-4" />
-                      </Button>
-                    )}
-                    <Button 
-                      variant="danger"
-                      className="w-10 h-10 p-0 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all duration-200"
-                      onClick={() => handleDeleteClick(booking)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-800/50 border-b border-slate-700">
+                  <tr>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      {t('bookingId') || 'Booking ID'}
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      {t('customer') || 'Customer'}
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      {t('route') || 'Route'}
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      {t('departure') || 'Departure'}
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      {t('status') || 'Status'}
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      {t('payment') || 'Payment'}
+                    </th>
+                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      {t('totalAmount') || 'Total'}
+                    </th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                      {t('actions') || 'Actions'}
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {bookings.map(booking => (
+                    <tr key={booking.id} className="hover:bg-slate-800/30 transition-colors">
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <div className="bg-blue-500/10 p-2 rounded-lg">
+                            <Ticket className="w-4 h-4 text-blue-500" />
+                          </div>
+                          <span className="font-semibold text-white">#{booking.id}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <User className="w-4 h-4 text-purple-400" />
+                          <span className="text-white">{booking.userName}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-orange-400" />
+                          <span className="text-white">{booking.routeName}</span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4 text-pink-400" />
+                          <span className="text-white text-sm">
+                            {new Date(booking.departureTime).toLocaleDateString()}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <Badge variant={getStatusColor(booking.bookingStatus)}>
+                          {booking.bookingStatus}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-4">
+                        <Badge variant={getPaymentStatusColor(booking.paymentStatus)}>
+                          {booking.paymentStatus}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <span className="font-bold text-lg text-green-400">
+                          ${booking.totalAmount?.toFixed(2)}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex items-center justify-center gap-2">
+                          <Button 
+                            variant="secondary" 
+                            className="w-9 h-9 p-0 flex items-center justify-center bg-slate-800 hover:bg-slate-700 border-slate-700 text-white transition-all duration-200"
+                            onClick={() => handleViewDetails(booking.id)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          {booking.bookingStatus === 'PENDING' && (
+                            <Button 
+                              variant="success"
+                              className="w-9 h-9 p-0 flex items-center justify-center bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 transition-all duration-200"
+                              onClick={() => handleConfirmClick(booking)}
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {booking.paymentStatus !== 'PAID' && booking.bookingStatus !== 'CANCELLED' && (
+                            <Button 
+                              variant="success"
+                              className="w-9 h-9 p-0 flex items-center justify-center bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all duration-200"
+                              onClick={() => handleMarkPaidClick(booking)}
+                            >
+                              <Banknote className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {booking.bookingStatus !== 'CANCELLED' && (
+                            <Button 
+                              variant="warning"
+                              className="w-9 h-9 p-0 flex items-center justify-center bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 transition-all duration-200"
+                              onClick={() => handleCancelClick(booking)}
+                            >
+                              <XCircle className="w-4 h-4" />
+                            </Button>
+                          )}
+                          <Button 
+                            variant="danger"
+                            className="w-9 h-9 p-0 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 transition-all duration-200"
+                            onClick={() => handleDeleteClick(booking)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Pagination */}
@@ -369,6 +416,15 @@ const BookingsPage = () => {
         bookingId={selectedBookingId}
       />
 
+      <CreateBookingDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        onSuccess={() => {
+          setCreateDialogOpen(false);
+          refetch();
+        }}
+      />
+
       <ConfirmDialog
         isOpen={cancelDialogOpen}
         onCancel={() => {
@@ -391,6 +447,30 @@ const BookingsPage = () => {
         title={t('deleteBooking') || 'Delete Booking'}
         message={`${t('confirmDeleteBooking') || 'Are you sure you want to delete booking'} #${selectedBooking?.id}?`}
         type="danger"
+      />
+
+      <ConfirmDialog
+        isOpen={confirmDialogOpen}
+        onCancel={() => {
+          setConfirmDialogOpen(false);
+          setSelectedBooking(null);
+        }}
+        onConfirm={handleConfirmBooking}
+        title={t('confirmBooking') || 'Confirm Booking'}
+        message={`${t('confirmBookingMessage') || 'Are you sure you want to confirm booking'} #${selectedBooking?.id}?`}
+        type="success"
+      />
+
+      <ConfirmDialog
+        isOpen={markPaidDialogOpen}
+        onCancel={() => {
+          setMarkPaidDialogOpen(false);
+          setSelectedBooking(null);
+        }}
+        onConfirm={handleMarkPaidConfirm}
+        title={t('markAsPaid') || 'Mark as Paid'}
+        message={`${t('confirmMarkPaidMessage') || 'Are you sure you want to mark booking'} #${selectedBooking?.id} ${t('asPaid') || 'as paid'}?`}
+        type="success"
       />
     </div>
   );

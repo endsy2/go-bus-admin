@@ -19,13 +19,15 @@ export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 
       setError(null);
       const response = await bookingService.filterBookings(filters, page, size);
       
-      // Handle PagedResponse structure
-      setBookings(response.data || []);
+      // Handle ApiResponse<PagedResponse<BookingResponse>> structure
+      // response.data contains the PagedResponse
+      const pagedData = response.data || {};
+      setBookings(pagedData.content || []);
       setPagination({
-        currentPage: response.currentPage || page,
-        totalPages: response.totalPages || 0,
-        totalElements: response.totalElements || 0,
-        size: response.size || size,
+        currentPage: pagedData.currentPage || page,
+        totalPages: pagedData.totalPages || 0,
+        totalElements: pagedData.totalElements || 0,
+        size: pagedData.size || size,
       });
     } catch (err) {
       setError(err.message || 'Failed to fetch bookings');

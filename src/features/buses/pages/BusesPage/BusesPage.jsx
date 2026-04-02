@@ -52,6 +52,15 @@ const BusesPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination.currentPage, pagination.pageSize]);
 
+  // Auto-fetch when filters change
+  useEffect(() => {
+    if (!loading) {
+      setPagination(prev => ({ ...prev, currentPage: 0 }));
+      fetchBuses();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterRoute, filterType, filterStatus, minSeats, maxSeats]);
+
   const fetchAll = async () => {
     setLoading(true);
     await Promise.all([fetchAllBuses(), fetchRoutes()]);
