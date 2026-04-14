@@ -83,10 +83,10 @@ export function Calendar({ mode = "single", selected, onSelect, className, initi
           handleDayClick(day);
         }}
         className={cn(
-          "w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg hover:bg-slate-800/50 transition-all duration-200 active:scale-95 relative",
+          "w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800/50 transition-all duration-200 active:scale-95 relative",
           isSelected(day) && "bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/30",
-          isToday(day) && !isSelected(day) && "border-2 border-blue-500/50 text-blue-400 font-bold",
-          !isSelected(day) && !isToday(day) && "text-slate-300 hover:text-white"
+          isToday(day) && !isSelected(day) && "border-2 border-blue-500/50 text-blue-500 dark:text-blue-400 font-bold",
+          !isSelected(day) && !isToday(day) && "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
         )}
       >
         {day}
@@ -100,24 +100,24 @@ export function Calendar({ mode = "single", selected, onSelect, className, initi
         <button
           type="button"
           onClick={(e) => handleNavClick(e, previousMonth)}
-          className="p-1.5 hover:bg-slate-800/50 rounded-lg transition-all duration-200 active:scale-95"
+          className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800/50 rounded-lg transition-all duration-200 active:scale-95"
         >
-          <ChevronLeft className="h-4 w-4 text-slate-400 hover:text-white transition-colors" />
+          <ChevronLeft className="h-4 w-4 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" />
         </button>
-        <div className="text-sm font-bold text-white">
+        <div className="text-sm font-bold text-slate-900 dark:text-white">
           {monthNames[currentMonth.getMonth()]} {currentMonth.getFullYear()}
         </div>
         <button
           type="button"
           onClick={(e) => handleNavClick(e, nextMonth)}
-          className="p-1.5 hover:bg-slate-800/50 rounded-lg transition-all duration-200 active:scale-95"
+          className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-800/50 rounded-lg transition-all duration-200 active:scale-95"
         >
-          <ChevronRight className="h-4 w-4 text-slate-400 hover:text-white transition-colors" />
+          <ChevronRight className="h-4 w-4 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors" />
         </button>
       </div>
       <div className="grid grid-cols-7 gap-1 mb-2">
         {dayNames.map(name => (
-          <div key={name} className="text-xs text-center text-slate-500 font-semibold p-1.5 w-9">
+          <div key={name} className="text-xs text-center text-slate-500 dark:text-slate-500 font-semibold p-1.5 w-9">
             {name}
           </div>
         ))}

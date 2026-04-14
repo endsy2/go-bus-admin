@@ -28,27 +28,9 @@ const bookingService = {
     return response.data;
   },
 
-  // Admin: Confirm booking
-  confirmBooking: async (id) => {
-    const response = await axiosInstance.patch(`/api/admin/bookings/${id}/confirm`);
-    return response.data;
-  },
-
-  // Admin: Cancel booking
-  cancelBooking: async (id) => {
-    const response = await axiosInstance.patch(`/api/admin/bookings/${id}/cancel`);
-    return response.data;
-  },
-
   // Admin: Force mark as paid
   forceMarkPaid: async (id) => {
     const response = await axiosInstance.patch(`/api/admin/bookings/${id}/force-pay`);
-    return response.data;
-  },
-
-  // Admin: Delete booking
-  deleteBooking: async (id) => {
-    const response = await axiosInstance.delete(`/api/admin/bookings/${id}`);
     return response.data;
   },
 };

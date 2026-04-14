@@ -40,12 +40,12 @@ export function DatePicker({ value, onChange, placeholder = "Pick a date", class
           variant="outline"
           disabled={disabled}
           className={cn(
-            "w-full justify-start text-left font-normal bg-slate-800/50 border-slate-700/50 text-white hover:bg-slate-800 hover:border-slate-600 hover:text-white relative transition-all duration-200",
-            !date && "text-slate-400",
+            "w-full justify-start text-left font-normal bg-white dark:bg-slate-800/50 border-slate-300 dark:border-slate-700/50 text-slate-900 dark:text-white hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-slate-400 dark:hover:border-slate-600 relative transition-all duration-200",
+            !date && "text-slate-400 dark:text-slate-400",
             className
           )}
         >
-          <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0 text-slate-400" />
+          <CalendarIcon className="mr-2 h-4 w-4 flex-shrink-0 text-slate-400 dark:text-slate-400" />
           <span className="flex-1 truncate">
             {date ? (
               date.toLocaleDateString('en-US', {
@@ -59,13 +59,13 @@ export function DatePicker({ value, onChange, placeholder = "Pick a date", class
           </span>
           {date && (
             <X 
-              className="h-4 w-4 ml-2 flex-shrink-0 text-slate-400 hover:text-red-400 transition-colors" 
+              className="h-4 w-4 ml-2 flex-shrink-0 text-slate-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors" 
               onClick={handleClear}
             />
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-auto p-0 bg-slate-900/95 backdrop-blur-xl border-slate-700/50 shadow-2xl" align="start">
+      <PopoverContent className="w-auto p-0 bg-white dark:bg-slate-900/95 backdrop-blur-xl border-slate-200 dark:border-slate-700/50 shadow-2xl" align="start">
         <Calendar
           mode="single"
           selected={date}

@@ -17,12 +17,31 @@ const BookingTable = ({ bookings, loading }) => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   
+  console.log('BookingTable - bookings:', bookings);
+  console.log('BookingTable - loading:', loading);
+  console.log('BookingTable - bookings length:', bookings?.length);
+  
   if (loading) {
     return (
       <Card>
         <CardContent className="flex items-center justify-center py-10">
           <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
           <span className="ml-2 text-muted-foreground">{t('loadingBookings')}</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!bookings || bookings.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('recentBookings')}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-10 text-muted-foreground">
+            {t('noBookingsFound')}
+          </div>
         </CardContent>
       </Card>
     );
@@ -40,8 +59,8 @@ const BookingTable = ({ bookings, loading }) => {
               <TableRow>
                 <TableHead>{t('bookingId')}</TableHead>
                 <TableHead>{t('customer')}</TableHead>
-                <TableHead>{t('route')}</TableHead>
-                <TableHead>{t('date')}</TableHead>
+                <TableHead>{t('destination')}</TableHead>
+                <TableHead>{t('createdDate')}</TableHead>
                 <TableHead>{t('status')}</TableHead>
               </TableRow>
             </TableHeader>
@@ -49,11 +68,11 @@ const BookingTable = ({ bookings, loading }) => {
               {bookings.map(booking => (
                 <TableRow key={booking.id}>
                   <TableCell>#{booking.id}</TableCell>
-                  <TableCell>{booking.userName || 'N/A'}</TableCell>
-                  <TableCell>{booking.routeName || 'N/A'}</TableCell>
+                  <TableCell>{booking.fullName || 'N/A'}</TableCell>
+                  <TableCell>{booking.destination || 'N/A'}</TableCell>
                   <TableCell>
-                    {booking.departureTime 
-                      ? new Date(booking.departureTime).toLocaleDateString() 
+                    {booking.createdAt 
+                      ? new Date(booking.createdAt).toLocaleDateString() 
                       : 'N/A'}
                   </TableCell>
                   <TableCell>

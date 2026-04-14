@@ -1,6 +1,14 @@
 import axiosInstance from 'services/axiosConfig';
 
 const reportService = {
+  // ========== Dashboard Stats ==========
+  
+  // Get dashboard statistics
+  // getDashboardStats: async () => {
+  //   const response = await axiosInstance.get('/api/admin/dashboard/stats');
+  //   return response.data;
+  // },
+
   // ========== Financial Reports (AdminFinancialReportController) ==========
   
   // Get revenue report (Excel download)

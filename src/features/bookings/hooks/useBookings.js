@@ -19,17 +19,20 @@ export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 
       setError(null);
       const response = await bookingService.filterBookings(filters, page, size);
       
-      // Handle ApiResponse<PagedResponse<BookingResponse>> structure
-      // response.data contains the PagedResponse
+      // Handle Spring Pageable response structure
+      // response.data.content contains the bookings array
       const pagedData = response.data || {};
-      setBookings(pagedData.content || []);
+      const bookingsData = pagedData.content || [];
+      
+      setBookings(bookingsData);
       setPagination({
-        currentPage: pagedData.currentPage || page,
+        currentPage: pagedData.number !== undefined ? pagedData.number : page,
         totalPages: pagedData.totalPages || 0,
         totalElements: pagedData.totalElements || 0,
         size: pagedData.size || size,
       });
     } catch (err) {
+      console.error('Error fetching bookings:', err);
       setError(err.message || 'Failed to fetch bookings');
       setBookings([]);
     } finally {
