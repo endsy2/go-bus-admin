@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, Shield, UserCheck, Edit, Save, AlertCircle, Trash2 } from 'lucide-react';
+import { Users, Shield, UserCheck, Save, AlertCircle, Trash2 } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
@@ -488,13 +488,6 @@ const TeamPage = () => {
                           title="Assign Roles"
                         >
                           <Shield className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          title="Edit member"
-                        >
-                          <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           size="icon"

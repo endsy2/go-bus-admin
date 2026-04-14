@@ -8,19 +8,19 @@ export const NavItem = ({ icon, label, active, onClick }) => {
       className={cn(
         "w-full flex items-center gap-3 px-5 py-3 text-sm font-medium transition-all duration-200 relative group",
         active 
-          ? "bg-white/15 text-white shadow-lg" 
-          : "text-white/70 hover:text-white hover:bg-white/5"
+          ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400" 
+          : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-800/50"
       )}
     >
       {/* Active indicator */}
       {active && (
-        <div className="absolute left-0 top-0 bottom-0 w-1 bg-white rounded-r-full shadow-lg shadow-white/30" />
+        <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-600 dark:bg-blue-500 rounded-r-full" />
       )}
       
       {/* Icon */}
       <span className={cn(
         "flex items-center justify-center w-5 h-5 transition-all duration-200",
-        active ? "text-white scale-110" : "text-white/70 group-hover:text-white group-hover:scale-105"
+        active ? "text-blue-600 dark:text-blue-400 scale-110" : "text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white group-hover:scale-105"
       )}>
         {icon}
       </span>
@@ -35,7 +35,7 @@ export const NavItem = ({ icon, label, active, onClick }) => {
 
       {/* Hover effect */}
       {!active && (
-        <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/5 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-100/50 dark:via-gray-700/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       )}
     </button>
   );

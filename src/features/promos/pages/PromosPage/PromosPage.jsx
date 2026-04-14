@@ -93,7 +93,7 @@ const PromosPage = () => {
 
   if (loading) {
     return (
-      <div className="flex-1 p-8 overflow-y-auto bg-slate-950 min-h-screen">
+      <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
         <div className="flex justify-between items-center mb-8">
           <div>
             <Skeleton className="h-10 w-80 mb-2" />
@@ -104,7 +104,7 @@ const PromosPage = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
           {[1, 2, 3, 4].map(i => (
-            <Card key={i} className="bg-slate-900 border-slate-800">
+            <Card key={i} className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
               <CardHeader>
                 <Skeleton className="h-6 w-32" />
               </CardHeader>
@@ -124,14 +124,14 @@ const PromosPage = () => {
   }
 
   return (
-    <div className="flex-1 p-8 overflow-y-auto bg-slate-950 min-h-screen">
+    <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <Tag className="w-7 h-7 text-blue-500" />
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-3">
+            <Tag className="w-7 h-7 text-blue-500 dark:text-blue-400" />
             {t('promoManagement') || 'Promo Code Management'}
           </h1>
-          <p className="text-slate-400 text-base">
+          <p className="text-slate-600 dark:text-slate-400 text-base">
             {t('managePromoCodes') || 'Manage promotional codes and discounts'}
           </p>
         </div>
@@ -146,14 +146,14 @@ const PromosPage = () => {
       </div>
 
       {promos.length === 0 ? (
-        <div className="text-center py-20 bg-slate-900 rounded-xl border border-slate-800">
-          <div className="bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Tag className="w-10 h-10 text-slate-500" />
+        <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="bg-slate-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <Tag className="w-10 h-10 text-slate-400 dark:text-slate-500" />
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">
+          <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
             {t('noPromosFound') || 'No promo codes found'}
           </h3>
-          <p className="text-slate-400 mb-6">
+          <p className="text-slate-600 dark:text-slate-400 mb-6">
             {t('createFirstPromo') || 'Create your first promo code to get started'}
           </p>
           <Button 
@@ -170,16 +170,16 @@ const PromosPage = () => {
           {promos.map(promo => (
             <Card 
               key={promo.id}
-              className="bg-slate-900 border-slate-800 transition-all duration-300 hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10"
+              className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10"
             >
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between gap-2 mb-3">
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="bg-blue-500/10 p-2.5 rounded-lg">
-                      <Tag className="w-5 h-5 text-blue-500" />
+                      <Tag className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <CardTitle className="text-lg font-bold text-white truncate">
+                      <CardTitle className="text-lg font-bold text-slate-900 dark:text-white truncate">
                         {promo.code}
                       </CardTitle>
                     </div>
@@ -191,7 +191,7 @@ const PromosPage = () => {
               <CardContent className="space-y-3">
                 {/* Description */}
                 {promo.description && (
-                  <p className="text-sm text-slate-400 line-clamp-2 min-h-[40px]">
+                  <p className="text-sm text-slate-600 dark:text-slate-400 line-clamp-2 min-h-[40px]">
                     {promo.description}
                   </p>
                 )}
@@ -200,31 +200,31 @@ const PromosPage = () => {
                 <div className="flex items-center gap-3 p-2.5 bg-green-500/10 rounded-lg border border-green-500/20">
                   <div className="bg-green-500/20 p-2 rounded-lg">
                     {promo.discountType === 'PERCENTAGE' ? (
-                      <Percent className="w-4 h-4 text-green-400" />
+                      <Percent className="w-4 h-4 text-green-600 dark:text-green-400" />
                     ) : (
-                      <DollarSign className="w-4 h-4 text-green-400" />
+                      <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-green-400">
+                    <p className="text-xs text-green-600 dark:text-green-400">
                       {t('discount') || 'Discount'}
                     </p>
-                    <p className="font-bold text-xl text-green-400">
+                    <p className="font-bold text-xl text-green-600 dark:text-green-400">
                       {getDiscountDisplay(promo)}
                     </p>
                   </div>
                 </div>
 
                 {/* Usage Stats */}
-                <div className="flex items-center gap-3 p-2.5 bg-slate-800/50 rounded-lg border border-slate-800">
+                <div className="flex items-center gap-3 p-2.5 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-800">
                   <div className="bg-purple-500/10 p-2 rounded-lg">
-                    <Users className="w-4 h-4 text-purple-400" />
+                    <Users className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs text-slate-500">
+                    <p className="text-xs text-slate-500 dark:text-slate-500">
                       {t('usage') || 'Usage'}
                     </p>
-                    <p className="font-medium text-white text-sm">
+                    <p className="font-medium text-slate-900 dark:text-white text-sm">
                       {promo.currentUsage || 0} / {promo.maxUsage || '∞'}
                     </p>
                   </div>
@@ -232,14 +232,14 @@ const PromosPage = () => {
 
                 {/* Min Purchase */}
                 {promo.minPurchaseAmount && (
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500">
                     <TrendingUp className="w-3 h-3" />
                     <span>Min: ${promo.minPurchaseAmount.toFixed(2)}</span>
                   </div>
                 )}
 
                 {/* Valid Period */}
-                <div className="flex items-center gap-2 text-xs text-slate-500 pt-2 border-t border-slate-800">
+                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500 pt-2 border-t border-slate-200 dark:border-slate-800">
                   <Calendar className="w-3 h-3" />
                   <span>
                     {new Date(promo.validFrom).toLocaleDateString()} - {new Date(promo.validUntil).toLocaleDateString()}
@@ -247,10 +247,10 @@ const PromosPage = () => {
                 </div>
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-3 border-t border-slate-800">
+                <div className="flex gap-2 pt-3 border-t border-slate-200 dark:border-slate-800">
                   <Button 
                     variant="secondary" 
-                    className="flex-1 flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+                    className="flex-1 flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                     onClick={() => handleEditClick(promo)}
                   >
                     <Edit className="w-4 h-4" />
@@ -258,7 +258,7 @@ const PromosPage = () => {
                   </Button>
                   <Button 
                     variant="danger"
-                    className="w-11 h-11 p-0 flex items-center justify-center bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20"
+                    className="w-11 h-11 p-0 flex items-center justify-center bg-red-100 dark:bg-red-500/10 hover:bg-red-200 dark:hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-500/20"
                     onClick={() => handleDeleteClick(promo)}
                   >
                     <Trash2 className="w-4 h-4" />

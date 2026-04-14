@@ -117,14 +117,14 @@ const WalletsPage = () => {
   };
 
   return (
-    <div className="flex-1 p-8 overflow-y-auto bg-slate-950 min-h-screen">
+    <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <Wallet className="w-7 h-7 text-blue-500" />
+          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-3">
+            <Wallet className="w-7 h-7 text-blue-500 dark:text-blue-400" />
             {t('walletManagement') || 'Wallet Management'}
           </h1>
-          <p className="text-slate-400 text-base">
+          <p className="text-slate-600 dark:text-slate-400 text-base">
             {t('manageUserWalletsTransactions') || 'Manage user wallets and transactions'}
           </p>
         </div>
@@ -137,7 +137,7 @@ const WalletsPage = () => {
           className={`px-6 py-3 rounded-lg font-semibold transition-all ${
             activeTab === 'wallets'
               ? 'bg-blue-500 text-white'
-              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'
           }`}
         >
           {t('wallets') || 'Wallets'}
@@ -147,7 +147,7 @@ const WalletsPage = () => {
           className={`px-6 py-3 rounded-lg font-semibold transition-all ${
             activeTab === 'transactions'
               ? 'bg-blue-500 text-white'
-              : 'bg-slate-800 text-slate-300 hover:bg-slate-700'
+              : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'
           }`}
         >
           {t('transactions') || 'Transactions'}
@@ -158,17 +158,17 @@ const WalletsPage = () => {
       {activeTab === 'wallets' && (
         <>
           {/* Wallet Filters */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Filter className="w-5 h-5 text-blue-500" />
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Filter className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                 {t('filters') || 'Filters'}
               </h3>
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => setShowWalletFilters(!showWalletFilters)}
-                className="bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+                className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
               >
                 {showWalletFilters ? t('hide') || 'Hide' : t('show') || 'Show'}
               </Button>
@@ -178,14 +178,14 @@ const WalletsPage = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {t('status') || 'Status'}
                     </label>
                     <select
                       name="status"
                       value={walletFilters.status}
                       onChange={handleWalletFilterChange}
-                      className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">{t('all') || 'All'}</option>
                       <option value="ACTIVE">ACTIVE</option>
@@ -196,7 +196,7 @@ const WalletsPage = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {t('minBalance') || 'Min Balance'}
                     </label>
                     <input
@@ -205,12 +205,12 @@ const WalletsPage = () => {
                       value={walletFilters.minBalance}
                       onChange={handleWalletFilterChange}
                       placeholder="0.00"
-                      className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {t('maxBalance') || 'Max Balance'}
                     </label>
                     <input
@@ -219,7 +219,7 @@ const WalletsPage = () => {
                       value={walletFilters.maxBalance}
                       onChange={handleWalletFilterChange}
                       placeholder="10000.00"
-                      className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
@@ -236,7 +236,7 @@ const WalletsPage = () => {
                   <Button
                     variant="secondary"
                     onClick={resetWalletFilters}
-                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   >
                     <X className="w-4 h-4" />
                     {t('resetFilters') || 'Reset'}
@@ -250,7 +250,7 @@ const WalletsPage = () => {
           {walletsLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
               {[1, 2, 3, 4].map(i => (
-                <Card key={i} className="bg-slate-900 border-slate-800">
+                <Card key={i} className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
                   <CardHeader>
                     <Skeleton className="h-6 w-32" />
                   </CardHeader>
@@ -262,14 +262,14 @@ const WalletsPage = () => {
               ))}
             </div>
           ) : wallets.length === 0 ? (
-            <div className="text-center py-20 bg-slate-900 rounded-xl border border-slate-800">
-              <div className="bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <Wallet className="w-10 h-10 text-slate-500" />
+            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+              <div className="bg-slate-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Wallet className="w-10 h-10 text-slate-400 dark:text-slate-500" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
                 {t('noWalletsFound') || 'No wallets found'}
               </h3>
-              <p className="text-slate-400">
+              <p className="text-slate-600 dark:text-slate-400">
                 {t('noWalletsMatchFilters') || 'No wallets match your current filters'}
               </p>
             </div>
@@ -279,18 +279,18 @@ const WalletsPage = () => {
                 {wallets.map(wallet => (
                   <Card 
                     key={wallet.id}
-                    className="bg-slate-900 border-slate-800 transition-all duration-300 hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10"
+                    className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10"
                   >
                     <CardHeader className="pb-4">
                       <div className="flex items-center gap-3 mb-3">
                         <div className="bg-blue-500/10 p-2.5 rounded-lg">
-                          <Wallet className="w-5 h-5 text-blue-500" />
+                          <Wallet className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-slate-500 mb-1">
+                          <p className="text-xs text-slate-500 dark:text-slate-500 mb-1">
                             {t('walletId') || 'Wallet ID'}
                           </p>
-                          <CardTitle className="text-base font-bold text-white truncate">
+                          <CardTitle className="text-base font-bold text-slate-900 dark:text-white truncate">
                             #{wallet.id}
                           </CardTitle>
                         </div>
@@ -302,15 +302,15 @@ const WalletsPage = () => {
                     
                     <CardContent className="space-y-3">
                       {/* User */}
-                      <div className="flex items-center gap-3 p-2.5 bg-slate-800/50 rounded-lg border border-slate-800">
+                      <div className="flex items-center gap-3 p-2.5 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-800">
                         <div className="bg-purple-500/10 p-2 rounded-lg">
-                          <User className="w-4 h-4 text-purple-400" />
+                          <User className="w-4 h-4 text-purple-600 dark:text-purple-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs text-slate-500 dark:text-slate-500">
                             {t('user') || 'User'}
                           </p>
-                          <p className="font-medium text-white truncate text-sm">
+                          <p className="font-medium text-slate-900 dark:text-white truncate text-sm">
                             {wallet.userName}
                           </p>
                         </div>
@@ -319,25 +319,25 @@ const WalletsPage = () => {
                       {/* Balance */}
                       <div className="flex items-center gap-3 p-2.5 bg-green-500/10 rounded-lg border border-green-500/20">
                         <div className="bg-green-500/20 p-2 rounded-lg">
-                          <DollarSign className="w-4 h-4 text-green-400" />
+                          <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs text-green-400">
+                          <p className="text-xs text-green-600 dark:text-green-400">
                             {t('balance') || 'Balance'}
                           </p>
-                          <p className="font-bold text-xl text-green-400">
+                          <p className="font-bold text-xl text-green-600 dark:text-green-400">
                             ${wallet.balance?.toFixed(2)}
                           </p>
                         </div>
                       </div>
 
                       {/* Currency */}
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-slate-500 dark:text-slate-500">
                         {t('currency') || 'Currency'}: {wallet.currency || 'USD'}
                       </div>
 
                       {/* Created Date */}
-                      <div className="text-xs text-slate-500 pt-2 border-t border-slate-800">
+                      <div className="text-xs text-slate-500 dark:text-slate-500 pt-2 border-t border-slate-200 dark:border-slate-800">
                         {t('created') || 'Created'}: {new Date(wallet.createdAt).toLocaleDateString()}
                       </div>
                     </CardContent>
@@ -352,7 +352,7 @@ const WalletsPage = () => {
                     variant="secondary"
                     onClick={() => goToWalletPage(walletPagination.currentPage - 1)}
                     disabled={walletPagination.currentPage === 0}
-                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     {t('previous') || 'Previous'}
@@ -378,7 +378,7 @@ const WalletsPage = () => {
                           className={`w-10 h-10 rounded-lg font-semibold transition-all ${
                             pageNum === walletPagination.currentPage
                               ? 'bg-blue-500 text-white'
-                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
                           }`}
                         >
                           {pageNum + 1}
@@ -391,7 +391,7 @@ const WalletsPage = () => {
                     variant="secondary"
                     onClick={() => goToWalletPage(walletPagination.currentPage + 1)}
                     disabled={walletPagination.currentPage >= walletPagination.totalPages - 1}
-                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   >
                     {t('next') || 'Next'}
                     <ChevronRight className="w-4 h-4" />
@@ -407,17 +407,17 @@ const WalletsPage = () => {
       {activeTab === 'transactions' && (
         <>
           {/* Transaction Filters */}
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 mb-6">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 mb-6">
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-bold text-white flex items-center gap-2">
-                <Filter className="w-5 h-5 text-blue-500" />
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <Filter className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                 {t('filters') || 'Filters'}
               </h3>
               <Button
                 variant="secondary"
                 size="sm"
                 onClick={() => setShowTxFilters(!showTxFilters)}
-                className="bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+                className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
               >
                 {showTxFilters ? t('hide') || 'Hide' : t('show') || 'Show'}
               </Button>
@@ -427,14 +427,14 @@ const WalletsPage = () => {
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {t('type') || 'Type'}
                     </label>
                     <select
                       name="type"
                       value={txFilters.type}
                       onChange={handleTxFilterChange}
-                      className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">{t('all') || 'All'}</option>
                       <option value="DEPOSIT">DEPOSIT</option>
@@ -447,14 +447,14 @@ const WalletsPage = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {t('status') || 'Status'}
                     </label>
                     <select
                       name="status"
                       value={txFilters.status}
                       onChange={handleTxFilterChange}
-                      className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="">{t('all') || 'All'}</option>
                       <option value="PENDING">PENDING</option>
@@ -477,7 +477,7 @@ const WalletsPage = () => {
                   <Button
                     variant="secondary"
                     onClick={resetTxFilters}
-                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   >
                     <X className="w-4 h-4" />
                     {t('resetFilters') || 'Reset'}
@@ -491,7 +491,7 @@ const WalletsPage = () => {
           {txLoading ? (
             <div className="space-y-3">
               {[1, 2, 3, 4].map(i => (
-                <Card key={i} className="bg-slate-900 border-slate-800">
+                <Card key={i} className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
                   <CardContent className="p-4">
                     <Skeleton className="h-16 w-full" />
                   </CardContent>
@@ -499,14 +499,14 @@ const WalletsPage = () => {
               ))}
             </div>
           ) : transactions.length === 0 ? (
-            <div className="text-center py-20 bg-slate-900 rounded-xl border border-slate-800">
-              <div className="bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-                <TrendingUp className="w-10 h-10 text-slate-500" />
+            <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+              <div className="bg-slate-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                <TrendingUp className="w-10 h-10 text-slate-400 dark:text-slate-500" />
               </div>
-              <h3 className="text-xl font-semibold text-white mb-2">
+              <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
                 {t('noTransactionsFound') || 'No transactions found'}
               </h3>
-              <p className="text-slate-400">
+              <p className="text-slate-600 dark:text-slate-400">
                 {t('noTransactionsMatchFilters') || 'No transactions match your current filters'}
               </p>
             </div>
@@ -516,7 +516,7 @@ const WalletsPage = () => {
                 {transactions.map(tx => (
                   <Card 
                     key={tx.id}
-                    className="bg-slate-900 border-slate-800 transition-all duration-300 hover:border-slate-700"
+                    className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700"
                   >
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between gap-4">
@@ -531,16 +531,16 @@ const WalletsPage = () => {
                           
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2 mb-1">
-                              <p className="font-semibold text-white">{tx.userName}</p>
+                              <p className="font-semibold text-slate-900 dark:text-white">{tx.userName}</p>
                               <Badge variant={getTxStatusColor(tx.status)} className="text-xs">
                                 {tx.status}
                               </Badge>
                             </div>
-                            <p className="text-sm text-slate-400">
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
                               {tx.type} • {new Date(tx.createdAt).toLocaleString()}
                             </p>
                             {tx.description && (
-                              <p className="text-xs text-slate-500 mt-1">{tx.description}</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{tx.description}</p>
                             )}
                           </div>
                         </div>
@@ -551,7 +551,7 @@ const WalletsPage = () => {
                             ${tx.amount?.toFixed(2)}
                           </p>
                           {tx.referenceId && (
-                            <p className="text-xs text-slate-500 mt-1">
+                            <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">
                               Ref: {tx.referenceId}
                             </p>
                           )}
@@ -569,7 +569,7 @@ const WalletsPage = () => {
                     variant="secondary"
                     onClick={() => goToTxPage(txPagination.currentPage - 1)}
                     disabled={txPagination.currentPage === 0}
-                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     {t('previous') || 'Previous'}
@@ -595,7 +595,7 @@ const WalletsPage = () => {
                           className={`w-10 h-10 rounded-lg font-semibold transition-all ${
                             pageNum === txPagination.currentPage
                               ? 'bg-blue-500 text-white'
-                              : 'bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700'
+                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
                           }`}
                         >
                           {pageNum + 1}
@@ -608,7 +608,7 @@ const WalletsPage = () => {
                     variant="secondary"
                     onClick={() => goToTxPage(txPagination.currentPage + 1)}
                     disabled={txPagination.currentPage >= txPagination.totalPages - 1}
-                    className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   >
                     {t('next') || 'Next'}
                     <ChevronRight className="w-4 h-4" />

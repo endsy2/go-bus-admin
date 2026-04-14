@@ -58,6 +58,20 @@ const CustomersPage = () => {
     fetchCustomers();
   }, []);
 
+  // Real-time filter effect with debouncing
+  useEffect(() => {
+    const hasFilters = Object.values(filters).some(value => value.trim() !== '');
+    
+    // Debounce the filter to avoid too many API calls
+    const timeoutId = setTimeout(() => {
+      if (hasFilters) {
+        fetchCustomers(filters, 1, pagination.pageSize);
+      }
+    }, 500); // Wait 500ms after user stops typing
+
+    return () => clearTimeout(timeoutId);
+  }, [filters]);
+
   const fetchCustomers = async (filterParams = null, page = 1, size = 15) => {
     try {
       setLoading(true);
@@ -67,16 +81,27 @@ const CustomersPage = () => {
       
       const queryParams = new URLSearchParams();
       
-      // Add pagination parameters
+      // Add pagination parameters - pageStart starts at 1
       queryParams.append('pageStart', page);
       queryParams.append('pageSize', size);
       queryParams.append('isEmployee', 'false');
       
-      // If filters are provided, add them as query parameters
+      // If filters are provided, add them as query parameters with proper type handling
       if (filterParams) {
         Object.keys(filterParams).forEach(key => {
-          if (filterParams[key]) {
-            queryParams.append(key, filterParams[key]);
+          const value = filterParams[key];
+          if (value && value.toString().trim() !== '') {
+            // Handle different data types
+            if (key === 'userId') {
+              // userId should be a number
+              const numValue = parseInt(value, 10);
+              if (!isNaN(numValue)) {
+                queryParams.append(key, numValue.toString());
+              }
+            } else {
+              // Other fields are strings
+              queryParams.append(key, value.toString().trim());
+            }
           }
         });
       }
@@ -97,10 +122,10 @@ const CustomersPage = () => {
         const users = result.data?.content || result.content || result.data || result;
         setCustomers(Array.isArray(users) ? users : []);
         
-        // Update pagination info - adjust for pageStart vs page difference
+        // Update pagination info
         const pageData = result.data || result;
         setPagination({
-          currentPage: (pageData.number || page - 1),
+          currentPage: page,
           pageSize: pageData.size || size,
           totalPages: pageData.totalPages || 1,
           totalElements: pageData.totalElements || 0
@@ -131,17 +156,6 @@ const CustomersPage = () => {
       ...prev,
       [name]: value
     }));
-  };
-
-  const handleApplyFilters = () => {
-    // Check if at least one filter has a value
-    const hasFilters = Object.values(filters).some(value => value.trim() !== '');
-    
-    if (!hasFilters) {
-      return;
-    }
-    
-    fetchCustomers(filters, 1, pagination.pageSize);
   };
 
   const handleClearFilters = () => {
@@ -345,7 +359,6 @@ const CustomersPage = () => {
             </div>
             <div className="flex gap-3 justify-end pt-5 border-t-2">
               <Button variant="outline" disabled><X className="h-4 w-4" />{t('clearFilters')}</Button>
-              <Button disabled><Search className="h-4 w-4" />{t('Search')}</Button>
             </div>
           </CardContent>
         </Card>
@@ -460,6 +473,7 @@ const CustomersPage = () => {
                 {t('userId')}
               </Label>
               <Input
+                type="number"
                 name="userId"
                 value={filters.userId}
                 onChange={handleFilterChange}
@@ -484,6 +498,7 @@ const CustomersPage = () => {
                 {t('email')}
               </Label>
               <Input
+                type="email"
                 name="email"
                 value={filters.email}
                 onChange={handleFilterChange}
@@ -496,6 +511,7 @@ const CustomersPage = () => {
                 {t('phone')}
               </Label>
               <Input
+                type="tel"
                 name="phone"
                 value={filters.phone}
                 onChange={handleFilterChange}
@@ -519,10 +535,6 @@ const CustomersPage = () => {
             <Button variant="outline" onClick={handleClearFilters}>
               <X className="h-4 w-4" />
               {t('clearFilters')}
-            </Button>
-            <Button onClick={handleApplyFilters}>
-              <Search className="h-4 w-4" />
-              {t('Search')}
             </Button>
           </div>
         </CardContent>

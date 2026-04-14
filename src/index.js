@@ -8,13 +8,11 @@ import { LocaleProvider } from 'shared/context/LocaleContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
-    <ThemeProvider>
-      <LocaleProvider>
-        <App />
-      </LocaleProvider>
-    </ThemeProvider>
-  </React.StrictMode>
+  <ThemeProvider>
+    <LocaleProvider>
+      <App />
+    </LocaleProvider>
+  </ThemeProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function
