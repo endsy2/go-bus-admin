@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
 import { Label } from 'shared/components/ui/label';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from 'shared/components/ui/dialog';
 import { DateTimePicker } from 'shared/components/ui/datetime-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
 import { Calendar, Bus, DollarSign, Plus, Edit, Trash2, Search, Loader2 } from 'lucide-react';
@@ -17,6 +18,8 @@ const SchedulesPage = () => {
   const [loadingBuses, setLoadingBuses] = useState(false);
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
+  const [deleteScheduleId, setDeleteScheduleId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
   const [filters, setFilters] = useState({
     busId: '',
     fromDate: '',
@@ -60,10 +63,10 @@ const SchedulesPage = () => {
         pageNo,
         pagination.pageSize
       );
-      
+
       const scheduleData = response.data?.content || response.content || [];
       setSchedules(Array.isArray(scheduleData) ? scheduleData : []);
-      
+
       setPagination({
         pageNo: response.data?.number + 1 || pageNo,
         pageSize: response.data?.size || pagination.pageSize,
@@ -78,15 +81,23 @@ const SchedulesPage = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this schedule?')) {
-      try {
-        await scheduleService.deleteSchedule(id);
-        fetchSchedules(pagination.pageNo);
-      } catch (error) {
-        console.error('Failed to delete schedule:', error);
-        alert('Failed to delete schedule');
-      }
+  const handleDelete = (id) => {
+    setDeleteScheduleId(id);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteScheduleId) return;
+
+    try {
+      setDeleting(true);
+      await scheduleService.deleteSchedule(deleteScheduleId);
+      setDeleteScheduleId(null);
+      fetchSchedules(pagination.pageNo);
+    } catch (error) {
+      console.error('Failed to delete schedule:', error);
+      alert('Failed to delete schedule');
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -105,7 +116,7 @@ const SchedulesPage = () => {
           </h1>
           <p className="text-slate-600 dark:text-slate-400 mt-1">Manage bus schedules and timetables</p>
         </div>
-        <Button 
+        <Button
           onClick={() => setShowCreateDialog(true)}
           className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2 shadow-lg shadow-blue-500/20"
         >
@@ -187,7 +198,7 @@ const SchedulesPage = () => {
           {/* Search Button */}
           <div className="space-y-2">
             <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300 opacity-0">Search</Label>
-            <Button 
+            <Button
               onClick={() => fetchSchedules(1)}
               disabled={loading}
               className="w-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center gap-2 h-[42px]"
@@ -241,17 +252,17 @@ const SchedulesPage = () => {
                     <TableCell className="text-emerald-600 dark:text-emerald-400 font-semibold">${schedule.price?.toFixed(2) || '0.00'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-2 justify-end">
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           onClick={() => setEditingSchedule(schedule)}
                           className="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white"
                         >
                           <Edit className="w-3 h-3 mr-1" />
                           Edit
                         </Button>
-                        <Button 
-                          size="sm" 
-                          variant="destructive" 
+                        <Button
+                          size="sm"
+                          variant="destructive"
                           onClick={() => handleDelete(schedule.id)}
                           className="bg-red-100 dark:bg-red-500/20 hover:bg-red-200 dark:hover:bg-red-500/30 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-500/50"
                         >
@@ -288,8 +299,8 @@ const SchedulesPage = () => {
                     key={i + 1}
                     size="sm"
                     onClick={() => handlePageChange(i + 1)}
-                    className={i + 1 === pagination.pageNo 
-                      ? "bg-blue-500 text-white" 
+                    className={i + 1 === pagination.pageNo
+                      ? "bg-blue-500 text-white"
                       : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white"
                     }
                   >
@@ -333,6 +344,51 @@ const SchedulesPage = () => {
           }}
         />
       )}
+
+      <Dialog
+        open={deleteScheduleId !== null}
+        onOpenChange={(open) => {
+          if (!open && !deleting) {
+            setDeleteScheduleId(null);
+          }
+        }}
+      >
+        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-white">Delete Schedule</DialogTitle>
+            <DialogDescription className="text-slate-300">
+              Are you sure you want to delete schedule #{deleteScheduleId}? This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={deleting}
+              onClick={() => setDeleteScheduleId(null)}
+              className="bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              disabled={deleting}
+              onClick={handleConfirmDelete}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {deleting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                'Confirm Delete'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

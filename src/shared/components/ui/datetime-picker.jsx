@@ -57,16 +57,16 @@ export function DateTimePicker({ value, onChange, placeholder = "Pick date and t
       let hour24 = h;
       if (p === 'PM' && h !== 12) hour24 = h + 12;
       if (p === 'AM' && h === 12) hour24 = 0;
-      
+
       newDate.setHours(hour24, m, 0, 0);
-      
+
       // Format as YYYY-MM-DDTHH:mm for datetime-local input compatibility
       const year = newDate.getFullYear();
       const month = String(newDate.getMonth() + 1).padStart(2, '0');
       const day = String(newDate.getDate()).padStart(2, '0');
       const hour = String(newDate.getHours()).padStart(2, '0');
       const minute = String(newDate.getMinutes()).padStart(2, '0');
-      
+
       onChange(`${year}-${month}-${day}T${hour}:${minute}`);
     }
   };
@@ -84,15 +84,15 @@ export function DateTimePicker({ value, onChange, placeholder = "Pick date and t
 
   const formatDateTime = () => {
     if (!date) return null;
-    
+
     const dateStr = date.toLocaleDateString('en-US', {
       month: 'short',
       day: 'numeric',
       year: 'numeric'
     });
-    
+
     const timeStr = `${hours}:${String(minutes).padStart(2, '0')} ${period}`;
-    
+
     return `${dateStr}, ${timeStr}`;
   };
 
@@ -100,6 +100,7 @@ export function DateTimePicker({ value, onChange, placeholder = "Pick date and t
     <Popover>
       <PopoverTrigger asChild>
         <Button
+          type="button"
           variant="outline"
           disabled={disabled}
           className={cn(
@@ -113,8 +114,8 @@ export function DateTimePicker({ value, onChange, placeholder = "Pick date and t
             {date ? formatDateTime() : placeholder}
           </span>
           {date && (
-            <X 
-              className="h-4 w-4 ml-2 flex-shrink-0 text-slate-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors" 
+            <X
+              className="h-4 w-4 ml-2 flex-shrink-0 text-slate-400 dark:text-slate-400 hover:text-red-500 dark:hover:text-red-400 transition-colors"
               onClick={handleClear}
             />
           )}
@@ -132,14 +133,14 @@ export function DateTimePicker({ value, onChange, placeholder = "Pick date and t
               className="bg-transparent"
             />
           </div>
-          
+
           {/* Time Picker Section */}
           <div className="p-4 space-y-3 bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900/50 dark:to-slate-900 w-52">
             <div className="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-700/50">
               <Clock className="h-4 w-4 text-blue-500 dark:text-blue-400" />
               <span className="text-sm font-semibold text-slate-900 dark:text-white">Select Time</span>
             </div>
-            
+
             <div className="flex items-center justify-center gap-2">
               {/* Hours */}
               <div className="flex flex-col items-center gap-1">
@@ -208,8 +209,8 @@ export function DateTimePicker({ value, onChange, placeholder = "Pick date and t
                 }}
                 className={cn(
                   "px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 flex-1",
-                  period === 'AM' 
-                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30" 
+                  period === 'AM'
+                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
                     : "bg-slate-200 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700/50 active:scale-95"
                 )}
               >
@@ -223,8 +224,8 @@ export function DateTimePicker({ value, onChange, placeholder = "Pick date and t
                 }}
                 className={cn(
                   "px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 flex-1",
-                  period === 'PM' 
-                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30" 
+                  period === 'PM'
+                    ? "bg-blue-500 text-white shadow-lg shadow-blue-500/30"
                     : "bg-slate-200 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700/50 active:scale-95"
                 )}
               >
