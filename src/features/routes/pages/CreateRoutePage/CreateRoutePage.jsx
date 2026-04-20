@@ -157,9 +157,9 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
           <div>
             <h1 className="flex items-center gap-3 text-3xl font-bold text-gray-900 dark:text-white mb-1.5">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
-                <circle cx="12" cy="12" r="10"/>
-                <line x1="12" y1="8" x2="12" y2="16"/>
-                <line x1="8" y1="12" x2="16" y2="12"/>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="16" />
+                <line x1="8" y1="12" x2="16" y2="12" />
               </svg>
               {t('createRoute') || 'Create New Route'}
             </h1>
@@ -190,9 +190,9 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
               <div className="flex items-start gap-3.5 mb-5">
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="3" y1="12" x2="21" y2="12"/>
-                    <line x1="3" y1="6" x2="21" y2="6"/>
-                    <line x1="3" y1="18" x2="21" y2="18"/>
+                    <line x1="3" y1="12" x2="21" y2="12" />
+                    <line x1="3" y1="6" x2="21" y2="6" />
+                    <line x1="3" y1="18" x2="21" y2="18" />
                   </svg>
                 </div>
                 <div>
@@ -221,7 +221,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                     {touched.origin && !errors.origin && formData.origin && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12"/>
+                          <polyline points="20 6 9 17 4 12" />
                         </svg>
                       </div>
                     )}
@@ -229,7 +229,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   {touched.origin && errors.origin && (
                     <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                       </svg>
                       {errors.origin}
                     </span>
@@ -243,7 +243,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                     <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-gray-600"></span>
                   </div>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 ml-0.5">
-                    <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+                    <line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" />
                   </svg>
                 </div>
 
@@ -266,7 +266,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                     {touched.destination && !errors.destination && formData.destination && (
                       <div className="absolute right-3 top-1/2 -translate-y-1/2 text-emerald-500">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                          <polyline points="20 6 9 17 4 12"/>
+                          <polyline points="20 6 9 17 4 12" />
                         </svg>
                       </div>
                     )}
@@ -274,7 +274,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   {touched.destination && errors.destination && (
                     <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                       </svg>
                       {errors.destination}
                     </span>
@@ -287,7 +287,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
               <div className="flex items-start gap-3.5 mb-5">
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center text-white flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M3 12h4l3-9 4 18 3-9h4"/>
+                    <path d="M3 12h4l3-9 4 18 3-9h4" />
                   </svg>
                 </div>
                 <div>
@@ -318,7 +318,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   {touched.distanceKm && errors.distanceKm && (
                     <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                       </svg>
                       {errors.distanceKm}
                     </span>
@@ -345,14 +345,14 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   {touched.durationMinutes && errors.durationMinutes ? (
                     <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                       </svg>
                       {errors.durationMinutes}
                     </span>
                   ) : durationPreview ? (
                     <span className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                        <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
                       </svg>
                       {durationPreview}
                     </span>
@@ -365,7 +365,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
               <div className="flex items-start gap-3.5 mb-5">
                 <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center text-white flex-shrink-0">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
                   </svg>
                 </div>
                 <div>
@@ -396,7 +396,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   {touched.lat && errors.lat && (
                     <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                       </svg>
                       {errors.lat}
                     </span>
@@ -421,7 +421,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   {touched.lng && errors.lng && (
                     <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
                       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+                        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
                       </svg>
                       {errors.lng}
                     </span>
@@ -433,7 +433,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                 <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden animate-[fadeIn_0.3s_ease]">
                   <div className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 font-semibold text-sm text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+                      <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
                     </svg>
                     {t('mapPreview') || 'Map Preview'}
                   </div>
@@ -469,7 +469,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                 ) : (
                   <>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
                     </svg>
                     {t('createRoute') || 'Create Route'}
                   </>
@@ -483,7 +483,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
           <div className="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden shadow-sm">
             <div className="flex items-center gap-2 px-5 py-4 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 text-sm font-bold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" /><circle cx="12" cy="12" r="3" />
               </svg>
               {t('livePreview') || 'Live Preview'}
             </div>
@@ -521,7 +521,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
               <div className="flex flex-col gap-2.5">
                 <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 flex-shrink-0">
-                    <path d="M3 12h4l3-9 4 18 3-9h4"/>
+                    <path d="M3 12h4l3-9 4 18 3-9h4" />
                   </svg>
                   <span className="text-sm text-gray-600 dark:text-gray-400 font-medium flex-1">{t('distance') || 'Distance'}</span>
                   <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
@@ -530,7 +530,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                 </div>
                 <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 flex-shrink-0">
-                    <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
                   </svg>
                   <span className="text-sm text-gray-600 dark:text-gray-400 font-medium flex-1">{t('duration') || 'Duration'}</span>
                   <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
@@ -539,7 +539,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                 </div>
                 <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 flex-shrink-0">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
                   </svg>
                   <span className="text-sm text-gray-600 dark:text-gray-400 font-medium flex-1">GPS</span>
                   <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
@@ -550,21 +550,6 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                 </div>
               </div>
 
-              <div className="border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
-                <div className="flex items-center gap-1.5 px-3.5 py-2 bg-gray-100 dark:bg-gray-700 text-xs font-bold text-gray-600 dark:text-gray-400 font-mono tracking-wide border-b border-gray-200 dark:border-gray-600">
-                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
-                  </svg>
-                  POST /api/routes
-                </div>
-                <pre className="p-3.5 m-0 text-xs font-mono text-cyan-600 dark:text-cyan-400 bg-gray-50 dark:bg-gray-900 overflow-x-auto leading-relaxed whitespace-pre">{JSON.stringify({
-                  origin: formData.origin || '...',
-                  destination: formData.destination || '...',
-                  distanceKm: formData.distanceKm ? parseFloat(formData.distanceKm) : '...',
-                  durationMinutes: formData.durationMinutes ? parseInt(formData.durationMinutes) : '...',
-                  ...(hasCoords && { location: `{"lat": ${formData.lat}, "lng": ${formData.lng}}` })
-                }, null, 2)}</pre>
-              </div>
             </div>
           </div>
         </div>

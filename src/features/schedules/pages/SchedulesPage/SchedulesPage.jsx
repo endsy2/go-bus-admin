@@ -5,30 +5,37 @@ import { Label } from 'shared/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from 'shared/components/ui/dialog';
 import { DateTimePicker } from 'shared/components/ui/datetime-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
+import { Pagination } from 'shared/components/feedback/Pagination';
 import { Calendar, Bus, DollarSign, Plus, Edit, Trash2, Search, Loader2 } from 'lucide-react';
 import scheduleService from '../../services/scheduleService';
 import busService from '../../../buses/services/busService';
+import routeService from '../../../routes/services/routeService';
 import CreateScheduleDialog from '../../components/CreateScheduleDialog/CreateScheduleDialog';
 import EditScheduleDialog from '../../components/EditScheduleDialog/EditScheduleDialog';
 
 const SchedulesPage = () => {
-  const [schedules, setSchedules] = useState([]);
-  const [buses, setBuses] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [loadingBuses, setLoadingBuses] = useState(false);
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingSchedule, setEditingSchedule] = useState(null);
-  const [deleteScheduleId, setDeleteScheduleId] = useState(null);
-  const [deleting, setDeleting] = useState(false);
-  const [filters, setFilters] = useState({
+  const initialFilters = {
+    routeId: '',
     busId: '',
     fromDate: '',
     toDate: '',
     maxPrice: '',
-  });
+  };
+
+  const [schedules, setSchedules] = useState([]);
+  const [buses, setBuses] = useState([]);
+  const [routes, setRoutes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [loadingBuses, setLoadingBuses] = useState(false);
+  const [loadingRoutes, setLoadingRoutes] = useState(false);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [editingSchedule, setEditingSchedule] = useState(null);
+  const [deleteScheduleId, setDeleteScheduleId] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+  const [filters, setFilters] = useState(initialFilters);
   const [pagination, setPagination] = useState({
     pageNo: 1,
-    pageSize: 10,
+    pageSize: 15,
     totalPages: 0,
     totalElements: 0,
   });
@@ -36,6 +43,7 @@ const SchedulesPage = () => {
   // Fetch buses on component mount and load initial schedules
   React.useEffect(() => {
     fetchBuses();
+    fetchRoutes();
     fetchSchedules(1); // Load all schedules initially
   }, []);
 
@@ -52,16 +60,38 @@ const SchedulesPage = () => {
     }
   };
 
-  const fetchSchedules = async (pageNo = 1) => {
+  const fetchRoutes = async () => {
+    setLoadingRoutes(true);
+    try {
+      const routesRes = await routeService.getRoutes();
+      const routesData = routesRes?.data || routesRes;
+      const routesArray = Array.isArray(routesData)
+        ? routesData
+        : Array.isArray(routesData?.data)
+          ? routesData.data
+          : [];
+      setRoutes(routesArray);
+    } catch (error) {
+      console.error('Failed to fetch routes:', error);
+      setRoutes([]);
+    } finally {
+      setLoadingRoutes(false);
+    }
+  };
+
+  const fetchSchedules = async (pageNo = 1, overrideFilters = null, overridePageSize = null) => {
+    const activeFilters = overrideFilters || filters;
+    const activePageSize = overridePageSize || pagination.pageSize;
+
     try {
       setLoading(true);
       const response = await scheduleService.filterSchedules(
-        filters.busId || null,
-        filters.fromDate || null,
-        filters.toDate || null,
-        filters.maxPrice || null,
+        activeFilters.routeId || null,
+        activeFilters.fromDate || null,
+        activeFilters.toDate || null,
+        activeFilters.maxPrice || null,
         pageNo,
-        pagination.pageSize
+        activePageSize
       );
 
       const scheduleData = response.data?.content || response.content || [];
@@ -69,7 +99,7 @@ const SchedulesPage = () => {
 
       setPagination({
         pageNo: response.data?.number + 1 || pageNo,
-        pageSize: response.data?.size || pagination.pageSize,
+        pageSize: response.data?.size || activePageSize,
         totalPages: response.data?.totalPages || 0,
         totalElements: response.data?.totalElements || 0,
       });
@@ -102,7 +132,21 @@ const SchedulesPage = () => {
   };
 
   const handlePageChange = (newPage) => {
-    fetchSchedules(newPage);
+    fetchSchedules(newPage + 1);
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPagination((prev) => ({
+      ...prev,
+      pageNo: 1,
+      pageSize: newSize,
+    }));
+    fetchSchedules(1, null, newSize);
+  };
+
+  const handleClearFilters = () => {
+    setFilters(initialFilters);
+    fetchSchedules(1, initialFilters);
   };
 
   return (
@@ -131,13 +175,34 @@ const SchedulesPage = () => {
           <Search className="w-5 h-5 text-blue-500 dark:text-blue-400" />
           Filter Schedules (Optional)
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-4">
+        <div className="flex flex-wrap items-end gap-4">
+
+          {/* Route Filter */}
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Route</Label>
+            <div className="relative">
+              <select
+                value={filters.routeId}
+                onChange={(e) => setFilters({ ...filters, routeId: e.target.value })}
+                disabled={loadingRoutes}
+                className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-700/50 rounded-xl bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none cursor-pointer"
+              >
+                <option value="">All Routes</option>
+                {routes.map(route => (
+                  <option key={route.id} value={route.id}>
+                    {route.origin} -&gt; {route.destination}
+                  </option>
+                ))}
+              </select>
+              <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </div>
+
           {/* Bus Filter */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-              <Bus className="w-4 h-4 text-blue-500 dark:text-blue-400" />
-              Bus
-            </Label>
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
+            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Bus</Label>
             <div className="relative">
               <select
                 value={filters.busId}
@@ -159,31 +224,30 @@ const SchedulesPage = () => {
           </div>
 
           {/* From Date */}
-          <div className="space-y-2">
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
             <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">From Date</Label>
             <DateTimePicker
               value={filters.fromDate}
               onChange={(value) => setFilters({ ...filters, fromDate: value })}
               placeholder="Select from date"
+              className="h-[42px] rounded-xl"
             />
           </div>
 
           {/* To Date */}
-          <div className="space-y-2">
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
             <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">To Date</Label>
             <DateTimePicker
               value={filters.toDate}
               onChange={(value) => setFilters({ ...filters, toDate: value })}
               placeholder="Select to date"
+              className="h-[42px] rounded-xl"
             />
           </div>
 
           {/* Max Price */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
-              <DollarSign className="w-4 h-4 text-emerald-500 dark:text-emerald-400" />
-              Max Price
-            </Label>
+          <div className="flex flex-col gap-1.5 flex-1 min-w-[120px]">
+            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Max Price</Label>
             <input
               type="number"
               step="0.01"
@@ -195,18 +259,27 @@ const SchedulesPage = () => {
             />
           </div>
 
-          {/* Search Button */}
-          <div className="space-y-2">
-            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300 opacity-0">Search</Label>
+          {/* Search + Clear Buttons — no label, aligned to bottom via items-end on parent */}
+          <div className="flex items-center gap-2 shrink-0">
             <Button
               onClick={() => fetchSchedules(1)}
               disabled={loading}
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center gap-2 h-[42px]"
+              className="h-[42px] px-5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
             >
               {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
               {loading ? 'Searching...' : 'Search'}
             </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClearFilters}
+              disabled={loading}
+              className="h-[42px] px-5 rounded-xl border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
+            >
+              Clear
+            </Button>
           </div>
+
         </div>
       </Card>
 
@@ -218,6 +291,7 @@ const SchedulesPage = () => {
               <TableRow className="border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50">
                 <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">ID</TableHead>
                 <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">Bus Number</TableHead>
+                <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">Route</TableHead>
                 <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">Departure</TableHead>
                 <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">Arrival</TableHead>
                 <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">Price</TableHead>
@@ -227,14 +301,14 @@ const SchedulesPage = () => {
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-slate-600 dark:text-slate-400">
+                  <TableCell colSpan={7} className="text-center py-12 text-slate-600 dark:text-slate-400">
                     <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
                     Loading schedules...
                   </TableCell>
                 </TableRow>
               ) : schedules.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center py-12 text-slate-600 dark:text-slate-400">
+                  <TableCell colSpan={7} className="text-center py-12 text-slate-600 dark:text-slate-400">
                     No schedules found. Try adjusting your filters.
                   </TableCell>
                 </TableRow>
@@ -243,6 +317,11 @@ const SchedulesPage = () => {
                   <TableRow key={schedule.id} className="border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                     <TableCell className="text-slate-900 dark:text-white font-medium">#{schedule.id}</TableCell>
                     <TableCell className="text-slate-700 dark:text-slate-300">{schedule.busNumber || 'N/A'}</TableCell>
+                    <TableCell className="text-slate-700 dark:text-slate-300">
+                      {schedule.route?.origin && schedule.route?.destination
+                        ? `${schedule.route.origin} -> ${schedule.route.destination}`
+                        : 'Route not assigned'}
+                    </TableCell>
                     <TableCell className="text-slate-700 dark:text-slate-300">
                       {schedule.departureDateTime ? new Date(schedule.departureDateTime).toLocaleString() : 'N/A'}
                     </TableCell>
@@ -280,44 +359,14 @@ const SchedulesPage = () => {
 
         {/* Pagination */}
         {schedules.length > 0 && (
-          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-200 dark:border-slate-700/50">
-            <div className="text-sm text-slate-600 dark:text-slate-400">
-              Showing {((pagination.pageNo - 1) * pagination.pageSize) + 1} to {Math.min(pagination.pageNo * pagination.pageSize, pagination.totalElements)} of {pagination.totalElements} results
-            </div>
-            <div className="flex gap-2">
-              <Button
-                size="sm"
-                onClick={() => handlePageChange(pagination.pageNo - 1)}
-                disabled={pagination.pageNo === 1}
-                className="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white disabled:opacity-50"
-              >
-                Previous
-              </Button>
-              <div className="flex items-center gap-1">
-                {[...Array(pagination.totalPages)].map((_, i) => (
-                  <Button
-                    key={i + 1}
-                    size="sm"
-                    onClick={() => handlePageChange(i + 1)}
-                    className={i + 1 === pagination.pageNo
-                      ? "bg-blue-500 text-white"
-                      : "bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white"
-                    }
-                  >
-                    {i + 1}
-                  </Button>
-                ))}
-              </div>
-              <Button
-                size="sm"
-                onClick={() => handlePageChange(pagination.pageNo + 1)}
-                disabled={pagination.pageNo === pagination.totalPages}
-                className="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white disabled:opacity-50"
-              >
-                Next
-              </Button>
-            </div>
-          </div>
+          <Pagination
+            currentPage={pagination.pageNo - 1}
+            totalPages={pagination.totalPages}
+            pageSize={pagination.pageSize}
+            totalElements={pagination.totalElements}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
         )}
       </Card>
 

@@ -108,6 +108,14 @@ const EditScheduleDialog = ({ open, schedule, onClose, onSuccess }) => {
         <form onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
+              <Label className="text-slate-300">Route</Label>
+              <div className="mt-1 rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-slate-100">
+                {schedule?.route?.origin && schedule?.route?.destination
+                  ? `${schedule.route.origin} -> ${schedule.route.destination}`
+                  : 'Route not assigned'}
+              </div>
+            </div>
+            <div>
               <Label className="text-slate-300">Departure Time</Label>
               <DateTimePicker
                 value={formData.departureDateTime}
