@@ -580,7 +580,6 @@ const BusesPage = () => {
                         </td>
                         <td className="py-4 px-4">
                           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            bus.busType === 'AC' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400' :
                             bus.busType === 'SLEEPER' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' :
                             'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
                           }`}>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Button } from 'shared/components/common/Button';
 import { Input } from 'shared/components/common/Input';
@@ -7,8 +7,9 @@ import { Skeleton } from 'shared/components/ui/skeleton';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import { useToast } from 'shared/components/ui/toast';
-import { User, Mail, Phone, Shield, Calendar, Save, X, Edit, Briefcase } from 'lucide-react';
+import { User, Mail, Phone, Shield, Calendar, Save, X, Edit, Briefcase, Camera, Trash2 } from 'lucide-react';
 import profileService from '../../services/profileService';
+import ConfirmDialog from 'shared/components/feedback/ConfirmDialog';
 
 const ProfilePage = () => {
   const { locale } = useLocale();
@@ -19,6 +20,10 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [profileImageUrl, setProfileImageUrl] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -29,6 +34,7 @@ const ProfilePage = () => {
 
   useEffect(() => {
     fetchProfile();
+    fetchProfileImage();
   }, []);
 
   const fetchProfile = async () => {
@@ -47,6 +53,61 @@ const ProfilePage = () => {
       addToast({ message: 'Failed to load profile', type: 'error' });
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchProfileImage = async () => {
+    try {
+      const response = await profileService.getProfileImageUrl();
+      const imageUrl = response.data?.imageUrl || response.data?.data?.imageUrl;
+      if (imageUrl) {
+        setProfileImageUrl(imageUrl);
+      }
+    } catch (error) {
+      console.log('No profile image found or failed to load');
+    }
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      addToast({ message: 'Please select an image file', type: 'error' });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      addToast({ message: 'Image size must be less than 5MB', type: 'error' });
+      return;
+    }
+
+    try {
+      setUploadingImage(true);
+      const response = await profileService.uploadProfileImage(file);
+      const imageUrl = response.data?.imageUrl || response.data?.data?.imageUrl;
+      setProfileImageUrl(imageUrl);
+      addToast({ message: 'Profile image uploaded successfully', type: 'success' });
+    } catch (error) {
+      addToast({ message: error.response?.data?.message || 'Failed to upload image', type: 'error' });
+    } finally {
+      setUploadingImage(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  const handleDeleteImage = async () => {
+    try {
+      await profileService.deleteProfileImage();
+      setProfileImageUrl(null);
+      setDeleteDialogOpen(false);
+      addToast({ message: 'Profile image deleted successfully', type: 'success' });
+    } catch (error) {
+      addToast({ message: error.response?.data?.message || 'Failed to delete image', type: 'error' });
     }
   };
 
@@ -156,11 +217,54 @@ const ProfilePage = () => {
             
             <CardContent className="relative pt-8 pb-6">
               <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
-                {/* Avatar */}
-                <div className="relative">
-                  <div className={`w-32 h-32 rounded-3xl bg-gradient-to-br ${getAvatarGradient(profile?.fullName)} text-white flex items-center justify-center font-bold text-5xl shadow-2xl ring-4 ring-white dark:ring-slate-800`}>
-                    {profile?.fullName ? profile.fullName.charAt(0).toUpperCase() : '?'}
+                {/* Avatar with Image Upload */}
+                <div className="relative group">
+                  {profileImageUrl ? (
+                    <img
+                      src={profileImageUrl}
+                      alt="Profile"
+                      className="w-32 h-32 rounded-3xl object-cover shadow-2xl ring-4 ring-white dark:ring-slate-800"
+                    />
+                  ) : (
+                    <div className={`w-32 h-32 rounded-3xl bg-gradient-to-br ${getAvatarGradient(profile?.fullName)} text-white flex items-center justify-center font-bold text-5xl shadow-2xl ring-4 ring-white dark:ring-slate-800`}>
+                      {profile?.fullName ? profile.fullName.charAt(0).toUpperCase() : '?'}
+                    </div>
+                  )}
+                  
+                  {/* Upload/Delete Overlay */}
+                  <div className="absolute inset-0 rounded-3xl bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={uploadingImage}
+                      className="bg-white/90 hover:bg-white text-slate-900 p-2.5 rounded-xl shadow-lg transition-all hover:scale-110"
+                      title="Upload Image"
+                    >
+                      {uploadingImage ? (
+                        <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"></div>
+                      ) : (
+                        <Camera className="w-5 h-5" />
+                      )}
+                    </button>
+                    {profileImageUrl && (
+                      <button
+                        onClick={() => setDeleteDialogOpen(true)}
+                        className="bg-red-500/90 hover:bg-red-500 text-white p-2.5 rounded-xl shadow-lg transition-all hover:scale-110"
+                        title="Delete Image"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    )}
                   </div>
+                  
+                  {/* Hidden File Input */}
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
+                  
                   {profile?.isEmployee && (
                     <div className="absolute -bottom-2 -right-2 bg-gradient-to-br from-blue-500 to-indigo-600 text-white p-2 rounded-xl shadow-lg">
                       <Briefcase className="w-5 h-5" />
@@ -401,6 +505,16 @@ const ProfilePage = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Delete Image Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteDialogOpen}
+        onCancel={() => setDeleteDialogOpen(false)}
+        onConfirm={handleDeleteImage}
+        title="Delete Profile Image"
+        message="Are you sure you want to delete your profile image? This action cannot be undone."
+        type="danger"
+      />
     </div>
   );
 };

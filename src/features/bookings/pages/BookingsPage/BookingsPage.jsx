@@ -3,7 +3,7 @@ import { useBookings } from '../../hooks/useBookings';
 import { useMultiScheduleWebSocket } from '../../hooks/useMultiScheduleWebSocket';
 import { Badge } from 'shared/components/common/Badge';
 import { Button } from 'shared/components/common/Button';
-import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
+import { Card, CardContent, CardHeader } from 'shared/components/ui/card';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
@@ -19,7 +19,8 @@ import {
   Banknote,
   Plus,
   Wifi,
-  WifiOff
+  WifiOff,
+  XCircle
 } from 'lucide-react';
 import BookingDetailsDialog from '../../components/BookingDetailsDialog/BookingDetailsDialog';
 import CreateBookingDialog from '../../components/CreateBookingDialog/CreateBookingDialog';
@@ -321,29 +322,30 @@ const BookingsPage = () => {
                         </span>
                       </td>
                       <td className="px-4 py-4">
-                        <div className="flex items-center justify-center gap-2">
+                        <div className="grid grid-cols-2 gap-2 w-20">
+                          {/* Force Pay button - Left column */}
+                          {booking.paymentStatus === 'PENDING' && booking.bookingStatus !== 'CANCELLED' && booking.bookingStatus !== 'COMPLETED' ? (
+                            <Button 
+                              variant="success"
+                              className="w-9 h-9 p-0 flex items-center justify-center bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all duration-200"
+                              onClick={() => handleMarkPaidClick(booking)}
+                              title="Force Mark as Paid"
+                            >
+                              <Banknote className="w-4 h-4" />
+                            </Button>
+                          ) : (
+                            <div className="w-9"></div>
+                          )}
+                          
+                          {/* View button - Right column - Always visible */}
                           <Button 
                             variant="secondary" 
                             className="w-9 h-9 p-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white transition-all duration-200"
                             onClick={() => handleViewDetails(booking.id)}
+                            title="View Details"
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
-                          
-                          {/* Hide all action buttons if booking is CONFIRMED or COMPLETED */}
-                          {booking.bookingStatus !== 'CONFIRMED' && booking.bookingStatus !== 'COMPLETED' && (
-                            <>
-                              {booking.paymentStatus !== 'PAID' && booking.bookingStatus !== 'CANCELLED' && (
-                                <Button 
-                                  variant="success"
-                                  className="w-9 h-9 p-0 flex items-center justify-center bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 transition-all duration-200"
-                                  onClick={() => handleMarkPaidClick(booking)}
-                                >
-                                  <Banknote className="w-4 h-4" />
-                                </Button>
-                              )}
-                            </>
-                          )}
                         </div>
                       </td>
                     </tr>
