@@ -53,17 +53,26 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
   const getCurrentUserId = () => {
     try {
       const userStr = localStorage.getItem('user');
+      console.log('👤 Getting current user ID from localStorage');
+      console.log('  - User string found:', !!userStr);
+      
       if (userStr) {
         const user = JSON.parse(userStr);
+        console.log('  - User object:', user);
+        console.log('  - User ID:', user.id);
+        console.log('  - User ID type:', typeof user.id);
         return user.id;
+      } else {
+        console.warn('  - No user found in localStorage');
       }
     } catch (error) {
-      console.error('Error getting user ID:', error);
+      console.error('❌ Error getting user ID:', error);
     }
     return null;
   };
 
   const currentUserId = getCurrentUserId();
+  console.log('👤 Current User ID set to:', currentUserId, '(type:', typeof currentUserId + ')');
 
   // Handle seat updates from WebSocket
   const handleSeatUpdate = useCallback((data) => {
@@ -244,6 +253,120 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
         return;
       }
       
+      // Auto-select seats that are PENDING by current user
+      console.log('🔍 ═══════════════════════════════════════════════');
+      console.log('🔍 CHECKING FOR PENDING SEATS BY CURRENT USER');
+      console.log('� ═══════════════════════════════════════════════');
+      console.log('� Current User ID:', currentUserId, '(type:', typeof currentUserId + ')');
+      console.log('🔍 Schedule ID:', scheduleId);
+      console.log('� Total seats:', seats.length);
+      
+      // Log all pending seats for debugging
+      const allPendingSeats = seats.filter(seat => seat.status === 'PENDING');
+      if (allPendingSeats.length > 0) {
+        console.log('� All PENDING seats found:', allPendingSeats.length);
+        allPendingSeats.forEach(seat => {
+          console.log('  - Seat:', seat.seatNumber, 
+                      '| Pending User ID:', seat.pendingUserId, 
+                      '(type:', typeof seat.pendingUserId + ')',
+                      '| Match?', seat.pendingUserId == currentUserId);
+        });
+      } else {
+        console.log('🔍 No PENDING seats found in backend');
+      }
+      
+      const myPendingSeats = seats.filter(
+        seat => seat.status === 'PENDING' && seat.pendingUserId == currentUserId
+      );
+      console.log('🔍 Pending seats by YOU (from backend):', myPendingSeats.length);
+      
+      // ALWAYS check localStorage for pending selections (backend may not have pendingUserId)
+      let restoredFromLocalStorage = false;
+      try {
+        const storedSelection = localStorage.getItem('pendingSeatSelection');
+        if (storedSelection) {
+          const parsed = JSON.parse(storedSelection);
+          console.log('📦 Found selection in localStorage');
+          console.log('  - Stored user:', parsed.userId, '| Current user:', currentUserId);
+          console.log('  - Stored schedule:', parsed.scheduleId, '| Current schedule:', parseInt(scheduleId));
+          
+          // Only restore if same user and same schedule
+          if (parsed.userId === currentUserId && parsed.scheduleId === parseInt(scheduleId)) {
+            console.log('📦 User and schedule match - restoring from localStorage');
+            
+            // Verify these seats still exist and are available/pending
+            const validSeats = parsed.seats.filter(storedSeat => {
+              const seat = seats.find(s => s.id === storedSeat.id);
+              const isValid = seat && (seat.status === 'AVAILABLE' || seat.status === 'PENDING');
+              console.log('  - Seat', storedSeat.seatNumber, ':', isValid ? '✅ Valid' : '❌ Invalid');
+              return isValid;
+            });
+            
+            if (validSeats.length > 0) {
+              console.log('📦 Adding', validSeats.length, 'seats from localStorage');
+              // Add localStorage seats to myPendingSeats (avoid duplicates)
+              validSeats.forEach(storedSeat => {
+                const seat = seats.find(s => s.id === storedSeat.id);
+                if (seat && !myPendingSeats.find(s => s.id === seat.id)) {
+                  myPendingSeats.push({
+                    id: seat.id,
+                    seatNumber: seat.seatNumber,
+                    status: seat.status
+                  });
+                }
+              });
+              restoredFromLocalStorage = true;
+            } else {
+              console.log('📦 No valid seats to restore');
+              localStorage.removeItem('pendingSeatSelection');
+            }
+          } else {
+            console.log('📦 User or schedule mismatch - not restoring');
+          }
+        } else {
+          console.log('📦 No selection in localStorage');
+        }
+      } catch (error) {
+        console.error('❌ Error checking localStorage:', error);
+      }
+      
+      console.log('🔍 Total seats to auto-select:', myPendingSeats.length);
+      console.log('🔍 ═══════════════════════════════════════════════');
+      
+      if (myPendingSeats.length > 0) {
+        console.log('🔄 ═══════════════════════════════════════════════');
+        console.log('🔄 AUTO-SELECTING YOUR PENDING SEATS');
+        console.log('🔄 ═══════════════════════════════════════════════');
+        console.log('🔄 Found', myPendingSeats.length, 'seats to select');
+        console.log('🔄 Seats:', myPendingSeats.map(s => s.seatNumber).join(', '));
+        console.log('🔄 Source:', restoredFromLocalStorage ? 'localStorage + backend' : 'backend only');
+        console.log('🔄 User ID:', currentUserId);
+        console.log('🔄 Schedule ID:', scheduleId);
+        
+        const selectedSeatsData = myPendingSeats.map(seat => ({
+          id: seat.id,
+          seatNumber: seat.seatNumber
+        }));
+        
+        setSelectedSeats(selectedSeatsData);
+        
+        // Store in localStorage for persistence across page refreshes
+        const pendingSelection = {
+          userId: currentUserId,
+          scheduleId: scheduleId,
+          seats: selectedSeatsData,
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('pendingSeatSelection', JSON.stringify(pendingSelection));
+        
+        console.log('🔄 These seats are now in your selection');
+        console.log('🔄 Selection saved to localStorage');
+        console.log('🔄 You can deselect them or proceed to booking');
+        console.log('🔄 ═══════════════════════════════════════════════');
+      } else {
+        console.log('ℹ️ No pending seats to auto-select');
+      }
+      
       // Create busDetails object from response
       setBusDetails({
         id: busData.id,
@@ -308,9 +431,37 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
     console.log('  - Seat ID:', scheduleSeatId);
     console.log('  - Current Status:', scheduleSeat.status);
     console.log('  - Pending User ID:', scheduleSeat.pendingUserId);
+    console.log('  - Pending User ID Type:', typeof scheduleSeat.pendingUserId);
     console.log('  - Current User ID:', currentUserId);
+    console.log('  - Current User ID Type:', typeof currentUserId);
     console.log('  - WebSocket Connected:', isConnected);
     console.log('  - Send Message Available:', !!sendMessage);
+    
+    // Check if seat is in local selection
+    const exists = selectedSeats.find(s => s.id === scheduleSeatId);
+    console.log('  - Is in local selection:', !!exists);
+    
+    // User ID comparison
+    if (scheduleSeat.status === 'PENDING') {
+      console.log('');
+      console.log('🔍 USER ID VERIFICATION:');
+      console.log('  - Seat is PENDING');
+      console.log('  - Pending User ID:', scheduleSeat.pendingUserId);
+      console.log('  - Current User ID:', currentUserId);
+      console.log('  - Are they equal (===)?', scheduleSeat.pendingUserId === currentUserId);
+      console.log('  - Are they equal (==)?', scheduleSeat.pendingUserId == currentUserId);
+      console.log('  - String comparison:', String(scheduleSeat.pendingUserId) === String(currentUserId));
+      console.log('  - Number comparison:', Number(scheduleSeat.pendingUserId) === Number(currentUserId));
+      
+      if (scheduleSeat.pendingUserId === currentUserId) {
+        console.log('  ✅ SAME USER - This is YOUR pending seat');
+      } else if (scheduleSeat.pendingUserId == currentUserId) {
+        console.log('  ⚠️ SAME USER (loose equality) - Type mismatch but same value');
+      } else {
+        console.log('  ❌ DIFFERENT USER - This seat is pending by another user');
+      }
+    }
+    
     console.log('═══════════════════════════════════════════════════');
 
     if (!isConnected || !sendMessage) {
@@ -318,15 +469,16 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
       addToast({ message: 'WebSocket not connected. Please refresh the page.', type: 'error' });
       return;
     }
-
-    // Check if seat is pending by another user
-    if (scheduleSeat.status === 'PENDING' && scheduleSeat.pendingUserId !== currentUserId) {
+    
+    // Check if seat is pending by another user (but allow if already in our selection)
+    // Use loose equality (==) to handle type mismatches between string and number
+    if (!exists && scheduleSeat.status === 'PENDING' && scheduleSeat.pendingUserId != currentUserId) {
       console.warn('⚠️ Seat is pending by another user');
+      console.warn('  - Pending User ID:', scheduleSeat.pendingUserId, '(type:', typeof scheduleSeat.pendingUserId + ')');
+      console.warn('  - Current User ID:', currentUserId, '(type:', typeof currentUserId + ')');
       addToast({ message: 'This seat is being selected by another user', type: 'warning' });
       return;
     }
-
-    const exists = selectedSeats.find(s => s.id === scheduleSeatId);
     
     if (exists) {
       // Deselect seat - send WebSocket message
@@ -358,6 +510,22 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
         console.log('  - Before:', prev.map(s => s.seatNumber).join(', ') || 'None');
         console.log('  - After:', updated.map(s => s.seatNumber).join(', ') || 'None');
         console.log('  - Count:', updated.length);
+        
+        // Update localStorage
+        if (updated.length > 0) {
+          const pendingSelection = {
+            userId: currentUserId,
+            scheduleId: parseInt(formData.scheduleId),
+            seats: updated,
+            timestamp: new Date().toISOString()
+          };
+          localStorage.setItem('pendingSeatSelection', JSON.stringify(pendingSelection));
+          console.log('💾 Selection saved to localStorage');
+        } else {
+          localStorage.removeItem('pendingSeatSelection');
+          console.log('💾 Removed selection from localStorage (no seats selected)');
+        }
+        
         return updated;
       });
     } else {
@@ -390,6 +558,17 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
         console.log('  - Before:', prev.map(s => s.seatNumber).join(', ') || 'None');
         console.log('  - After:', updated.map(s => s.seatNumber).join(', ') || 'None');
         console.log('  - Count:', updated.length);
+        
+        // Update localStorage
+        const pendingSelection = {
+          userId: currentUserId,
+          scheduleId: parseInt(formData.scheduleId),
+          seats: updated,
+          timestamp: new Date().toISOString()
+        };
+        localStorage.setItem('pendingSeatSelection', JSON.stringify(pendingSelection));
+        console.log('💾 Selection saved to localStorage');
+        
         return updated;
       });
     }
@@ -459,6 +638,10 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
       };
       
       await bookingService.createBooking(payload);
+      
+      // Clear localStorage after successful booking
+      localStorage.removeItem('pendingSeatSelection');
+      console.log('💾 Cleared pending selection from localStorage (booking completed)');
       
       // Reset form
       setFormData({

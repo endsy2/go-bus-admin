@@ -8,7 +8,7 @@ import { translations } from 'shared/locales/translations';
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
-const BUS_TYPES = ['AC', 'SLEEPER', 'SEATER'];
+const BUS_TYPES = ['SLEEPER', 'SEATER'];
 const STATUS_OPTIONS = ['Active', 'Standby', 'Maintenance', 'Inactive', 'InService'];
 
 const CreateBusPage = ({ onBack, onSuccess }) => {
@@ -26,7 +26,7 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
     busNumber: '',
     model: '',
     plate: '',
-    busType: 'AC',
+    busType: 'SLEEPER',
     layoutId: '',
     busStatus: 'Active',
   });
@@ -281,9 +281,7 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
                 >
                   <div className="font-semibold text-sm mb-1">{type.replace('_', ' ')}</div>
                   <div className="text-xs text-muted-foreground">
-                    {type === 'AC' ? 'Air conditioned'
-                      : type === 'SLEEPER' ? 'Reclining beds'
-                      : 'Standard seats'}
+                    {type === 'SLEEPER' ? 'Reclining beds' : 'Standard seats'}
                   </div>
                   {form.busType === type && (
                     <div className="mt-2 flex justify-center">

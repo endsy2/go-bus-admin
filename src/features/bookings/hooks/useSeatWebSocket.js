@@ -30,7 +30,6 @@ export const useSeatWebSocket = (scheduleId, onSeatUpdate, enabled = true) => {
     if (!scheduleId || !enabled) {
       return;
     }
-
     try {
       // Connect to WebSocket if not already connected
       if (!websocketService.isConnected()) {

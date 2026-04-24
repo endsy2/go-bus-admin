@@ -18,7 +18,7 @@ import { cn } from 'lib/utils';
 
 const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
-const BUS_TYPES = ['AC', 'SLEEPER', 'SEATER'];
+const BUS_TYPES = ['SLEEPER', 'SEATER'];
 const STATUS_OPTIONS = ['Active', 'Standby', 'Maintenance', 'Inactive', 'InService'];
 
 const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
@@ -37,7 +37,7 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
     model: '',
     plate: '',
     totalSeats: '',
-    busType: 'AC',
+    busType: 'SLEEPER',
     layoutId: '',
     busStatus: 'Active',
   });
@@ -46,6 +46,7 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
     try {
       const res = await apiRequest(`${BASE_URL}/api/routes`, { method: 'GET' });
       const result = await res.json();
+      console.log('Fetched routes:', result);
       if (res.ok) setRoutes(result.data || result || []);
     } catch (err) {
       console.error('Failed to fetch routes:', err);
@@ -56,6 +57,7 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
     try {
       const res = await apiRequest(`${BASE_URL}/api/layouts`, { method: 'GET' });
       const result = await res.json();
+      console.log('Fetched layouts:', result);
       if (res.ok) setLayouts(result.data || result || []);
     } catch (err) {
       console.error('Failed to fetch layouts:', err);
@@ -76,7 +78,7 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
         model: bus.model || '',
         plate: bus.plate || '',
         totalSeats: bus.totalSeats || '',
-        busType: bus.busType || 'AC',
+        busType: bus.busType || 'SLEEPER',
         layoutId: bus.layoutId || '',
         busStatus: bus.status || bus.busStatus || 'Active',
       });
@@ -164,14 +166,18 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
                 <Label>{t('route') || 'Route'} <span className="text-destructive">*</span></Label>
                 <Select value={String(form.routeId)} onValueChange={(val) => set('routeId', val)}>
                   <SelectTrigger className={errors.routeId ? 'border-destructive' : ''}>
-                    <SelectValue placeholder={t('selectRoute') || 'Select a route...'} />
+                    <SelectValue placeholder={t('selectRoute') || 'Select Route'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {routes.map(r => (
-                      <SelectItem key={r.id} value={String(r.id)}>
-                        {r.origin} → {r.destination}
-                      </SelectItem>
-                    ))}
+                    {routes.length === 0 ? (
+                      <div className="p-2 text-sm text-muted-foreground">No routes available</div>
+                    ) : (
+                      routes.map(r => (
+                        <SelectItem key={r.id} value={String(r.id)}>
+                          {r.origin} → {r.destination}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
                 {errors.routeId && <p className="text-sm text-destructive">{errors.routeId}</p>}
@@ -218,18 +224,6 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
                   />
                   {errors.plate && <p className="text-sm text-destructive">{errors.plate}</p>}
                 </div>
-                <div className="space-y-2">
-                  <Label>{t('totalSeats') || 'Total Seats'}</Label>
-                  <Input
-                    type="number"
-                    value={form.totalSeats}
-                    onChange={(e) => set('totalSeats', e.target.value)}
-                    placeholder="e.g. 40"
-                    min="1"
-                    className={errors.totalSeats ? 'border-destructive' : ''}
-                  />
-                  {errors.totalSeats && <p className="text-sm text-destructive">{errors.totalSeats}</p>}
-                </div>
               </div>
             </div>
 
@@ -263,14 +257,18 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
                 <Label>{t('layout') || 'Layout'}</Label>
                 <Select value={String(form.layoutId)} onValueChange={(val) => set('layoutId', val)}>
                   <SelectTrigger className={errors.layoutId ? 'border-destructive' : ''}>
-                    <SelectValue placeholder={t('selectLayout') || 'Select a layout...'} />
+                    <SelectValue placeholder={t('selectLayout') || 'Select Layout'} />
                   </SelectTrigger>
                   <SelectContent>
-                    {layouts.map(layout => (
-                      <SelectItem key={layout.id} value={String(layout.id)}>
-                        {layout.name}
-                      </SelectItem>
-                    ))}
+                    {layouts.length === 0 ? (
+                      <div className="p-2 text-sm text-muted-foreground">No layouts available</div>
+                    ) : (
+                      layouts.map(layout => (
+                        <SelectItem key={layout.id} value={String(layout.id)}>
+                          {layout.name}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>

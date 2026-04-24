@@ -96,8 +96,10 @@ const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
                     .filter(bus => (bus.status || bus.busStatus) === 'Active' || (bus.status || bus.busStatus) === 'Standby')
                     .map(bus => (
                       <option key={bus.id} value={bus.id} className="bg-slate-800">
-                        {bus.busNumber} | {bus.busType} | {bus.totalSeats} seats | {bus.status || bus.busStatus}
+                        {bus.busNumber} | {bus.busType} | {bus.totalSeats} seats
+                        {bus.route ? ` | ${bus.route.origin} → ${bus.route.destination}` : ''}
                         {bus.plate ? ` | ${bus.plate}` : ''}
+                        {` | ${bus.status || bus.busStatus}`}
                       </option>
                     ))}
                   {buses.filter(bus => (bus.status || bus.busStatus) !== 'Active' && (bus.status || bus.busStatus) !== 'Standby').length > 0 && (
@@ -106,7 +108,9 @@ const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
                         .filter(bus => (bus.status || bus.busStatus) !== 'Active' && (bus.status || bus.busStatus) !== 'Standby')
                         .map(bus => (
                           <option key={bus.id} value={bus.id} disabled className="bg-slate-800 text-slate-500">
-                            {bus.busNumber} | {bus.busType} | {bus.totalSeats} seats | {bus.status || bus.busStatus}
+                            {bus.busNumber} | {bus.busType} | {bus.totalSeats} seats
+                            {bus.route ? ` | ${bus.route.origin} → ${bus.route.destination}` : ''}
+                            {` | ${bus.status || bus.busStatus}`}
                           </option>
                         ))}
                     </optgroup>
