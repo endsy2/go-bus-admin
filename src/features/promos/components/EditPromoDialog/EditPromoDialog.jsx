@@ -26,11 +26,10 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
     description: '',
     discountType: 'PERCENTAGE',
     discountValue: '',
-    maxUsage: '',
-    maxUsagePerUser: '',
-    minPurchaseAmount: '',
+    maxUses: '',
     validFrom: '',
-    validUntil: '',
+    validTo: '',
+    status: 'ACTIVE',
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -42,11 +41,10 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
         description: promo.description || '',
         discountType: promo.discountType || 'PERCENTAGE',
         discountValue: promo.discountValue || '',
-        maxUsage: promo.maxUsage || '',
-        maxUsagePerUser: promo.maxUsagePerUser || '',
-        minPurchaseAmount: promo.minPurchaseAmount || '',
+        maxUses: promo.maxUses || '',
         validFrom: promo.validFrom ? promo.validFrom.slice(0, 16) : '',
-        validUntil: promo.validUntil ? promo.validUntil.slice(0, 16) : '',
+        validTo: promo.validTo ? promo.validTo.slice(0, 16) : '',
+        status: promo.status || 'ACTIVE',
       });
     }
   }, [promo]);
@@ -76,9 +74,6 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
     if (!formData.validFrom) {
       newErrors.validFrom = t('validFromRequired') || 'Valid from date is required';
     }
-    if (!formData.validUntil) {
-      newErrors.validUntil = t('validUntilRequired') || 'Valid until date is required';
-    }
     return newErrors;
   };
 
@@ -98,11 +93,10 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
         description: formData.description.trim() || null,
         discountType: formData.discountType,
         discountValue: parseFloat(formData.discountValue),
-        maxUsage: formData.maxUsage ? parseInt(formData.maxUsage) : null,
-        maxUsagePerUser: formData.maxUsagePerUser ? parseInt(formData.maxUsagePerUser) : null,
-        minPurchaseAmount: formData.minPurchaseAmount ? parseFloat(formData.minPurchaseAmount) : null,
+        maxUses: formData.maxUses ? parseInt(formData.maxUses) : null,
         validFrom: formData.validFrom,
-        validUntil: formData.validUntil,
+        validTo: formData.validTo || null,
+        status: formData.status,
       };
       
       await promoService.updatePromo(promo.id, payload);
@@ -191,39 +185,14 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <Input
-              label={t('maxUsage') || 'Max Usage (Total)'}
-              name="maxUsage"
-              type="number"
-              min="1"
-              value={formData.maxUsage}
-              onChange={handleChange}
-              placeholder="100"
-              className="bg-slate-800 border-slate-700 text-white"
-            />
-
-            <Input
-              label={t('maxUsagePerUser') || 'Max Usage Per User'}
-              name="maxUsagePerUser"
-              type="number"
-              min="1"
-              value={formData.maxUsagePerUser}
-              onChange={handleChange}
-              placeholder="1"
-              className="bg-slate-800 border-slate-700 text-white"
-            />
-          </div>
-
           <Input
-            label={t('minPurchaseAmount') || 'Min Purchase Amount'}
-            name="minPurchaseAmount"
+            label={t('maxUsage') || 'Max Usage (Total)'}
+            name="maxUses"
             type="number"
-            step="0.01"
-            min="0"
-            value={formData.minPurchaseAmount}
+            min="1"
+            value={formData.maxUses}
             onChange={handleChange}
-            placeholder="0.00"
+            placeholder="100"
             className="bg-slate-800 border-slate-700 text-white"
           />
 
@@ -239,13 +208,13 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
             </div>
 
             <div>
-              <Label className="text-slate-300">{t('validUntil') || 'Valid Until'}</Label>
+              <Label className="text-slate-300">{t('validUntil') || 'Valid Until (Optional)'}</Label>
               <DateTimePicker
-                value={formData.validUntil}
-                onChange={(value) => setFormData(prev => ({ ...prev, validUntil: value }))}
-                placeholder="Select end date and time"
+                value={formData.validTo}
+                onChange={(value) => setFormData(prev => ({ ...prev, validTo: value }))}
+                placeholder="No expiration"
               />
-              {errors.validUntil && <p className="text-sm text-red-400 mt-1">{errors.validUntil}</p>}
+              {errors.validTo && <p className="text-sm text-red-400 mt-1">{errors.validTo}</p>}
             </div>
           </div>
 

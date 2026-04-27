@@ -10,7 +10,7 @@ class WebSocketService {
     this.reconnectDelay = 3000;
   }
 
-  connect(url = 'http://localhost:8080/bus-service/ws/bus') {
+  connect(url = 'http://192.168.1.8:8080/bus-service/ws/bus') {
     if (this.client?.connected) {
       console.log('[WebSocket] Already connected');
       return Promise.resolve();

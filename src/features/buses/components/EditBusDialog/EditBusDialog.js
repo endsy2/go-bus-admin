@@ -26,7 +26,6 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
 
   const [routes, setRoutes] = useState([]);
-  const [layouts, setLayouts] = useState([]);
   const [loadingData, setLoadingData] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
@@ -38,7 +37,6 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
     plate: '',
     totalSeats: '',
     busType: 'SLEEPER',
-    layoutId: '',
     busStatus: 'Active',
   });
 
@@ -53,22 +51,11 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
     }
   }, []);
 
-  const fetchLayouts = useCallback(async () => {
-    try {
-      const res = await apiRequest(`${BASE_URL}/api/layouts`, { method: 'GET' });
-      const result = await res.json();
-      console.log('Fetched layouts:', result);
-      if (res.ok) setLayouts(result.data || result || []);
-    } catch (err) {
-      console.error('Failed to fetch layouts:', err);
-    }
-  }, []);
-
   const fetchData = useCallback(async () => {
     setLoadingData(true);
-    await Promise.all([fetchRoutes(), fetchLayouts()]);
+    await fetchRoutes();
     setLoadingData(false);
-  }, [fetchRoutes, fetchLayouts]);
+  }, [fetchRoutes]);
 
   useEffect(() => {
     if (isOpen && bus) {
@@ -79,7 +66,6 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
         plate: bus.plate || '',
         totalSeats: bus.totalSeats || '',
         busType: bus.busType || 'SLEEPER',
-        layoutId: bus.layoutId || '',
         busStatus: bus.status || bus.busStatus || 'Active',
       });
       fetchData();
@@ -96,7 +82,6 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
     if (!form.routeId) e.routeId = 'Route is required';
     if (!form.busNumber.trim()) e.busNumber = 'Bus number is required';
     if (!form.plate.trim()) e.plate = 'Plate number is required';
-    if (!form.layoutId) e.layoutId = 'Layout is required';
     if (form.totalSeats && isNaN(Number(form.totalSeats))) e.totalSeats = 'Must be a number';
     return e;
   };
@@ -115,7 +100,6 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
         plate: form.plate.trim(),
         totalSeats: form.totalSeats ? Number(form.totalSeats) : undefined,
         busType: form.busType,
-        layoutId: Number(form.layoutId),
         busStatus: form.busStatus,
       };
 
@@ -230,7 +214,7 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
             {/* Bus Type */}
             <div className="space-y-3">
               <h3 className="text-sm font-semibold pb-2 border-b">{t('busType') || 'Bus Type'}</h3>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-2 gap-2">
                 {BUS_TYPES.map(type => (
                   <button
                     key={type}
@@ -246,31 +230,6 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
                     {type.replace('_', ' ')}
                   </button>
                 ))}
-              </div>
-            </div>
-
-            {/* Layout */}
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold pb-2 border-b">{t('seatLayout') || 'Seat Layout'} <span className="text-destructive">*</span></h3>
-              {errors.layoutId && <p className="text-sm text-destructive mb-2">{errors.layoutId}</p>}
-              <div className="space-y-2">
-                <Label>{t('layout') || 'Layout'}</Label>
-                <Select value={String(form.layoutId)} onValueChange={(val) => set('layoutId', val)}>
-                  <SelectTrigger className={errors.layoutId ? 'border-destructive' : ''}>
-                    <SelectValue placeholder={t('selectLayout') || 'Select Layout'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {layouts.length === 0 ? (
-                      <div className="p-2 text-sm text-muted-foreground">No layouts available</div>
-                    ) : (
-                      layouts.map(layout => (
-                        <SelectItem key={layout.id} value={String(layout.id)}>
-                          {layout.name}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
