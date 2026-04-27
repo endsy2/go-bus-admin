@@ -25,6 +25,7 @@ const ProfilePage = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const fileInputRef = useRef(null);
   const [formData, setFormData] = useState({
+    userName: '',
     fullName: '',
     email: '',
     phone: '',
@@ -44,6 +45,7 @@ const ProfilePage = () => {
       const userData = response.data || response;
       setProfile(userData);
       setFormData({
+        userName: userData.userName || '',
         fullName: userData.fullName || '',
         email: userData.email || '',
         phone: userData.phone || '',
@@ -121,6 +123,13 @@ const ProfilePage = () => {
 
   const validateForm = () => {
     const newErrors = {};
+    if (!formData.userName?.trim()) {
+      newErrors.userName = 'Username is required';
+    } else if (formData.userName.length < 3 || formData.userName.length > 30) {
+      newErrors.userName = 'Username must be between 3 and 30 characters';
+    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.userName)) {
+      newErrors.userName = 'Username may only contain letters, numbers, and underscores';
+    }
     if (!formData.fullName?.trim()) {
       newErrors.fullName = 'Full name is required';
     }
@@ -143,7 +152,7 @@ const ProfilePage = () => {
 
     try {
       setSaving(true);
-      await profileService.updateProfile(formData);
+      await profileService.updateProfile(profile.id, formData);
       await fetchProfile();
       setIsEditing(false);
       addToast({ message: 'Profile updated successfully', type: 'success' });
@@ -156,6 +165,7 @@ const ProfilePage = () => {
 
   const handleCancel = () => {
     setFormData({
+      userName: profile.userName || '',
       fullName: profile.fullName || '',
       email: profile.email || '',
       phone: profile.phone || '',
@@ -338,6 +348,17 @@ const ProfilePage = () => {
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Input
+                    label={t('username') || 'Username'}
+                    name="userName"
+                    value={formData.userName}
+                    onChange={handleChange}
+                    error={errors.userName}
+                    required
+                    placeholder="e.g. john_doe"
+                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                  />
+
+                  <Input
                     label={t('fullName') || 'Full Name'}
                     name="fullName"
                     value={formData.fullName}
@@ -355,7 +376,8 @@ const ProfilePage = () => {
                     onChange={handleChange}
                     error={errors.email}
                     required
-                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                    disabled
+                    className="bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
                   />
 
                   <Input

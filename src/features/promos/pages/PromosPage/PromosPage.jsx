@@ -15,8 +15,7 @@ import {
   Percent,
   DollarSign,
   Calendar,
-  Users,
-  TrendingUp
+  Users
 } from 'lucide-react';
 import CreatePromoDialog from '../../components/CreatePromoDialog/CreatePromoDialog';
 import EditPromoDialog from '../../components/EditPromoDialog/EditPromoDialog';
@@ -68,15 +67,19 @@ const PromosPage = () => {
   };
 
   const getStatusBadge = (promo) => {
+    if (promo.status === 'INACTIVE') {
+      return <Badge variant="default">INACTIVE</Badge>;
+    }
+    
     const now = new Date();
     const validFrom = new Date(promo.validFrom);
-    const validUntil = new Date(promo.validUntil);
+    const validTo = promo.validTo ? new Date(promo.validTo) : null;
     
     if (now < validFrom) {
       return <Badge variant="info">UPCOMING</Badge>;
-    } else if (now > validUntil) {
+    } else if (validTo && now > validTo) {
       return <Badge variant="default">EXPIRED</Badge>;
-    } else if (promo.currentUsage >= promo.maxUsage) {
+    } else if (promo.maxUses && promo.usedCount >= promo.maxUses) {
       return <Badge variant="danger">EXHAUSTED</Badge>;
     } else {
       return <Badge variant="success">ACTIVE</Badge>;
@@ -225,24 +228,16 @@ const PromosPage = () => {
                       {t('usage') || 'Usage'}
                     </p>
                     <p className="font-medium text-slate-900 dark:text-white text-sm">
-                      {promo.currentUsage || 0} / {promo.maxUsage || '∞'}
+                      {promo.usedCount || 0} / {promo.maxUses || '∞'}
                     </p>
                   </div>
                 </div>
-
-                {/* Min Purchase */}
-                {promo.minPurchaseAmount && (
-                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500">
-                    <TrendingUp className="w-3 h-3" />
-                    <span>Min: ${promo.minPurchaseAmount.toFixed(2)}</span>
-                  </div>
-                )}
 
                 {/* Valid Period */}
                 <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500 pt-2 border-t border-slate-200 dark:border-slate-800">
                   <Calendar className="w-3 h-3" />
                   <span>
-                    {new Date(promo.validFrom).toLocaleDateString()} - {new Date(promo.validUntil).toLocaleDateString()}
+                    {new Date(promo.validFrom).toLocaleDateString()} - {promo.validTo ? new Date(promo.validTo).toLocaleDateString() : 'No expiration'}
                   </span>
                 </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, Plus, Search, X, Hash, Users, Mail, Phone, Globe, Calendar, Eye, Trash2, Copy, AlertCircle, ArrowLeft } from 'lucide-react';
+import { Filter, Plus, X, Users, Mail, Phone, Calendar, Eye, Copy, AlertCircle, CheckCircle, XCircle, Power } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Input } from 'shared/components/ui/input';
 import { Label } from 'shared/components/ui/label';
@@ -33,19 +33,19 @@ const CustomersPage = () => {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [customerToDelete, setCustomerToDelete] = useState(null);
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [customerToToggle, setCustomerToToggle] = useState(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [customerToEdit, setCustomerToEdit] = useState(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showDetailView, setShowDetailView] = useState(false);
   const [selectedCustomerId, setSelectedCustomerId] = useState(null);
   const [filters, setFilters] = useState({
-    userId: '',
     email: '',
     phone: '',
     username: '',
-    googleId: ''
+    isActive: 'all',
+    isDeleted: 'all'
   });
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -90,26 +90,34 @@ const CustomersPage = () => {
       if (filterParams) {
         Object.keys(filterParams).forEach(key => {
           const value = filterParams[key];
-          if (value && value.toString().trim() !== '') {
+          if (value && value.toString().trim() !== '' && value !== 'all') {
             // Handle different data types
             if (key === 'userId') {
               // userId should be a number
               const numValue = parseInt(value, 10);
               if (!isNaN(numValue)) {
                 queryParams.append(key, numValue.toString());
+                console.log('Added userId filter:', numValue);
               }
+            } else if (key === 'isActive' || key === 'isDeleted') {
+              // Boolean fields
+              queryParams.append(key, value);
+              console.log(`Added ${key} filter:`, value);
             } else {
               // Other fields are strings
               queryParams.append(key, value.toString().trim());
+              console.log(`Added ${key} filter:`, value.toString().trim());
             }
           }
         });
       }
       
       const queryString = queryParams.toString();
+      console.log('Final query string:', queryString);
       if (queryString) {
         url = `${url}?${queryString}`;
       }
+      console.log('Fetching customers from:', url);
 
       const response = await apiRequest(url, {
         method: 'GET'
@@ -160,11 +168,11 @@ const CustomersPage = () => {
 
   const handleClearFilters = () => {
     setFilters({
-      userId: '',
       email: '',
       phone: '',
       username: '',
-      googleId: ''
+      isActive: 'all',
+      isDeleted: 'all'
     });
     fetchCustomers(null, 1, pagination.pageSize);
   };
@@ -186,13 +194,13 @@ const CustomersPage = () => {
     });
   };
 
-  const handleDeleteClick = (customer) => {
+  const handleToggleStatusClick = (customer) => {
     if (!canDelete) {
-      addToast({ message: 'You do not have permission to delete customers', type: 'error' });
+      addToast({ message: 'You do not have permission to change customer status', type: 'error' });
       return;
     }
-    setCustomerToDelete(customer);
-    setShowDeleteDialog(true);
+    setCustomerToToggle(customer);
+    setShowStatusDialog(true);
   };
 
   const handleEditClick = (customer) => {
@@ -274,35 +282,48 @@ const CustomersPage = () => {
     fetchCustomers(filters, pagination.currentPage, pagination.pageSize);
   };
 
-  const confirmDelete = async () => {
-    if (!customerToDelete) return;
+  const confirmToggleStatus = async () => {
+    if (!customerToToggle) return;
 
     try {
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/${customerToDelete.id}`, {
-        method: 'DELETE'
+      const newStatus = !customerToToggle.isActive;
+      
+      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/users/${customerToToggle.id}/status`, {
+        method: 'PATCH',
+        body: JSON.stringify({ active: newStatus })
       });
 
       if (response.ok) {
-        setCustomers(customers.filter(c => c.id !== customerToDelete.id));
-        setShowDeleteDialog(false);
-        setCustomerToDelete(null);
-        addToast({ message: 'Customer deleted successfully', type: 'success' });
+        const result = await response.json();
+        const updatedCustomer = result.data || result;
+        
+        // Update customer in list
+        setCustomers(customers.map(c => 
+          c.id === customerToToggle.id ? { ...c, isActive: updatedCustomer.active } : c
+        ));
+        
+        setShowStatusDialog(false);
+        setCustomerToToggle(null);
+        addToast({ 
+          message: `Customer ${newStatus ? 'activated' : 'deactivated'} successfully`, 
+          type: 'success' 
+        });
       } else {
         const result = await response.json();
         const errorData = result.data || result;
-        setError(errorData.message || 'Failed to delete customer');
-        setShowDeleteDialog(false);
+        setError(errorData.message || 'Failed to update customer status');
+        setShowStatusDialog(false);
       }
     } catch (err) {
-      setError('Network error. Failed to delete customer.');
-      console.error('Error deleting customer:', err);
-      setShowDeleteDialog(false);
+      setError('Network error. Failed to update customer status.');
+      console.error('Error updating customer status:', err);
+      setShowStatusDialog(false);
     }
   };
 
-  const cancelDelete = () => {
-    setShowDeleteDialog(false);
-    setCustomerToDelete(null);
+  const cancelToggleStatus = () => {
+    setShowStatusDialog(false);
+    setCustomerToToggle(null);
   };
 
   if (!canView) {
@@ -349,17 +370,18 @@ const CustomersPage = () => {
             </div>
           </CardHeader>
           <CardContent className="pt-6 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-5">
-              {[1, 2, 3, 4, 5].map(i => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
+              {[1, 2, 3].map(i => (
                 <div key={i} className="space-y-2">
                   <div className="h-4 w-20 bg-muted animate-pulse rounded" />
                   <div className="h-10 bg-muted animate-pulse rounded" />
                 </div>
               ))}
-            </div>
-            <div className="flex gap-3 justify-end pt-5 border-t-2">
+              <div className="col-span-full flex gap-3 justify-end pt-5 border-t-2">
               <Button variant="outline" disabled><X className="h-4 w-4" />{t('clearFilters')}</Button>
             </div>
+            </div>
+            
           </CardContent>
         </Card>
 
@@ -466,20 +488,7 @@ const CustomersPage = () => {
           </div>
         </CardHeader>
         <CardContent className="pt-6 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 mb-5">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
-                <Hash className="h-3.5 w-3.5 text-primary" />
-                {t('userId')}
-              </Label>
-              <Input
-                type="number"
-                name="userId"
-                value={filters.userId}
-                onChange={handleFilterChange}
-                placeholder={t('userId')}
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
                 <Users className="h-3.5 w-3.5 text-primary" />
@@ -520,20 +529,40 @@ const CustomersPage = () => {
             </div>
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
-                <Globe className="h-3.5 w-3.5 text-primary" />
-                {t('googleId')}
+                <CheckCircle className="h-3.5 w-3.5 text-primary" />
+                Is Active
               </Label>
-              <Input
-                name="googleId"
-                value={filters.googleId}
-                onChange={handleFilterChange}
-                placeholder={t('googleId')}
-              />
+              <Select value={filters.isActive} onValueChange={(value) => setFilters(prev => ({ ...prev, isActive: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="true">Active</SelectItem>
+                  <SelectItem value="false">Inactive</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
+                <XCircle className="h-3.5 w-3.5 text-primary" />
+                Is Deleted
+              </Label>
+              <Select value={filters.isDeleted} onValueChange={(value) => setFilters(prev => ({ ...prev, isDeleted: value }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="All" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="false">Not Deleted</SelectItem>
+                  <SelectItem value="true">Deleted</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div className="flex gap-3 justify-end pt-5 border-t-2">
-            <Button variant="outline" onClick={handleClearFilters}>
-              <X className="h-4 w-4" />
+          <div className="flex justify-end mt-4 pt-4 border-t">
+            <Button variant="outline" onClick={handleClearFilters} className="whitespace-nowrap">
+              <X className="h-4 w-4 mr-2" />
               {t('clearFilters')}
             </Button>
           </div>
@@ -550,6 +579,8 @@ const CustomersPage = () => {
               <TableHead className="font-bold text-xs uppercase">{t('email')}</TableHead>
               <TableHead className="font-bold text-xs uppercase">{t('phone')}</TableHead>
               <TableHead className="font-bold text-xs uppercase">{t('gender')}</TableHead>
+              <TableHead className="font-bold text-xs uppercase">Is Active</TableHead>
+              <TableHead className="font-bold text-xs uppercase">Is Deleted</TableHead>
               <TableHead className="font-bold text-xs uppercase">{t('joinedDate')}</TableHead>
               <TableHead className="font-bold text-xs uppercase">{t('actions')}</TableHead>
             </TableRow>
@@ -557,7 +588,7 @@ const CustomersPage = () => {
           <TableBody>
             {customers.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-20">
+                <TableCell colSpan={9} className="text-center py-20">
                   <div className="flex flex-col items-center gap-4">
                     <div className="bg-muted p-6 rounded-full">
                       <Users className="h-12 w-12 text-muted-foreground" />
@@ -632,6 +663,32 @@ const CustomersPage = () => {
                     </Badge>
                   </TableCell>
                   <TableCell>
+                    {customer.isActive ? (
+                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-gradient-to-r from-gray-400 to-gray-500 text-white">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Inactive
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {customer.isDeleted ? (
+                      <Badge variant="destructive" className="bg-gradient-to-r from-red-500 to-red-600 text-white">
+                        <XCircle className="h-3 w-3 mr-1" />
+                        Deleted
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Active
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Calendar className="h-3.5 w-3.5" />
                       <span className="font-medium">{formatDate(customer.createdAt)}</span>
@@ -649,11 +706,15 @@ const CustomersPage = () => {
                       {canDelete && (
                         <Button
                           size="icon"
-                          variant="destructive"
-                          className="bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
-                          onClick={() => handleDeleteClick(customer)}
+                          variant={customer.isActive ? "destructive" : "default"}
+                          className={customer.isActive 
+                            ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700" 
+                            : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                          }
+                          onClick={() => handleToggleStatusClick(customer)}
+                          title={customer.isActive ? "Deactivate Customer" : "Activate Customer"}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          <Power className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
@@ -678,19 +739,33 @@ const CustomersPage = () => {
         )}
       </Card>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+      {/* Status Toggle Confirmation Dialog */}
+      <Dialog open={showStatusDialog} onOpenChange={setShowStatusDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{t('confirmDelete')}</DialogTitle>
-            <DialogDescription>{t('confirmDeleteMessage')}</DialogDescription>
+            <DialogTitle>
+              {customerToToggle?.isActive ? 'Deactivate Customer' : 'Activate Customer'}
+            </DialogTitle>
+            <DialogDescription>
+              {customerToToggle?.isActive 
+                ? `Are you sure you want to deactivate ${customerToToggle?.fullName}? They will not be able to access their account.`
+                : `Are you sure you want to activate ${customerToToggle?.fullName}? They will be able to access their account.`
+              }
+            </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDeleteDialog(false)}>
+            <Button variant="outline" onClick={cancelToggleStatus}>
               {t('cancel')}
             </Button>
-            <Button variant="destructive" onClick={confirmDelete}>
-              {t('delete')}
+            <Button 
+              variant={customerToToggle?.isActive ? "destructive" : "default"}
+              onClick={confirmToggleStatus}
+              className={customerToToggle?.isActive 
+                ? "" 
+                : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+              }
+            >
+              {customerToToggle?.isActive ? 'Deactivate' : 'Activate'}
             </Button>
           </DialogFooter>
         </DialogContent>

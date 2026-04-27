@@ -40,8 +40,19 @@ const scheduleService = {
     
     // Only add parameters if they have values
     if (routeId) params.append('routeId', routeId);
-    if (fromDate) params.append('fromDate', fromDate);
-    if (toDate) params.append('toDate', toDate);
+    
+    // Format dates to YYYY-MM-DD (LocalDate format expected by backend)
+    if (fromDate) {
+      const date = new Date(fromDate);
+      const formattedDate = date.toISOString().split('T')[0]; // Extract YYYY-MM-DD
+      params.append('fromDate', formattedDate);
+    }
+    if (toDate) {
+      const date = new Date(toDate);
+      const formattedDate = date.toISOString().split('T')[0]; // Extract YYYY-MM-DD
+      params.append('toDate', formattedDate);
+    }
+    
     if (maxPrice) params.append('maxPrice', maxPrice);
     params.append('pageNo', pageNo);
     params.append('pageSize', pageSize);

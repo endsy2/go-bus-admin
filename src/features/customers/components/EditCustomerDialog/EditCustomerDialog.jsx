@@ -19,9 +19,7 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
   const [formData, setFormData] = useState({
     userName: '',
     fullName: '',
-    email: '',
     phone: '',
-    password: '',
     gender: 'MALE'
   });
   const [errors, setErrors] = useState({});
@@ -32,9 +30,7 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
       setFormData({
         userName: customer.userName || '',
         fullName: customer.fullName || '',
-        email: customer.email || '',
         phone: customer.phone || '',
-        password: '',
         gender: customer.gender || 'MALE'
       });
     }
@@ -58,11 +54,6 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
     if (!formData.fullName.trim()) {
       newErrors.fullName = 'Full name is required';
     }
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
-    }
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone is required';
     }
@@ -79,13 +70,7 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
     }
 
     setLoading(true);
-    
-    const updateData = { ...formData };
-    if (!updateData.password) {
-      delete updateData.password;
-    }
-    
-    await onSave(updateData);
+    await onSave(formData);
     setLoading(false);
   };
 
@@ -120,18 +105,6 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">{t('email')}</Label>
-            <Input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-              className={errors.email ? 'border-destructive' : ''}
-            />
-            {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="phone">{t('phone')}</Label>
             <Input
               id="phone"
@@ -154,19 +127,6 @@ const EditCustomerDialog = ({ isOpen, customer, onSave, onCancel }) => {
                 <SelectItem value="FEMALE">{t('female')}</SelectItem>
               </SelectContent>
             </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">{t('newPasswordLeaveEmpty')}</Label>
-            <Input
-              id="password"
-              type="password"
-              value={formData.password}
-              onChange={(e) => handleChange('password', e.target.value)}
-              placeholder={t('newPasswordLeaveEmpty')}
-              className={errors.password ? 'border-destructive' : ''}
-            />
-            {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
           </div>
         </form>
 

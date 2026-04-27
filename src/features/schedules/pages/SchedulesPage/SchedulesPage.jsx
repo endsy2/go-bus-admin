@@ -3,7 +3,7 @@ import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
 import { Label } from 'shared/components/ui/label';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from 'shared/components/ui/dialog';
-import { DateTimePicker } from 'shared/components/ui/datetime-picker';
+import { DatePicker } from 'shared/components/ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
 import { Pagination } from 'shared/components/feedback/Pagination';
 import { Calendar, Bus, DollarSign, Plus, Edit, Trash2, Search, Loader2 } from 'lucide-react';
@@ -14,10 +14,16 @@ import CreateScheduleDialog from '../../components/CreateScheduleDialog/CreateSc
 import EditScheduleDialog from '../../components/EditScheduleDialog/EditScheduleDialog';
 
 const SchedulesPage = () => {
+  const getTodayStartISO = () => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day
+    return today.toISOString();
+  };
+
   const initialFilters = {
     routeId: '',
     busId: '',
-    fromDate: '',
+    fromDate: getTodayStartISO(), // Auto-set to today at midnight
     toDate: '',
     maxPrice: '',
   };
@@ -46,6 +52,15 @@ const SchedulesPage = () => {
     fetchRoutes();
     fetchSchedules(1); // Load all schedules initially
   }, []);
+
+  // Auto-search when filters change
+  React.useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      fetchSchedules(1);
+    }, 500); // Debounce by 500ms to avoid too many API calls
+
+    return () => clearTimeout(timeoutId);
+  }, [filters.routeId, filters.busId, filters.fromDate, filters.toDate, filters.maxPrice]);
 
   const fetchBuses = async () => {
     setLoadingBuses(true);
@@ -173,7 +188,7 @@ const SchedulesPage = () => {
       <Card className="p-6 mb-6 bg-white dark:bg-slate-900/50 backdrop-blur-xl border-slate-200 dark:border-slate-700/50 shadow-xl dark:shadow-2xl">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
           <Search className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-          Filter Schedules (Optional)
+          Filter Schedules
         </h2>
         <div className="flex flex-wrap items-end gap-4">
 
@@ -226,7 +241,7 @@ const SchedulesPage = () => {
           {/* From Date */}
           <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
             <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">From Date</Label>
-            <DateTimePicker
+            <DatePicker
               value={filters.fromDate}
               onChange={(value) => setFilters({ ...filters, fromDate: value })}
               placeholder="Select from date"
@@ -237,7 +252,7 @@ const SchedulesPage = () => {
           {/* To Date */}
           <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
             <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">To Date</Label>
-            <DateTimePicker
+            <DatePicker
               value={filters.toDate}
               onChange={(value) => setFilters({ ...filters, toDate: value })}
               placeholder="Select to date"
@@ -259,16 +274,8 @@ const SchedulesPage = () => {
             />
           </div>
 
-          {/* Search + Clear Buttons — no label, aligned to bottom via items-end on parent */}
+          {/* Clear Button — no label, aligned to bottom via items-end on parent */}
           <div className="flex items-center gap-2 shrink-0">
-            <Button
-              onClick={() => fetchSchedules(1)}
-              disabled={loading}
-              className="h-[42px] px-5 rounded-xl bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2"
-            >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              {loading ? 'Searching...' : 'Search'}
-            </Button>
             <Button
               type="button"
               variant="outline"

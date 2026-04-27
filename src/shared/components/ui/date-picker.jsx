@@ -6,22 +6,36 @@ import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 export function DatePicker({ value, onChange, placeholder = "Pick a date", className, disabled }) {
-  const [date, setDate] = React.useState(value ? new Date(value) : undefined);
+  const parseDate = (dateString) => {
+    if (!dateString) return undefined;
+    // Parse YYYY-MM-DD as local date (no timezone conversion)
+    const [year, month, day] = dateString.split('T')[0].split('-').map(Number);
+    return new Date(year, month - 1, day);
+  };
+
+  const [date, setDate] = React.useState(value ? parseDate(value) : undefined);
 
   React.useEffect(() => {
     if (value) {
-      setDate(new Date(value));
+      setDate(parseDate(value));
+    } else {
+      setDate(undefined);
     }
   }, [value]);
 
   const handleSelect = (selectedDate) => {
     setDate(selectedDate);
     if (onChange) {
-      // Format as YYYY-MM-DD
-      const formatted = selectedDate
-        ? selectedDate.toISOString().split('T')[0]
-        : '';
-      onChange(formatted);
+      // Format as YYYY-MM-DD using local date (no timezone conversion)
+      if (selectedDate) {
+        const year = selectedDate.getFullYear();
+        const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+        const day = String(selectedDate.getDate()).padStart(2, '0');
+        const formatted = `${year}-${month}-${day}`;
+        onChange(formatted);
+      } else {
+        onChange('');
+      }
     }
   };
 

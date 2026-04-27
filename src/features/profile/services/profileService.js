@@ -8,8 +8,16 @@ const profileService = {
   },
 
   // Update current user profile
-  updateProfile: async (profileData) => {
-    const response = await axiosInstance.put('/api/users/profile', profileData);
+  updateProfile: async (userId, profileData) => {
+    // Only send fields that are allowed to be updated
+    const updatePayload = {
+      userName: profileData.userName,
+      fullName: profileData.fullName,
+      phone: profileData.phone,
+      gender: profileData.gender,
+    };
+    
+    const response = await axiosInstance.put(`/api/users/${userId}`, updatePayload);
     return response.data;
   },
 
