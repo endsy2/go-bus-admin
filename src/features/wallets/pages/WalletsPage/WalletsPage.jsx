@@ -7,6 +7,7 @@ import { Button } from 'shared/components/common/Button';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
+import WalletDetailsDialog from '../../components/WalletDetailsDialog/WalletDetailsDialog';
 import { 
   Wallet, 
   User, 
@@ -19,7 +20,8 @@ import {
   X,
   Search,
   ArrowUpRight,
-  ArrowDownLeft
+  ArrowDownLeft,
+  Eye
 } from 'lucide-react';
 
 const WalletsPage = () => {
@@ -29,6 +31,8 @@ const WalletsPage = () => {
   const [activeTab, setActiveTab] = useState('wallets');
   const [showWalletFilters, setShowWalletFilters] = useState(false);
   const [showTxFilters, setShowTxFilters] = useState(false);
+  const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
+  const [selectedWalletId, setSelectedWalletId] = useState(null);
   
   const [walletFilters, setWalletFilters] = useState({
     status: '',
@@ -82,6 +86,11 @@ const WalletsPage = () => {
   const resetTxFilters = () => {
     setTxFilters({ type: '', status: '' });
     updateTxFilters({});
+  };
+
+  const handleViewDetails = (walletId) => {
+    setSelectedWalletId(walletId);
+    setDetailsDialogOpen(true);
   };
 
   const getStatusColor = (status) => {
@@ -246,20 +255,35 @@ const WalletsPage = () => {
             )}
           </div>
 
-          {/* Wallets Grid */}
+          {/* Wallets Table */}
           {walletsLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {[1, 2, 3, 4].map(i => (
-                <Card key={i} className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
-                  <CardHeader>
-                    <Skeleton className="h-6 w-32" />
-                  </CardHeader>
-                  <CardContent className="space-y-3">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-4 w-3/4" />
-                  </CardContent>
-                </Card>
-              ))}
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                    <tr>
+                      <th className="px-4 py-3 text-left"><Skeleton className="h-4 w-20" /></th>
+                      <th className="px-4 py-3 text-left"><Skeleton className="h-4 w-20" /></th>
+                      <th className="px-4 py-3 text-left"><Skeleton className="h-4 w-20" /></th>
+                      <th className="px-4 py-3 text-left"><Skeleton className="h-4 w-20" /></th>
+                      <th className="px-4 py-3 text-left"><Skeleton className="h-4 w-20" /></th>
+                      <th className="px-4 py-3 text-left"><Skeleton className="h-4 w-20" /></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[1, 2, 3, 4].map(i => (
+                      <tr key={i}>
+                        <td className="px-4 py-4"><Skeleton className="h-4 w-32" /></td>
+                        <td className="px-4 py-4"><Skeleton className="h-4 w-24" /></td>
+                        <td className="px-4 py-4"><Skeleton className="h-4 w-28" /></td>
+                        <td className="px-4 py-4"><Skeleton className="h-4 w-20" /></td>
+                        <td className="px-4 py-4"><Skeleton className="h-4 w-24" /></td>
+                        <td className="px-4 py-4"><Skeleton className="h-4 w-20" /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           ) : wallets.length === 0 ? (
             <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -275,74 +299,104 @@ const WalletsPage = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                {wallets.map(wallet => (
-                  <Card 
-                    key={wallet.id}
-                    className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 transition-all duration-300 hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-lg hover:shadow-blue-500/10"
-                  >
-                    <CardHeader className="pb-4">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="bg-blue-500/10 p-2.5 rounded-lg">
-                          <Wallet className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-slate-500 dark:text-slate-500 mb-1">
-                            {t('walletId') || 'Wallet ID'}
-                          </p>
-                          <CardTitle className="text-base font-bold text-slate-900 dark:text-white truncate">
-                            #{wallet.id}
-                          </CardTitle>
-                        </div>
-                      </div>
-                      <Badge variant={getStatusColor(wallet.status)}>
-                        {wallet.status}
-                      </Badge>
-                    </CardHeader>
-                    
-                    <CardContent className="space-y-3">
-                      {/* User */}
-                      <div className="flex items-center gap-3 p-2.5 bg-slate-100 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-800">
-                        <div className="bg-purple-500/10 p-2 rounded-lg">
-                          <User className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-slate-500 dark:text-slate-500">
-                            {t('user') || 'User'}
-                          </p>
-                          <p className="font-medium text-slate-900 dark:text-white truncate text-sm">
-                            {wallet.userName}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Balance */}
-                      <div className="flex items-center gap-3 p-2.5 bg-green-500/10 rounded-lg border border-green-500/20">
-                        <div className="bg-green-500/20 p-2 rounded-lg">
-                          <DollarSign className="w-4 h-4 text-green-600 dark:text-green-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs text-green-600 dark:text-green-400">
-                            {t('balance') || 'Balance'}
-                          </p>
-                          <p className="font-bold text-xl text-green-600 dark:text-green-400">
-                            ${wallet.balance?.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Currency */}
-                      <div className="text-xs text-slate-500 dark:text-slate-500">
-                        {t('currency') || 'Currency'}: {wallet.currency || 'USD'}
-                      </div>
-
-                      {/* Created Date */}
-                      <div className="text-xs text-slate-500 dark:text-slate-500 pt-2 border-t border-slate-200 dark:border-slate-800">
-                        {t('created') || 'Created'}: {new Date(wallet.createdAt).toLocaleDateString()}
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+              <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                          {t('walletId') || 'Wallet ID'}
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                          {t('userId') || 'User ID'}
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                          {t('balance') || 'Balance'}
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                          {t('currency') || 'Currency'}
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                          {t('status') || 'Status'}
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                          {t('createdDate') || 'Created Date'}
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                          {t('actions') || 'Actions'}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                      {wallets.map(wallet => (
+                        <tr 
+                          key={wallet.id} 
+                          className={`transition-colors ${
+                            wallet.status === 'ACTIVE' 
+                              ? 'bg-green-50/50 dark:bg-green-900/10 hover:bg-green-100/50 dark:hover:bg-green-900/20 border-l-4 border-l-green-500'
+                              : wallet.status === 'SUSPENDED'
+                              ? 'bg-red-50/50 dark:bg-red-900/10 hover:bg-red-100/50 dark:hover:bg-red-900/20 border-l-4 border-l-red-500'
+                              : wallet.status === 'INACTIVE'
+                              ? 'bg-yellow-50/50 dark:bg-yellow-900/10 hover:bg-yellow-100/50 dark:hover:bg-yellow-900/20 border-l-4 border-l-yellow-500'
+                              : 'hover:bg-slate-50 dark:hover:bg-slate-800/30 border-l-4 border-l-transparent'
+                          }`}
+                        >
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-2">
+                              <div className="bg-blue-500/10 p-2 rounded-lg">
+                                <Wallet className="w-4 h-4 text-blue-500" />
+                              </div>
+                              <span className="font-semibold text-slate-900 dark:text-white text-sm truncate max-w-[200px]" title={wallet.id}>
+                                {wallet.id}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-2">
+                              <User className="w-4 h-4 text-purple-400" />
+                              <span className="text-slate-900 dark:text-white">#{wallet.userId}</span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="w-4 h-4 text-green-400" />
+                              <span className="font-bold text-lg text-green-400">
+                                ${wallet.balance?.toFixed(2)}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className="text-slate-900 dark:text-white">{wallet.currency || 'USD'}</span>
+                          </td>
+                          <td className="px-4 py-4">
+                            <Badge variant={getStatusColor(wallet.status)}>
+                              {wallet.status}
+                            </Badge>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="text-slate-900 dark:text-white text-sm">
+                                {wallet.createdAt ? new Date(wallet.createdAt).toLocaleDateString() : 'N/A'}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4">
+                            <div className="flex justify-center">
+                              <Button 
+                                variant="secondary" 
+                                className="w-9 h-9 p-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white transition-all duration-200"
+                                onClick={() => handleViewDetails(wallet.id)}
+                                title="View Details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
 
               {/* Pagination */}
@@ -619,6 +673,16 @@ const WalletsPage = () => {
           )}
         </>
       )}
+
+      {/* Wallet Details Dialog */}
+      <WalletDetailsDialog
+        open={detailsDialogOpen}
+        onClose={() => {
+          setDetailsDialogOpen(false);
+          setSelectedWalletId(null);
+        }}
+        walletId={selectedWalletId}
+      />
     </div>
   );
 };

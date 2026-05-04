@@ -19,9 +19,10 @@ export const useWallets = (initialFilters = {}, initialPage = 0, initialSize = 1
       setError(null);
       const response = await walletService.getWallets(filters, page, size);
       
-      setWallets(response.data || []);
+      // Handle PagedResponse structure: { content, page, size, totalElements, totalPages }
+      setWallets(response.content || []);
       setPagination({
-        currentPage: response.currentPage || page,
+        currentPage: response.page || page,
         totalPages: response.totalPages || 0,
         totalElements: response.totalElements || 0,
         size: response.size || size,
