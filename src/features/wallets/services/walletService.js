@@ -13,6 +13,12 @@ const walletService = {
     return response.data;
   },
 
+  // Get wallet by ID
+  getWalletById: async (walletId) => {
+    const response = await axiosInstance.get(`/api/wallets/${walletId}`);
+    return response.data.data; // Extract data from ApiResponse wrapper
+  },
+
   // Get all wallets with filters and pagination
   getWallets: async (filters = {}, page = 0, size = 10) => {
     const params = new URLSearchParams();
@@ -25,7 +31,7 @@ const walletService = {
     params.append('page', page);
     params.append('size', size);
 
-    const response = await axiosInstance.get(`/api/wallets?${params.toString()}`);
+    const response = await axiosInstance.get(`/api/wallets/user/specification?${params.toString()}`);
     return response.data;
   },
 
