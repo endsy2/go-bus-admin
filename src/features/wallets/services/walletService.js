@@ -23,6 +23,7 @@ const walletService = {
   getWallets: async (filters = {}, page = 0, size = 10) => {
     const params = new URLSearchParams();
     
+    if (filters.name) params.append('name', filters.name);
     if (filters.userId) params.append('userId', filters.userId);
     if (filters.status) params.append('status', filters.status);
     if (filters.minBalance) params.append('minBalance', filters.minBalance);

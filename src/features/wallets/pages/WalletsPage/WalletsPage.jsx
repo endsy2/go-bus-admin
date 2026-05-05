@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useWallets } from '../../hooks/useWallets';
 import { useTransactions } from '../../hooks/useTransactions';
 import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
@@ -8,11 +8,12 @@ import { Skeleton } from 'shared/components/ui/skeleton';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import WalletDetailsDialog from '../../components/WalletDetailsDialog/WalletDetailsDialog';
-import { 
-  Wallet, 
-  User, 
-  DollarSign, 
-  TrendingUp, 
+import CreateWalletDialog from '../../components/CreateWalletDialog/CreateWalletDialog';
+import {
+  Wallet,
+  User,
+  DollarSign,
+  TrendingUp,
   TrendingDown,
   ChevronLeft,
   ChevronRight,
@@ -21,20 +22,42 @@ import {
   Search,
   ArrowUpRight,
   ArrowDownLeft,
-  Eye
+  Eye,
+  Copy,
+  Check
 } from 'lucide-react';
+
+const CopyButton = ({ text }) => {
+  const [copied, setCopied] = useState(false);
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(text);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }, [text]);
+  return (
+    <button
+      onClick={handleCopy}
+      title={copied ? 'Copied!' : 'Copy'}
+      className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+    >
+      {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
+    </button>
+  );
+};
 
 const WalletsPage = () => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
-  
+
   const [activeTab, setActiveTab] = useState('wallets');
   const [showWalletFilters, setShowWalletFilters] = useState(false);
   const [showTxFilters, setShowTxFilters] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedWalletId, setSelectedWalletId] = useState(null);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
   
   const [walletFilters, setWalletFilters] = useState({
+    name: '',
     status: '',
     minBalance: '',
     maxBalance: '',
@@ -45,7 +68,7 @@ const WalletsPage = () => {
     status: '',
   });
 
-  const { wallets, loading: walletsLoading, pagination: walletPagination, updateFilters: updateWalletFilters, goToPage: goToWalletPage } = useWallets();
+  const { wallets, loading: walletsLoading, pagination: walletPagination, updateFilters: updateWalletFilters, goToPage: goToWalletPage, refetch: refetchWallets } = useWallets();
   const { transactions, loading: txLoading, pagination: txPagination, updateFilters: updateTxFilters, goToPage: goToTxPage } = useTransactions();
 
   const handleWalletFilterChange = (e) => {
@@ -69,8 +92,9 @@ const WalletsPage = () => {
   };
 
   const resetWalletFilters = () => {
-    setWalletFilters({ status: '', minBalance: '', maxBalance: '' });
-    updateWalletFilters({});
+    const empty = { name: '', status: '', minBalance: '', maxBalance: '' };
+    setWalletFilters(empty);
+    updateWalletFilters(empty);
   };
 
   const applyTxFilters = () => {
@@ -137,6 +161,13 @@ const WalletsPage = () => {
             {t('manageUserWalletsTransactions') || 'Manage user wallets and transactions'}
           </p>
         </div>
+        <Button
+          onClick={() => setCreateDialogOpen(true)}
+          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+        >
+          <Wallet className="w-4 h-4" />
+          {t('createWallet') || 'Create Wallet'}
+        </Button>
       </div>
 
       {/* Tabs */}
@@ -185,7 +216,21 @@ const WalletsPage = () => {
 
             {showWalletFilters && (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                      {t('name') || 'Name'}
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={walletFilters.name}
+                      onChange={handleWalletFilterChange}
+                      placeholder={t('searchByName') || 'Search by name...'}
+                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
                       {t('status') || 'Status'}
@@ -308,7 +353,7 @@ const WalletsPage = () => {
                           {t('walletId') || 'Wallet ID'}
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
-                          {t('userId') || 'User ID'}
+                          {t('user') || 'User'}
                         </th>
                         <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                           {t('balance') || 'Balance'}
@@ -343,18 +388,27 @@ const WalletsPage = () => {
                         >
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-2">
-                              <div className="bg-blue-500/10 p-2 rounded-lg">
+                              <div className="bg-blue-500/10 p-2 rounded-lg flex-shrink-0">
                                 <Wallet className="w-4 h-4 text-blue-500" />
                               </div>
-                              <span className="font-semibold text-slate-900 dark:text-white text-sm truncate max-w-[200px]" title={wallet.id}>
+                              <span className="font-semibold text-slate-900 dark:text-white text-sm truncate max-w-[160px]" title={wallet.id}>
                                 {wallet.id}
                               </span>
+                              <CopyButton text={wallet.id} />
                             </div>
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-2">
-                              <User className="w-4 h-4 text-purple-400" />
-                              <span className="text-slate-900 dark:text-white">#{wallet.userId}</span>
+                              <div className="bg-purple-500/10 p-2 rounded-lg flex-shrink-0">
+                                <User className="w-4 h-4 text-purple-500" />
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-sm font-semibold text-slate-900 dark:text-white truncate max-w-[140px]" title={wallet.userName || wallet.fullName}>
+                                  {wallet.userName || wallet.fullName || `#${wallet.userId}`}
+                                </p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">ID: {wallet.userId}</p>
+                              </div>
+                              <CopyButton text={wallet.userName || wallet.fullName || String(wallet.userId)} />
                             </div>
                           </td>
                           <td className="px-4 py-4">
@@ -682,6 +736,13 @@ const WalletsPage = () => {
           setSelectedWalletId(null);
         }}
         walletId={selectedWalletId}
+      />
+
+      {/* Create Wallet Dialog */}
+      <CreateWalletDialog
+        open={createDialogOpen}
+        onClose={() => setCreateDialogOpen(false)}
+        onSuccess={() => refetchWallets()}
       />
     </div>
   );
