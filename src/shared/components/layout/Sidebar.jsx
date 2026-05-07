@@ -98,12 +98,6 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
       label: t('team'),
       requiresPermission: 'ADMIN_ACCESS'
     },
-    { 
-      id: 'admin', 
-      icon: <Icon name="shield" />, 
-      label: 'Admin Panel',
-      requiresPermission: 'ADMIN_ACCESS'
-    },
   ];
 
   const menuItems = allMenuItems.filter(item => {
