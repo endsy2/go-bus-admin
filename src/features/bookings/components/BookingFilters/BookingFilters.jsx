@@ -32,11 +32,11 @@ const BookingFilters = ({ onFilterChange, onReset }) => {
   };
 
   const handleReset = () => {
-    setFilters({
-      bookingStatus: '',
-      paymentStatus: '',
-    });
-    onReset();
+    const hasActiveFilters = Object.values(filters).some(v => v !== '');
+    setFilters({ bookingStatus: '', paymentStatus: '' });
+    if (hasActiveFilters) {
+      onReset();
+    }
   };
 
   return (

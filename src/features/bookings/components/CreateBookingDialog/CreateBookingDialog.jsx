@@ -208,20 +208,20 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
   useEffect(() => {
     if (open) {
       fetchRoutes();
-      fetchSchedules(); // Auto-fetch all schedules on open
+      fetchSchedules();
     }
-  }, [open, fetchSchedules]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]); // Only react to open/close, not filter changes
 
-  // Auto-refresh schedules when filters change
+  // Auto-refresh schedules when filters change (debounced)
   useEffect(() => {
-    if (open) {
-      const timeoutId = setTimeout(() => {
-        fetchSchedules();
-      }, 500); // Debounce for 500ms to avoid too many requests
-      
-      return () => clearTimeout(timeoutId);
-    }
-  }, [open, fetchSchedules]);
+    if (!open) return;
+    const timeoutId = setTimeout(() => {
+      fetchSchedules();
+    }, 500);
+    return () => clearTimeout(timeoutId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [scheduleFilters.routeId, scheduleFilters.fromDate, scheduleFilters.toDate, scheduleFilters.maxPrice]); // Only react to filter changes, not open
 
   const fetchRoutes = async () => {
     setLoadingRoutes(true);
@@ -697,7 +697,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+      <DialogContent className="sm:max-w-4xl min-h-[600px] max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
             <Ticket className="w-5 h-5 text-blue-500" />
@@ -821,7 +821,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
                 {t('availableSchedules') || 'Available Schedules'}
               </h3>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
+              <div className="space-y-2 h-64 overflow-y-auto">
                 {loadingSchedules ? (
                   <div className="text-center py-8 text-slate-600 dark:text-slate-400">
                     <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />

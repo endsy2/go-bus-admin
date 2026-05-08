@@ -60,14 +60,18 @@ const CustomersPage = () => {
 
   // Real-time filter effect with debouncing
   useEffect(() => {
-    const hasFilters = Object.values(filters).some(value => value.trim() !== '');
-    
-    // Debounce the filter to avoid too many API calls
+    const hasFilters =
+      filters.email.trim() !== '' ||
+      filters.phone.trim() !== '' ||
+      filters.username.trim() !== '' ||
+      filters.isActive !== 'all' ||
+      filters.isDeleted !== 'all';
+
+    if (!hasFilters) return;
+
     const timeoutId = setTimeout(() => {
-      if (hasFilters) {
-        fetchCustomers(filters, 1, pagination.pageSize);
-      }
-    }, 500); // Wait 500ms after user stops typing
+      fetchCustomers(filters, 1, pagination.pageSize);
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [filters]);

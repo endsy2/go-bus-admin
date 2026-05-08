@@ -3,7 +3,6 @@ import { useBookings } from '../../hooks/useBookings';
 import { useMultiScheduleWebSocket } from '../../hooks/useMultiScheduleWebSocket';
 import { Badge } from 'shared/components/common/Badge';
 import { Button } from 'shared/components/common/Button';
-import { Card, CardContent, CardHeader } from 'shared/components/ui/card';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
@@ -32,7 +31,7 @@ const BookingsPage = () => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const { addToast } = useToast();
-  const { bookings, loading, pagination, updateFilters, goToPage, refetch } = useBookings();
+  const { bookings, loading, pagination, updateFilters, resetFilters, goToPage, refetch } = useBookings();
   
   // Debug logging
   console.log('BookingsPage - bookings:', bookings);
@@ -116,7 +115,7 @@ const BookingsPage = () => {
   };
 
   const handleResetFilters = () => {
-    updateFilters({});
+    resetFilters();
   };
 
   const getStatusColor = (status) => {
@@ -149,39 +148,6 @@ const BookingsPage = () => {
     return colorMap[status] || 'hover:bg-slate-50 dark:hover:bg-slate-800/30 border-l-4 border-l-transparent';
   };
 
-  if (loading) {
-    return (
-      <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
-        <div className="flex justify-between items-center mb-8">
-          <div>
-            <Skeleton className="h-10 w-80 mb-2" />
-            <Skeleton className="h-5 w-96" />
-          </div>
-        </div>
-
-        <Skeleton className="h-32 w-full mb-6" />
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map(i => (
-            <Card key={i} className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
-              <CardHeader>
-                <Skeleton className="h-6 w-32" />
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-                <div className="flex gap-2 pt-2">
-                  <Skeleton className="h-9 flex-1" />
-                  <Skeleton className="h-9 w-9" />
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
       <div className="flex justify-between items-center mb-8">
@@ -189,7 +155,6 @@ const BookingsPage = () => {
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-3">
             <Ticket className="w-7 h-7 text-blue-500" />
             {t('bookingsManagement') || 'Bookings Management'}
-            {/* WebSocket Connection Status */}
             <span className="flex items-center gap-2 text-sm font-normal">
               {wsConnected ? (
                 <>
@@ -223,14 +188,41 @@ const BookingsPage = () => {
         </Button>
       </div>
 
-      {/* Filters */}
-      <BookingFilters 
+      {/* Filters — always mounted so local state is preserved across fetches */}
+      <BookingFilters
         onFilterChange={handleFilterChange}
         onReset={handleResetFilters}
       />
 
       {/* Bookings Table */}
-      {bookings.length === 0 ? (
+      {loading ? (
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                <tr>
+                  {['Booking ID', 'Customer', 'Destination', 'Created Date', 'Status', 'Payment', 'Total', 'Actions'].map(col => (
+                    <th key={col} className="px-4 py-3">
+                      <Skeleton className="h-4 w-20" />
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                {[1, 2, 3, 4, 5].map(i => (
+                  <tr key={i}>
+                    {[1, 2, 3, 4, 5, 6, 7, 8].map(j => (
+                      <td key={j} className="px-4 py-4">
+                        <Skeleton className="h-5 w-full" />
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : bookings.length === 0 ? (
         <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
           <div className="bg-slate-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
             <Ticket className="w-10 h-10 text-slate-400 dark:text-slate-500" />

@@ -47,7 +47,12 @@ export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 
 
   const updateFilters = (newFilters) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setPagination(prev => ({ ...prev, currentPage: 0 })); // Reset to first page
+    setPagination(prev => ({ ...prev, currentPage: 0 }));
+  };
+
+  const resetFilters = () => {
+    setFilters({});
+    setPagination(prev => ({ ...prev, currentPage: 0 }));
   };
 
   const goToPage = (page) => {
@@ -66,6 +71,7 @@ export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 
     pagination,
     filters,
     updateFilters,
+    resetFilters,
     goToPage,
     changePageSize,
     refetch: fetchBookings,

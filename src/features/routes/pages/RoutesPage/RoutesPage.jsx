@@ -248,48 +248,6 @@ const RoutesPage = () => {
     );
   }
 
-  if (loading) {
-    return (
-      <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
-        <div className="flex justify-between items-center mb-8">
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-64" />
-            <Skeleton className="h-4 w-96" />
-          </div>
-          <Skeleton className="h-10 w-40" />
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-          {[...Array(4)].map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <Skeleton className="h-12 w-12 rounded-xl" />
-                  <div className="space-y-2 flex-1">
-                    <Skeleton className="h-8 w-16" />
-                    <Skeleton className="h-4 w-24" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <div className="flex gap-2">
-              <Skeleton className="h-10 flex-1" />
-              <Skeleton className="h-10 w-24" />
-            </div>
-            {[...Array(5)].map((_, i) => (
-              <Skeleton key={i} className="h-24 w-full" />
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
   return (
     <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
       {/* Header */}
@@ -328,7 +286,7 @@ const RoutesPage = () => {
                 <MapPin className="h-6 w-6" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{pagination.totalElements}</div>
+                {loading ? <Skeleton className="h-8 w-16 mb-1" /> : <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{pagination.totalElements}</div>}
                 <div className="text-sm text-muted-foreground">{t('totalRoutes') || 'Total Routes'}</div>
               </div>
             </div>
@@ -342,7 +300,7 @@ const RoutesPage = () => {
                 <Bus className="h-6 w-6" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{totalBuses}</div>
+                {loading ? <Skeleton className="h-8 w-16 mb-1" /> : <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{totalBuses}</div>}
                 <div className="text-sm text-muted-foreground">{t('totalBusesAssigned') || 'Buses Assigned'}</div>
               </div>
             </div>
@@ -356,7 +314,7 @@ const RoutesPage = () => {
                 <Clock className="h-6 w-6" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{formatDuration(avgDuration)}</div>
+                {loading ? <Skeleton className="h-8 w-16 mb-1" /> : <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{formatDuration(avgDuration)}</div>}
                 <div className="text-sm text-muted-foreground">{t('avgDuration') || 'Avg Duration'}</div>
               </div>
             </div>
@@ -370,10 +328,12 @@ const RoutesPage = () => {
                 <Activity className="h-6 w-6" />
               </div>
               <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                  {Math.round(totalDistance).toLocaleString()}
-                  <span className="text-lg text-muted-foreground ml-1">km</span>
-                </div>
+                {loading ? <Skeleton className="h-8 w-16 mb-1" /> : (
+                  <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
+                    {Math.round(totalDistance).toLocaleString()}
+                    <span className="text-lg text-muted-foreground ml-1">km</span>
+                  </div>
+                )}
                 <div className="text-sm text-muted-foreground">{t('totalDistance') || 'Total Distance'}</div>
               </div>
             </div>
@@ -437,7 +397,13 @@ const RoutesPage = () => {
           </div>
 
           {/* Routes List */}
-          {routes.length === 0 ? (
+          {loading ? (
+            <div className="space-y-4">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-24 w-full" />
+              ))}
+            </div>
+          ) : routes.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20">
               <div className="bg-muted p-6 rounded-full mb-4">
                 <MapPin className="h-12 w-12 text-muted-foreground" />
