@@ -84,14 +84,14 @@ const WalletsPage = () => {
   const applyWalletFilters = () => {
     const cleanFilters = {};
     Object.keys(walletFilters).forEach(key => {
-      if (walletFilters[key]) {
-        cleanFilters[key] = walletFilters[key];
-      }
+      if (walletFilters[key]) cleanFilters[key] = walletFilters[key];
     });
+    if (Object.keys(cleanFilters).length === 0) return;
     updateWalletFilters(cleanFilters);
   };
 
   const resetWalletFilters = () => {
+    if (!Object.values(walletFilters).some(v => v !== '')) return;
     const empty = { name: '', status: '', minBalance: '', maxBalance: '' };
     setWalletFilters(empty);
     updateWalletFilters(empty);
@@ -100,14 +100,14 @@ const WalletsPage = () => {
   const applyTxFilters = () => {
     const cleanFilters = {};
     Object.keys(txFilters).forEach(key => {
-      if (txFilters[key]) {
-        cleanFilters[key] = txFilters[key];
-      }
+      if (txFilters[key]) cleanFilters[key] = txFilters[key];
     });
+    if (Object.keys(cleanFilters).length === 0) return;
     updateTxFilters(cleanFilters);
   };
 
   const resetTxFilters = () => {
+    if (!Object.values(txFilters).some(v => v !== '')) return;
     setTxFilters({ type: '', status: '' });
     updateTxFilters({});
   };

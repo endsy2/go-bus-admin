@@ -164,7 +164,6 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
         <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
           {t('addNewBus') || 'Add New Bus'}
         </h1>
-        <p className="text-muted-foreground">{t('addNewBusDesc') || 'Register a bus and assign it to a route'}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6" noValidate>

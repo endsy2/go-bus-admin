@@ -716,7 +716,7 @@ const CustomersPage = () => {
                             : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
                           }
                           onClick={() => handleToggleStatusClick(customer)}
-                          title={customer.isActive ? "Deactivate Customer" : "Activate Customer"}
+                          title={customer.isActive ? t('deactivateCustomer') : t('activateCustomer')}
                         >
                           <Power className="h-4 w-4" />
                         </Button>
@@ -748,12 +748,12 @@ const CustomersPage = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {customerToToggle?.isActive ? 'Deactivate Customer' : 'Activate Customer'}
+              {customerToToggle?.isActive ? t('deactivateCustomer') : t('activateCustomer')}
             </DialogTitle>
             <DialogDescription>
               {customerToToggle?.isActive 
-                ? `Are you sure you want to deactivate ${customerToToggle?.fullName}? They will not be able to access their account.`
-                : `Are you sure you want to activate ${customerToToggle?.fullName}? They will be able to access their account.`
+                ? t('confirmDeactivateCustomer').replace('{name}', customerToToggle?.fullName || 'this customer')
+                : t('confirmActivateCustomer').replace('{name}', customerToToggle?.fullName || 'this customer')
               }
             </DialogDescription>
           </DialogHeader>
@@ -769,7 +769,7 @@ const CustomersPage = () => {
                 : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
               }
             >
-              {customerToToggle?.isActive ? 'Deactivate' : 'Activate'}
+              {customerToToggle?.isActive ? t('deactivate') : t('activate')}
             </Button>
           </DialogFooter>
         </DialogContent>

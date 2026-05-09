@@ -50,13 +50,13 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
     { 
       id: 'schedules', 
       icon: <Icon name="calendar" />, 
-      label: 'Schedules',
+      label: t('schedules'),
       requiresPermission: 'BUS_READ'
     },
     { 
       id: 'layouts', 
       icon: <Icon name="grid" />, 
-      label: 'Seat Layouts',
+      label: t('layouts'),
       requiresPermission: 'BUS_READ'
     },
     { 
@@ -66,22 +66,10 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
       requiresPermission: 'USER_READ'
     },
     { 
-      id: 'promos', 
-      icon: <Icon name="ticket" />, 
-      label: 'Promos',
-      requiresPermission: 'ADMIN_ACCESS'
-    },
-    { 
       id: 'wallets', 
       icon: <Icon name="dollarSign" />, 
-      label: 'Wallets',
+      label: t('wallets'),
       requiresPermission: 'ADMIN_ACCESS'
-    },
-    { 
-      id: 'notifications', 
-      icon: <Icon name="bell" />, 
-      label: 'Notifications',
-      requiresPermission: null
     },
     { 
       id: 'reports', 
@@ -128,14 +116,14 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
       <div className="w-[260px] h-screen bg-white dark:bg-[#0A0E1A] text-gray-900 dark:text-white flex flex-col shadow-xl border-r border-gray-200 dark:border-gray-800 fixed left-0 top-0 z-[100] transition-colors duration-200">
         {/* Header */}
         <div className="px-6 py-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
-          <div className="mb-3 bg-gray-100 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl p-4 flex items-center justify-center">
+          <div className="mb-3 flex items-center justify-center">
             <img 
-              src="/go_bus_new_logo.png" 
+              src="/Blue Minimal Idea Free Education Logo.png" 
               alt="GoBus Logo" 
-              className="max-w-[160px] h-auto max-h-16 object-contain" 
+              className="max-w-[160px] h-auto max-h-16 object-contain rounded-xl" 
             />
           </div>
-          <p className="text-sm text-center text-gray-600 dark:text-gray-400 font-medium">Admin Panel</p>
+          <p className="text-sm text-center text-gray-600 dark:text-gray-400 font-medium">Go Bus Admin</p>
         </div>
 
         {/* Navigation */}
@@ -203,7 +191,7 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
             onClick={handleLogoutClick}
           >
             <LogOut className="mr-2 h-4 w-4" />
-            Logout
+            {t('logout')}
           </Button>
         </div>
 
@@ -235,17 +223,17 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
       <Dialog open={showLogoutDialog} onOpenChange={cancelLogout}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Confirm Logout</DialogTitle>
+            <DialogTitle>{t('confirmLogout')}</DialogTitle>
             <DialogDescription>
-              Are you sure you want to logout?
+              {t('confirmLogoutMessage') || 'Are you sure you want to logout?'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
             <Button variant="outline" onClick={cancelLogout}>
-              Cancel
+              {t('cancel')}
             </Button>
             <Button variant="destructive" onClick={confirmLogout}>
-              Logout
+              {t('logout') || 'Logout'}
             </Button>
           </DialogFooter>
         </DialogContent>

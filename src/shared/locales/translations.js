@@ -98,6 +98,12 @@ export const translations = {
     customers: 'Customers',
     addCustomer: 'Add Customer',
     customerId: 'Customer ID',
+    deactivateCustomer: 'Deactivate Customer',
+    activateCustomer: 'Activate Customer',
+    deactivate: 'Deactivate',
+    activate: 'Activate',
+    confirmDeactivateCustomer: 'Are you sure you want to deactivate {name}? They will not be able to access their account.',
+    confirmActivateCustomer: 'Are you sure you want to activate {name}? They will be able to access their account.',
     name: 'Name',
     email: 'Email',
     phone: 'Phone',
@@ -383,6 +389,7 @@ export const translations = {
     sameOriginDestination: 'Origin and destination cannot be the same',
     
     // Layouts
+    layouts: 'Seat Layouts',
     layoutsManagement: 'Layouts Management',
     manageBusSeatLayouts: 'Manage bus seat layouts and configurations',
     newLayout: 'New Layout',
@@ -481,6 +488,11 @@ export const translations = {
     profileUpdated: 'Profile Updated Successfully',
     profileUpdateFailed: 'Failed To Update Profile',
     isEmployee: 'Is Employee',
+    
+    // Logout
+    logout: 'Logout',
+    confirmLogout: 'Confirm Logout',
+    confirmLogoutMessage: 'Are you sure you want to logout?',
   },
   km: {
     // Common
@@ -581,6 +593,12 @@ export const translations = {
     customers: 'អតិថិជន',
     addCustomer: 'បន្ថែមអតិថិជន',
     customerId: 'លេខសម្គាល់អតិថិជន',
+    deactivateCustomer: 'បិទដំណើរការអតិថិជន',
+    activateCustomer: 'បើកដំណើរការអតិថិជន',
+    deactivate: 'បិទដំណើរការ',
+    activate: 'បើកដំណើរការ',
+    confirmDeactivateCustomer: 'តើអ្នកប្រាកដថាចង់បិទដំណើរការ {name} ទេ? ពួកគេនឹងមិនអាចចូលប្រើគណនីរបស់ពួកគេបានទេ។',
+    confirmActivateCustomer: 'តើអ្នកប្រាកដថាចង់បើកដំណើរការ {name} ទេ? ពួកគេនឹងអាចចូលប្រើគណនីរបស់ពួកគេបាន។',
     name: 'ឈ្មោះ',
     email: 'អ៊ីមែល',
     phone: 'ទូរស័ព្ទ',
@@ -865,6 +883,7 @@ export const translations = {
     sameOriginDestination: 'ប្រភពនិងគោលដៅមិនអាចដូចគ្នាបានទេ',
     
     // Layouts
+    layouts: 'ប្លង់កៅអី',
     layoutsManagement: 'ការគ្រប់គ្រងប្លង់',
     manageBusSeatLayouts: 'គ្រប់គ្រងប្លង់កៅអីឡានក្រុងនិងការកំណត់រចនាសម្ព័ន្ធ',
     newLayout: 'ប្លង់ថ្មី',
@@ -963,6 +982,11 @@ export const translations = {
     profileUpdated: 'ធ្វើបច្ចុប្បន្នភាពប្រវត្តិរូបបានជោគជ័យ',
     profileUpdateFailed: 'បរាជ័យក្នុងការធ្វើបច្ចុប្បន្នភាពប្រវត្តិរូប',
     isEmployee: 'គឺជាបុគ្គលិក',
+    
+    // Logout
+    logout: 'ចាកចេញ',
+    confirmLogout: 'បញ្ជាក់ការចាកចេញ',
+    confirmLogoutMessage: 'តើអ្នកប្រាកដថាចង់ចាកចេញទេ?',
   }
 };
 

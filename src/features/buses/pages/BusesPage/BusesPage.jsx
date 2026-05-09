@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Plus, Search, X, Eye, Trash2, AlertCircle, Bus as BusIcon, Users, MapPin } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent } from 'shared/components/ui/card';
@@ -33,6 +33,7 @@ const BusesPage = () => {
   const [maxSeats, setMaxSeats] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [busToDelete, setBusToDelete] = useState(null);
+  const searchDebounceRef = useRef(null);
   const [pagination, setPagination] = useState({
     currentPage: 0,
     pageSize: 15,
@@ -52,14 +53,31 @@ const BusesPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination.currentPage, pagination.pageSize]);
 
-  // Auto-fetch when filters change
+  // Auto-fetch when dropdown filters change (uses shared ref so search debounce cancels this if both fire)
   useEffect(() => {
     if (!loading) {
-      setPagination(prev => ({ ...prev, currentPage: 0 }));
-      fetchBuses();
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      searchDebounceRef.current = setTimeout(() => {
+        setPagination(prev => ({ ...prev, currentPage: 0 }));
+        fetchBuses();
+      }, 0);
     }
+    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterRoute, filterType, filterStatus, minSeats, maxSeats]);
+
+  // Debounced auto-fetch when search text changes (cancels the dropdown 0ms timer if both fire together)
+  useEffect(() => {
+    if (!loading) {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      searchDebounceRef.current = setTimeout(() => {
+        setPagination(prev => ({ ...prev, currentPage: 0 }));
+        fetchBuses();
+      }, 500);
+    }
+    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
 
   const fetchAll = async () => {
     setLoading(true);
@@ -105,6 +123,7 @@ const BusesPage = () => {
   };
 
   const handleClearFilters = () => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     setFilterStatus('ALL');
     setFilterType('ALL');
     setFilterRoute('ALL');
@@ -112,7 +131,6 @@ const BusesPage = () => {
     setMinSeats('');
     setMaxSeats('');
     setPagination(prev => ({ ...prev, currentPage: 0 }));
-    fetchAllBuses();
   };
 
   const handlePageChange = (newPage) => {

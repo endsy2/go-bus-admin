@@ -122,14 +122,15 @@ const LoginPage = ({ onLoginSuccess }) => {
             <div className="relative">
               <div className="absolute inset-0 bg-blue-500/20 blur-xl rounded-full"></div>
               <img 
-                src="/go_bus_new_logo.png" 
+                src="/Blue Minimal Idea Free Education Logo.png" 
                 alt="GoBus Admin" 
-                className="relative max-w-[200px] max-h-20 w-auto h-auto object-contain drop-shadow-2xl"
+                className="relative max-w-[200px] max-h-20 w-auto h-auto object-contain drop-shadow-2xl rounded-xl"
               />
             </div>
           </div>
           <h1 className="text-2xl font-bold text-white mb-2">
-            {t('busBookingSystem') || 'Bus Booking System'}
+            {/* {t('busBookingSystem') || 'Go Bus Booking System'} */}
+            {'Go Bus Booking System'}
           </h1>
           <p className="text-slate-400 text-sm">
             {t('signInToAccount') || 'Sign in to your account'}
@@ -236,7 +237,7 @@ const LoginPage = ({ onLoginSuccess }) => {
         {/* Footer */}
         <div className="mt-8 text-center">
           <p className="text-slate-500 text-xs">
-            © 2024 GoBus. All rights reserved.
+            © 2026 GoBus. All rights reserved.
           </p>
         </div>
       </div>

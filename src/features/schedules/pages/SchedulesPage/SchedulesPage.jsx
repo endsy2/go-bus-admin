@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
 import { Label } from 'shared/components/ui/label';
@@ -39,6 +39,7 @@ const SchedulesPage = () => {
   const [deleteScheduleId, setDeleteScheduleId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [filters, setFilters] = useState(initialFilters);
+  const isInitialMount = useRef(true);
   const [pagination, setPagination] = useState({
     pageNo: 1,
     pageSize: 15,
@@ -53,11 +54,15 @@ const SchedulesPage = () => {
     fetchSchedules(1); // Load all schedules initially
   }, []);
 
-  // Auto-search when filters change
+  // Auto-search when filters change (skip on initial mount — mount effect already fetches)
   React.useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     const timeoutId = setTimeout(() => {
       fetchSchedules(1);
-    }, 500); // Debounce by 500ms to avoid too many API calls
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [filters.routeId, filters.busId, filters.fromDate, filters.toDate, filters.maxPrice]);
@@ -161,7 +166,6 @@ const SchedulesPage = () => {
 
   const handleClearFilters = () => {
     setFilters(initialFilters);
-    fetchSchedules(1, initialFilters);
   };
 
   return (
