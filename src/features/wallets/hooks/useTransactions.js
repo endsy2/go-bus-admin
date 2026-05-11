@@ -21,7 +21,7 @@ export const useTransactions = (initialFilters = {}, initialPage = 0, initialSiz
       
       // Handle PagedResponse structure: { content, page, size, totalElements, totalPages }
       setTransactions(response.content || []);
-      setPagination({
+    setPagination({
         currentPage: response.page || page,
         totalPages: response.totalPages || 0,
         totalElements: response.totalElements || 0,

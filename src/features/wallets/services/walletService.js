@@ -3,13 +3,13 @@ import axiosInstance from 'services/axiosConfig';
 const walletService = {
   // Create wallet for user
   createWallet: async (userId) => {
-    const response = await axiosInstance.post(`/api/wallets/user/${userId}`);
+    const response = await axiosInstance.post(`/api/admin/wallets/${userId}`);
     return response.data;
   },
 
   // Get wallet by user ID
   getWalletByUser: async (userId) => {
-    const response = await axiosInstance.get(`/api/wallets/user/${userId}`);
+    const response = await axiosInstance.get(`/api/admin/wallets/${userId}`);
     return response.data;
   },
 
@@ -32,7 +32,7 @@ const walletService = {
     params.append('page', page);
     params.append('size', size);
 
-    const response = await axiosInstance.get(`/api/wallets/user/specification?${params.toString()}`);
+    const response = await axiosInstance.get(`/api/admin/wallets/specification?${params.toString()}`);
     return response.data;
   },
 

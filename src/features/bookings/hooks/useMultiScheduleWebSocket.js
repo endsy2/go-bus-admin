@@ -56,6 +56,14 @@ export const useMultiScheduleWebSocket = (scheduleIds = [], onSeatUpdate, enable
     } catch (error) {
       console.error(`Failed to subscribe to schedule ${scheduleId}:`, error);
       isConnectedRef.current = false;
+      
+      // If it's an authentication error, provide helpful guidance
+      if (error.message && error.message.includes('Authentication token not found')) {
+        console.error('WebSocket authentication failed. Please try:');
+        console.error('1. Logging out and logging back in');
+        console.error('2. Refreshing the page');
+        console.error('3. Clearing browser cache and cookies');
+      }
     }
   }, [handleSeatUpdate]);
 
