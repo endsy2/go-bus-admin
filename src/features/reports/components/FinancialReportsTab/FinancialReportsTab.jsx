@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Download, FileText, CreditCard, RefreshCw } from 'lucide-react';
+import { Download, FileText, CreditCard, RefreshCw, Tag, Calendar } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Input } from 'shared/components/common/Input';
+import { DatePicker } from 'shared/components/ui/date-picker';
 import {
   Select,
   SelectContent,
@@ -41,6 +42,13 @@ const FinancialReportsTab = () => {
     startDate: '',
     endDate: '',
     period: 'DAILY'
+  });
+
+  // Promo Code Report State
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoFilters, setPromoFilters] = useState({
+    startDate: '',
+    endDate: ''
   });
 
   // ========== Revenue Report ==========
@@ -120,6 +128,31 @@ const FinancialReportsTab = () => {
     }
   };
 
+  // ========== Promo Code Report ==========
+  const handleDownloadPromoCodeReport = async () => {
+    if (!promoFilters.startDate || !promoFilters.endDate) {
+      addToast({ message: 'Please select start and end dates', type: 'error' });
+      return;
+    }
+
+    setPromoLoading(true);
+    try {
+      const blob = await reportService.getPromoCodeUsageReport(
+        promoFilters.startDate,
+        promoFilters.endDate
+      );
+      
+      const filename = `promo_code_usage_report_${promoFilters.startDate}_to_${promoFilters.endDate}.xlsx`;
+      reportService.downloadFile(blob, filename);
+      addToast({ message: 'Promo code usage report downloaded successfully', type: 'success' });
+    } catch (error) {
+      console.error('Error downloading promo code report:', error);
+      addToast({ message: error.response?.data?.message || 'Failed to download promo code report', type: 'error' });
+    } finally {
+      setPromoLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Revenue Report */}
@@ -141,20 +174,20 @@ const FinancialReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={revenueFilters.startDate}
-                onChange={(e) => setRevenueFilters({ ...revenueFilters, startDate: e.target.value })}
+                onChange={(value) => setRevenueFilters({ ...revenueFilters, startDate: value })}
+                placeholder="Select start date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={revenueFilters.endDate}
-                onChange={(e) => setRevenueFilters({ ...revenueFilters, endDate: e.target.value })}
+                onChange={(value) => setRevenueFilters({ ...revenueFilters, endDate: value })}
+                placeholder="Select end date"
               />
             </div>
             <div>
@@ -208,20 +241,20 @@ const FinancialReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={paymentFilters.startDate}
-                onChange={(e) => setPaymentFilters({ ...paymentFilters, startDate: e.target.value })}
+                onChange={(value) => setPaymentFilters({ ...paymentFilters, startDate: value })}
+                placeholder="Select start date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={paymentFilters.endDate}
-                onChange={(e) => setPaymentFilters({ ...paymentFilters, endDate: e.target.value })}
+                onChange={(value) => setPaymentFilters({ ...paymentFilters, endDate: value })}
+                placeholder="Select end date"
               />
             </div>
             <div className="flex items-end">
@@ -257,20 +290,20 @@ const FinancialReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={refundFilters.startDate}
-                onChange={(e) => setRefundFilters({ ...refundFilters, startDate: e.target.value })}
+                onChange={(value) => setRefundFilters({ ...refundFilters, startDate: value })}
+                placeholder="Select start date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={refundFilters.endDate}
-                onChange={(e) => setRefundFilters({ ...refundFilters, endDate: e.target.value })}
+                onChange={(value) => setRefundFilters({ ...refundFilters, endDate: value })}
+                placeholder="Select end date"
               />
             </div>
             <div>
@@ -299,6 +332,55 @@ const FinancialReportsTab = () => {
               >
                 <Download className="w-4 h-4" />
                 {refundLoading ? 'Generating...' : 'Download Excel'}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Promo Code Usage Report */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <div className="w-10 h-10 rounded-lg bg-purple-500 flex items-center justify-center text-white">
+              <Tag className="w-5 h-5" />
+            </div>
+            Promo Code Usage Report
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+            Monitor promo code usage and effectiveness during campaigns
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
+                Start Date
+              </label>
+              <DatePicker
+                value={promoFilters.startDate}
+                onChange={(value) => setPromoFilters({ ...promoFilters, startDate: value })}
+                placeholder="Select start date"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
+                End Date
+              </label>
+              <DatePicker
+                value={promoFilters.endDate}
+                onChange={(value) => setPromoFilters({ ...promoFilters, endDate: value })}
+                placeholder="Select end date"
+              />
+            </div>
+            <div className="flex items-end">
+              <Button
+                onClick={handleDownloadPromoCodeReport}
+                disabled={promoLoading}
+                className="w-full gap-2"
+              >
+                <Download className="w-4 h-4" />
+                {promoLoading ? 'Generating...' : 'Download Excel'}
               </Button>
             </div>
           </div>

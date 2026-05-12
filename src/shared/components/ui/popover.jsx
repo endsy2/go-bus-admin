@@ -44,31 +44,58 @@ export function PopoverTrigger({ children, asChild }) {
   );
 }
 
-export function PopoverContent({ children, className, align = "start" }) {
+export function PopoverContent({ children, className, align = "start", side = "bottom" }) {
   const { open, setOpen, triggerRef } = React.useContext(PopoverContext);
   const contentRef = React.useRef(null);
   const [position, setPosition] = React.useState({ top: 0, left: 0 });
+  const [actualSide, setActualSide] = React.useState(side);
 
   React.useEffect(() => {
-    if (open && triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    if (open && triggerRef.current && contentRef.current) {
+      // Small delay to ensure content is fully rendered before measuring
+      const timeoutId = setTimeout(() => {
+        if (!triggerRef.current || !contentRef.current) return;
+        
+        const rect = triggerRef.current.getBoundingClientRect();
+        const contentRect = contentRef.current.getBoundingClientRect();
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        
+        const viewportHeight = window.innerHeight;
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        
+        // Determine if we should show above or below
+        let finalSide = side;
+        if (side === "bottom" && spaceBelow < contentRect.height + 20 && spaceAbove > spaceBelow) {
+          finalSide = "top";
+        } else if (side === "top" && spaceAbove < contentRect.height + 20 && spaceBelow > spaceAbove) {
+          finalSide = "bottom";
+        }
+        
+        setActualSide(finalSide);
+        
+        let left = rect.left + scrollLeft;
+        
+        if (align === 'center') {
+          left = rect.left + scrollLeft + rect.width / 2;
+        } else if (align === 'end') {
+          left = rect.right + scrollLeft;
+        }
+        
+        const top = finalSide === "top" 
+          ? rect.top + scrollTop - contentRect.height - 8
+          : rect.bottom + scrollTop + 8;
+        
+        setPosition({
+          top: top,
+          left: left
+        });
+      }, 10);
       
-      let left = rect.left + scrollLeft;
-      
-      if (align === 'center') {
-        left = rect.left + scrollLeft + rect.width / 2;
-      } else if (align === 'end') {
-        left = rect.right + scrollLeft;
-      }
-      
-      setPosition({
-        top: rect.bottom + scrollTop + 8,
-        left: left
-      });
+      return () => clearTimeout(timeoutId);
     }
-  }, [open, align, triggerRef]);
+  }, [open, align, side, triggerRef]);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {

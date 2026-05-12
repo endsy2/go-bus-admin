@@ -10,7 +10,10 @@ class WebSocketService {
     this.reconnectDelay = 3000;
   }
 
-  connect(url = 'http://192.168.1.8:8080/bus-service/ws/bus') {
+  connect(url) {
+    // Use provided URL or construct from environment variable or default to localhost
+    const wsUrl = url || process.env.REACT_APP_WS_URL || 'http://localhost:8080/bus-service/ws/bus';
+    
     if (this.client?.connected) {
       console.log('[WebSocket] Already connected');
       return Promise.resolve();
@@ -26,50 +29,79 @@ class WebSocketService {
         if (storedUser) {
           try {
             const userData = JSON.parse(storedUser);
-            token = userData.token;
+            // Try both 'token' and 'accessToken' fields
+            token = userData.token || userData.accessToken;
             console.log('[WebSocket] Token extracted:', token ? `${token.substring(0, 20)}...` : 'Missing');
+            console.log('[WebSocket] User data keys:', Object.keys(userData));
           } catch (e) {
             console.error('[WebSocket] Failed to parse stored user:', e);
           }
+        } else {
+          console.warn('[WebSocket] No user data in localStorage');
+        }
+
+        if (!token) {
+          const errorMsg = 'Authentication token not found. Please login again.';
+          console.error('[WebSocket]', errorMsg);
+          console.error('[WebSocket] Please ensure user is logged in');
+          reject(new Error(errorMsg));
+          return;
         }
         
-        console.log('[WebSocket] Connecting with token:', token ? 'Present' : 'Missing');
+        console.log('[WebSocket] Connecting to:', wsUrl);
 
-        // Add token as query parameter if it exists
-        const connectionUrl = token ? `${url}?token=${encodeURIComponent(token)}` : url;
-        console.log('[WebSocket] Connection URL:', connectionUrl.replace(token || '', '***TOKEN***'));
+        // Add token as query parameter if available
+        const connectionUrl = token ? `${wsUrl}?token=${encodeURIComponent(token)}` : wsUrl;
 
         this.client = new Client({
           webSocketFactory: () => {
-            console.log('[WebSocket] Creating SockJS connection to:', connectionUrl.replace(token || '', '***TOKEN***'));
+            console.log('[WebSocket] Creating SockJS connection');
             return new SockJS(connectionUrl);
           },
-          connectHeaders: {
-            // Also try to add authorization header (for STOMP level)
-            ...(token && { Authorization: `Bearer ${token}` })
-          },
+          connectHeaders: token ? {
+            Authorization: `Bearer ${token}`
+          } : {},
           debug: (str) => {
-            console.log('STOMP Debug:', str);
+            // Only log important debug messages
+            if (str.includes('ERROR') || str.includes('CONNECT') || str.includes('DISCONNECT')) {
+              console.log('[STOMP]', str);
+            }
           },
           reconnectDelay: this.reconnectDelay,
           heartbeatIncoming: 4000,
           heartbeatOutgoing: 4000,
           onConnect: () => {
-            console.log('[WebSocket] Connected successfully');
+            console.log('[WebSocket] ✅ Connected successfully');
             this.reconnectAttempts = 0;
             resolve();
           },
           onStompError: (frame) => {
-            console.error('[WebSocket] STOMP error:', frame);
-            reject(new Error(frame.headers?.message || 'STOMP connection error'));
+            console.error('[WebSocket] ❌ STOMP error:', frame);
+            const errorMessage = frame.headers?.message || 'STOMP connection error';
+            
+            // Check if it's an authentication error
+            if (errorMessage.includes('401') || errorMessage.includes('Unauthorized') || errorMessage.includes('Authentication')) {
+              console.error('[WebSocket] Authentication failed - token may be invalid or expired');
+              console.error('[WebSocket] Please try logging out and logging in again');
+            }
+            
+            reject(new Error(errorMessage));
           },
           onWebSocketError: (error) => {
-            console.error('[WebSocket] WebSocket error:', error);
+            console.error('[WebSocket] ❌ WebSocket error:', error);
             reject(error);
+          },
+          onWebSocketClose: (event) => {
+            console.log('[WebSocket] Connection closed:', event.reason || 'Unknown reason');
+            if (event.code === 1006) {
+              console.error('[WebSocket] Abnormal closure - possible network issue or server down');
+            } else if (event.code === 1008) {
+              console.error('[WebSocket] Policy violation - likely authentication issue');
+            }
           },
           onDisconnect: () => {
             console.log('[WebSocket] Disconnected');
-            this.handleReconnect();
+            this.handleReconnect(wsUrl);
           }
         });
 
@@ -82,18 +114,18 @@ class WebSocketService {
     });
   }
 
-  handleReconnect() {
+  handleReconnect(url) {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++;
-      console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+      console.log(`[WebSocket] Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
       
       setTimeout(() => {
-        this.connect().catch(error => {
-          console.error('Reconnection failed:', error);
+        this.connect(url).catch(error => {
+          console.error('[WebSocket] Reconnection failed:', error);
         });
       }, this.reconnectDelay * this.reconnectAttempts);
     } else {
-      console.error('Max reconnection attempts reached');
+      console.error('[WebSocket] Max reconnection attempts reached');
     }
   }
 

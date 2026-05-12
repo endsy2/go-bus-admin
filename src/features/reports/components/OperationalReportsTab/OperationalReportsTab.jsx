@@ -3,6 +3,7 @@ import { Download, FileText, TrendingUp, Users, Ticket, MapPin } from 'lucide-re
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Input } from 'shared/components/common/Input';
+import { DatePicker } from 'shared/components/ui/date-picker';
 import {
   Select,
   SelectContent,
@@ -209,20 +210,20 @@ const OperationalReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={bookingFilters.startDate}
-                onChange={(e) => setBookingFilters({ ...bookingFilters, startDate: e.target.value })}
+                onChange={(value) => setBookingFilters({ ...bookingFilters, startDate: value })}
+                placeholder="Select start date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={bookingFilters.endDate}
-                onChange={(e) => setBookingFilters({ ...bookingFilters, endDate: e.target.value })}
+                onChange={(value) => setBookingFilters({ ...bookingFilters, endDate: value })}
+                placeholder="Select end date"
               />
             </div>
             <div>
@@ -276,20 +277,20 @@ const OperationalReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={routeRevenueFilters.startDate}
-                onChange={(e) => setRouteRevenueFilters({ ...routeRevenueFilters, startDate: e.target.value })}
+                onChange={(value) => setRouteRevenueFilters({ ...routeRevenueFilters, startDate: value })}
+                placeholder="Select start date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={routeRevenueFilters.endDate}
-                onChange={(e) => setRouteRevenueFilters({ ...routeRevenueFilters, endDate: e.target.value })}
+                onChange={(value) => setRouteRevenueFilters({ ...routeRevenueFilters, endDate: value })}
+                placeholder="Select end date"
               />
             </div>
             <div className="flex items-end">
@@ -325,20 +326,20 @@ const OperationalReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={popularRoutesFilters.startDate}
-                onChange={(e) => setPopularRoutesFilters({ ...popularRoutesFilters, startDate: e.target.value })}
+                onChange={(value) => setPopularRoutesFilters({ ...popularRoutesFilters, startDate: value })}
+                placeholder="Select start date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={popularRoutesFilters.endDate}
-                onChange={(e) => setPopularRoutesFilters({ ...popularRoutesFilters, endDate: e.target.value })}
+                onChange={(value) => setPopularRoutesFilters({ ...popularRoutesFilters, endDate: value })}
+                placeholder="Select end date"
               />
             </div>
             <div>
@@ -433,20 +434,20 @@ const OperationalReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={ticketSalesFilters.startDate}
-                onChange={(e) => setTicketSalesFilters({ ...ticketSalesFilters, startDate: e.target.value })}
+                onChange={(value) => setTicketSalesFilters({ ...ticketSalesFilters, startDate: value })}
+                placeholder="Select start date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={ticketSalesFilters.endDate}
-                onChange={(e) => setTicketSalesFilters({ ...ticketSalesFilters, endDate: e.target.value })}
+                onChange={(value) => setTicketSalesFilters({ ...ticketSalesFilters, endDate: value })}
+                placeholder="Select end date"
               />
             </div>
             <div>

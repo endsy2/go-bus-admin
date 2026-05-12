@@ -20,8 +20,8 @@ import { LayoutsPage } from './features/layouts';
 import { PromosPage } from './features/promos';
 import { WalletsPage } from './features/wallets';
 import { NotificationsPage } from './features/notifications';
-import { AdminPage } from './features/admin';
 import { ProfilePage } from './features/profile';
+import { RefundsPage } from './features/refunds';
 
 // Services
 import { setUnauthorizedHandler } from './services';
@@ -71,10 +71,10 @@ const MainLayout = ({ user, onLogout }) => {
             <Route path="/customers" element={<CustomersPage />} />
             <Route path="/promos" element={<PromosPage />} />
             <Route path="/wallets" element={<WalletsPage />} />
+            <Route path="/refunds" element={<RefundsPage />} />
             <Route path="/notifications" element={<NotificationsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
             <Route path="/team" element={<TeamPage />} />
-            <Route path="/admin" element={<AdminPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>

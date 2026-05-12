@@ -3,6 +3,7 @@ import { Download, Users, Award, PieChart, Calendar, Clock } from 'lucide-react'
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Input } from 'shared/components/common/Input';
+import { DatePicker } from 'shared/components/ui/date-picker';
 import {
   Select,
   SelectContent,
@@ -203,20 +204,20 @@ const CustomerReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={activeCustomerFilters.startDate}
-                onChange={(e) => setActiveCustomerFilters({ ...activeCustomerFilters, startDate: e.target.value })}
+                onChange={(value) => setActiveCustomerFilters({ ...activeCustomerFilters, startDate: value })}
+                placeholder="Select date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={activeCustomerFilters.endDate}
-                onChange={(e) => setActiveCustomerFilters({ ...activeCustomerFilters, endDate: e.target.value })}
+                onChange={(value) => setActiveCustomerFilters({ ...activeCustomerFilters, endDate: value })}
+                placeholder="Select date"
               />
             </div>
             <div className="flex items-end">
@@ -252,20 +253,20 @@ const CustomerReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={frequentTravelerFilters.startDate}
-                onChange={(e) => setFrequentTravelerFilters({ ...frequentTravelerFilters, startDate: e.target.value })}
+                onChange={(value) => setFrequentTravelerFilters({ ...frequentTravelerFilters, startDate: value })}
+                placeholder="Select date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={frequentTravelerFilters.endDate}
-                onChange={(e) => setFrequentTravelerFilters({ ...frequentTravelerFilters, endDate: e.target.value })}
+                onChange={(value) => setFrequentTravelerFilters({ ...frequentTravelerFilters, endDate: value })}
+                placeholder="Select date"
               />
             </div>
             <div>
@@ -320,20 +321,20 @@ const CustomerReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={demographicsFilters.startDate}
-                onChange={(e) => setDemographicsFilters({ ...demographicsFilters, startDate: e.target.value })}
+                onChange={(value) => setDemographicsFilters({ ...demographicsFilters, startDate: value })}
+                placeholder="Select date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={demographicsFilters.endDate}
-                onChange={(e) => setDemographicsFilters({ ...demographicsFilters, endDate: e.target.value })}
+                onChange={(value) => setDemographicsFilters({ ...demographicsFilters, endDate: value })}
+                placeholder="Select date"
               />
             </div>
             <div className="flex items-end">
@@ -369,20 +370,20 @@ const CustomerReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={patternsByDayFilters.startDate}
-                onChange={(e) => setPatternsByDayFilters({ ...patternsByDayFilters, startDate: e.target.value })}
+                onChange={(value) => setPatternsByDayFilters({ ...patternsByDayFilters, startDate: value })}
+                placeholder="Select date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={patternsByDayFilters.endDate}
-                onChange={(e) => setPatternsByDayFilters({ ...patternsByDayFilters, endDate: e.target.value })}
+                onChange={(value) => setPatternsByDayFilters({ ...patternsByDayFilters, endDate: value })}
+                placeholder="Select date"
               />
             </div>
             <div className="flex items-end">
@@ -418,20 +419,20 @@ const CustomerReportsTab = () => {
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 Start Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={patternsByHourFilters.startDate}
-                onChange={(e) => setPatternsByHourFilters({ ...patternsByHourFilters, startDate: e.target.value })}
+                onChange={(value) => setPatternsByHourFilters({ ...patternsByHourFilters, startDate: value })}
+                placeholder="Select date"
               />
             </div>
             <div>
               <label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1 block">
                 End Date
               </label>
-              <Input
-                type="date"
+              <DatePicker
                 value={patternsByHourFilters.endDate}
-                onChange={(e) => setPatternsByHourFilters({ ...patternsByHourFilters, endDate: e.target.value })}
+                onChange={(value) => setPatternsByHourFilters({ ...patternsByHourFilters, endDate: value })}
+                placeholder="Select date"
               />
             </div>
             <div className="flex items-end">

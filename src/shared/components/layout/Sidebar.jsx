@@ -72,6 +72,12 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
       requiresPermission: 'ADMIN_ACCESS'
     },
     { 
+      id: 'refunds', 
+      icon: <Icon name="dollarSign" />, 
+      label: t('refunds') || 'Refunds',
+      requiresPermission: 'ADMIN_ACCESS'
+    },
+    { 
       id: 'reports', 
       icon: <Icon name="barChart" />, 
       label: t('reports'),
