@@ -5,7 +5,7 @@ const reportService = {
   
   // Get dashboard statistics
   // getDashboardStats: async () => {
-  //   const response = await axiosInstance.get('/api/admin/dashboard/stats');
+  //   const response = await axiosInstance.get('/admin/dashboard/stats');
   //   return response.data;
   // },
 
@@ -13,7 +13,7 @@ const reportService = {
   
   // Get revenue report (Excel download)
   getRevenueReport: async (startDate, endDate, period = 'DAILY') => {
-    const response = await axiosInstance.get('/api/admin/financial-reports/revenue', {
+    const response = await axiosInstance.get('/admin/financial-reports/revenue', {
       params: { startDate, endDate, period },
       responseType: 'blob'
     });
@@ -22,7 +22,7 @@ const reportService = {
 
   // Get payment method report (Excel download)
   getPaymentMethodReport: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/financial-reports/payment-methods', {
+    const response = await axiosInstance.get('/admin/financial-reports/payment-methods', {
       params: { startDate, endDate },
       responseType: 'blob'
     });
@@ -31,7 +31,7 @@ const reportService = {
 
   // Get refund & cancellation report (Excel download)
   getRefundCancellationReport: async (startDate, endDate, period = 'DAILY') => {
-    const response = await axiosInstance.get('/api/admin/financial-reports/refunds-cancellations', {
+    const response = await axiosInstance.get('/admin/financial-reports/refunds-cancellations', {
       params: { startDate, endDate, period },
       responseType: 'blob'
     });
@@ -40,7 +40,7 @@ const reportService = {
 
   // Get promo code usage report (Excel download)
   getPromoCodeUsageReport: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/financial-reports/promo-codes', {
+    const response = await axiosInstance.get('/admin/financial-reports/promo-codes', {
       params: { startDate, endDate },
       responseType: 'blob'
     });
@@ -58,7 +58,7 @@ const reportService = {
     if (year) params.year = year;
     if (month) params.month = month;
     
-    const response = await axiosInstance.get('/api/admin/reports-operation/bookings', {
+    const response = await axiosInstance.get('/admin/reports-operation/bookings', {
       params,
       responseType: 'blob'
     });
@@ -67,7 +67,7 @@ const reportService = {
 
   // Get route revenue report (Excel download)
   getRouteRevenueReport: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/reports-operation/revenue/routes', {
+    const response = await axiosInstance.get('/admin/reports-operation/revenue/routes', {
       params: { startDate, endDate },
       responseType: 'blob'
     });
@@ -76,7 +76,7 @@ const reportService = {
 
   // Get popular routes report (Excel download)
   getPopularRoutesReport: async (startDate, endDate, limit = 10) => {
-    const response = await axiosInstance.get('/api/admin/reports-operation/routes/popular', {
+    const response = await axiosInstance.get('/admin/reports-operation/routes/popular', {
       params: { startDate, endDate, limit },
       responseType: 'blob'
     });
@@ -88,7 +88,7 @@ const reportService = {
     const params = {};
     if (scheduleId) params.scheduleId = scheduleId;
     
-    const response = await axiosInstance.get('/api/admin/report-operation/occupancy', {
+    const response = await axiosInstance.get('/admin/report-operation/occupancy', {
       params,
       responseType: 'blob'
     });
@@ -101,7 +101,7 @@ const reportService = {
     if (routeId) params.routeId = routeId;
     if (busId) params.busId = busId;
     
-    const response = await axiosInstance.get('/api/admin/reports-operation/tickets/sales', {
+    const response = await axiosInstance.get('/admin/reports-operation/tickets/sales', {
       params,
       responseType: 'blob'
     });
@@ -112,7 +112,7 @@ const reportService = {
   
   // Get active customer report (Excel download)
   getActiveCustomerReport: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/reports-customer/customers/active', {
+    const response = await axiosInstance.get('/admin/reports-customer/customers/active', {
       params: { startDate, endDate },
       responseType: 'blob'
     });
@@ -121,7 +121,7 @@ const reportService = {
 
   // Get frequent traveler report (Excel download)
   getFrequentTravelerReport: async (startDate, endDate, limit = 50) => {
-    const response = await axiosInstance.get('/api/admin/reports-customer/customers/frequent-travelers', {
+    const response = await axiosInstance.get('/admin/reports-customer/customers/frequent-travelers', {
       params: { startDate, endDate, limit },
       responseType: 'blob'
     });
@@ -130,7 +130,7 @@ const reportService = {
 
   // Get customer demographics report (Excel download)
   getCustomerDemographicsReport: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/reports-customer/customers/demographics', {
+    const response = await axiosInstance.get('/admin/reports-customer/customers/demographics', {
       params: { startDate, endDate },
       responseType: 'blob'
     });
@@ -139,7 +139,7 @@ const reportService = {
 
   // Get booking patterns by day report (Excel download)
   getBookingPatternsByDayReport: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/reports-customer/bookings/patterns-by-day', {
+    const response = await axiosInstance.get('/admin/reports-customer/bookings/patterns-by-day', {
       params: { startDate, endDate },
       responseType: 'blob'
     });
@@ -148,7 +148,7 @@ const reportService = {
 
   // Get booking patterns by hour report (Excel download)
   getBookingPatternsByHourReport: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/reports-customer/bookings/patterns-by-hour', {
+    const response = await axiosInstance.get('/admin/reports-customer/bookings/patterns-by-hour', {
       params: { startDate, endDate },
       responseType: 'blob'
     });
@@ -159,7 +159,7 @@ const reportService = {
   
   // Get bus utilization report (Excel download)
   getBusUtilizationReport: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/reports-bus/buses/utilization', {
+    const response = await axiosInstance.get('/admin/reports-bus/buses/utilization', {
       params: { startDate, endDate },
       responseType: 'blob'
     });
@@ -168,7 +168,7 @@ const reportService = {
 
   // Get route performance report (Excel download)
   getRoutePerformanceReport: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/reports-bus/routes/performance', {
+    const response = await axiosInstance.get('/admin/reports-bus/routes/performance', {
       params: { startDate, endDate },
       responseType: 'blob'
     });
@@ -177,7 +177,7 @@ const reportService = {
 
   // Get inactive bus report (Excel download)
   getInactiveBusReport: async (daysThreshold = 30) => {
-    const response = await axiosInstance.get('/api/admin/reports-bus/buses/inactive', {
+    const response = await axiosInstance.get('/admin/reports-bus/buses/inactive', {
       params: { daysThreshold },
       responseType: 'blob'
     });
@@ -186,7 +186,7 @@ const reportService = {
 
   // Get inactive route report (Excel download)
   getInactiveRouteReport: async (daysThreshold = 30) => {
-    const response = await axiosInstance.get('/api/admin/reports-bus/routes/inactive', {
+    const response = await axiosInstance.get('/admin/reports-bus/routes/inactive', {
       params: { daysThreshold },
       responseType: 'blob'
     });
@@ -195,7 +195,7 @@ const reportService = {
 
   // Get bus capacity analysis report (Excel download)
   getBusCapacityAnalysisReport: async (startDate, endDate) => {
-    const response = await axiosInstance.get('/api/admin/reports-bus/buses/capacity-analysis', {
+    const response = await axiosInstance.get('/admin/reports-bus/buses/capacity-analysis', {
       params: { startDate, endDate },
       responseType: 'blob'
     });

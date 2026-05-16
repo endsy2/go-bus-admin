@@ -9,7 +9,7 @@ const refundService = {
     params.append('page', page);
     params.append('size', size);
 
-    const response = await axiosInstance.get(`/api/admin/refunds?${params.toString()}`);
+    const response = await axiosInstance.get(`/admin/refunds?${params.toString()}`);
     return response.data;
   },
 
@@ -23,13 +23,13 @@ const refundService = {
     params.append('page', page);
     params.append('size', size);
 
-    const response = await axiosInstance.get(`/api/admin/refunds/date-range?${params.toString()}`);
+    const response = await axiosInstance.get(`/admin/refunds/date-range?${params.toString()}`);
     return response.data;
   },
 
   // Process refund (approve or reject)
   processRefund: async (refundId, approved, rejectionReason = null) => {
-    const response = await axiosInstance.put(`/api/admin/refunds/${refundId}/process`, {
+    const response = await axiosInstance.put(`/admin/refunds/${refundId}/process`, {
       approved,
       rejectionReason
     });
@@ -42,7 +42,7 @@ const refundService = {
     params.append('fromDate', fromDate);
     params.append('toDate', toDate);
 
-    const response = await axiosInstance.get(`/api/admin/refunds/statistics?${params.toString()}`);
+    const response = await axiosInstance.get(`/admin/refunds/statistics?${params.toString()}`);
     return response.data;
   },
 };

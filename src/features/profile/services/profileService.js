@@ -3,7 +3,7 @@ import axiosInstance from 'services/axiosConfig';
 const profileService = {
   // Get current user profile
   getProfile: async () => {
-    const response = await axiosInstance.get('/api/users/profile');
+    const response = await axiosInstance.get('/users/profile');
     return response.data;
   },
 
@@ -17,7 +17,7 @@ const profileService = {
       gender: profileData.gender,
     };
     
-    const response = await axiosInstance.put(`/api/users/${userId}`, updatePayload);
+    const response = await axiosInstance.put(`/users/${userId}`, updatePayload);
     return response.data;
   },
 
@@ -26,7 +26,7 @@ const profileService = {
     const formData = new FormData();
     formData.append('file', file);
     
-    const response = await axiosInstance.post('/api/profile/image', formData, {
+    const response = await axiosInstance.post('/profile/image', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
@@ -36,13 +36,13 @@ const profileService = {
 
   // Delete profile image
   deleteProfileImage: async () => {
-    const response = await axiosInstance.delete('/api/profile/image');
+    const response = await axiosInstance.delete('/profile/image');
     return response.data;
   },
 
   // Get profile image URL
   getProfileImageUrl: async () => {
-    const response = await axiosInstance.get('/api/profile/image/url');
+    const response = await axiosInstance.get('/profile/image/url');
     return response.data;
   },
 };
