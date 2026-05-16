@@ -3,7 +3,7 @@ import axiosInstance from 'services/axiosConfig';
 const scheduleService = {
   // Get all schedules with pagination
   getSchedules: async (pageNo = 1, pageSize = 10) => {
-    const response = await axiosInstance.get('/api/schedules', {
+    const response = await axiosInstance.get('/schedules', {
       params: { pageNo, pageSize }
     });
     return response.data;
@@ -11,25 +11,25 @@ const scheduleService = {
 
   // Get schedule by ID
   getScheduleById: async (id) => {
-    const response = await axiosInstance.get(`/api/schedules/${id}`);
+    const response = await axiosInstance.get(`/schedules/${id}`);
     return response.data;
   },
 
   // Create new schedule
   createSchedule: async (scheduleData) => {
-    const response = await axiosInstance.post('/api/schedules', scheduleData);
+    const response = await axiosInstance.post('/schedules', scheduleData);
     return response.data;
   },
 
   // Update schedule
   updateSchedule: async (id, scheduleData) => {
-    const response = await axiosInstance.put(`/api/schedules/${id}`, scheduleData);
+    const response = await axiosInstance.put(`/schedules/${id}`, scheduleData);
     return response.data;
   },
 
   // Delete schedule
   deleteSchedule: async (id) => {
-    const response = await axiosInstance.delete(`/api/schedules/${id}`);
+    const response = await axiosInstance.delete(`/schedules/${id}`);
     return response.data;
   },
 
@@ -57,19 +57,19 @@ const scheduleService = {
     params.append('pageNo', pageNo);
     params.append('pageSize', pageSize);
 
-    const response = await axiosInstance.get(`/api/schedules/filter/specification?${params.toString()}`);
+    const response = await axiosInstance.get(`/schedules/filter/specification?${params.toString()}`);
     return response.data;
   },
 
   // Get schedule seats by schedule ID
   getScheduleSeats: async (scheduleId) => {
-    const response = await axiosInstance.get(`/api/schedule-seats/schedule/${scheduleId}`);
+    const response = await axiosInstance.get(`/schedule-seats/schedule/${scheduleId}`);
     return response.data;
   },
 
   // Get bus details by schedule ID (legacy - if still needed)
   getBusBySchedule: async (scheduleId) => {
-    const response = await axiosInstance.get(`/api/buses/schedule/${scheduleId}`);
+    const response = await axiosInstance.get(`/buses/schedule/${scheduleId}`);
     return response.data;
   },
 };

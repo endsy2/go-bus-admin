@@ -20,7 +20,7 @@ const dashboardService = {
     }
     
     const queryString = queryParams.toString();
-    const url = `/api/admin/dashboard/stats${queryString ? `?${queryString}` : ''}`;
+    const url = `/admin/dashboard/stats${queryString ? `?${queryString}` : ''}`;
     
     return axiosInstance.get(url);
   },
@@ -44,7 +44,7 @@ const dashboardService = {
     }
     
     const queryString = queryParams.toString();
-    const url = `/api/admin/dashboard/velocity${queryString ? `?${queryString}` : ''}`;
+    const url = `/admin/dashboard/velocity${queryString ? `?${queryString}` : ''}`;
     
     return axiosInstance.get(url);
   },
@@ -68,7 +68,7 @@ const dashboardService = {
     }
     
     const queryString = queryParams.toString();
-    const url = `/api/admin/dashboard/revenue-stream${queryString ? `?${queryString}` : ''}`;
+    const url = `/admin/dashboard/revenue-stream${queryString ? `?${queryString}` : ''}`;
     
     return axiosInstance.get(url);
   },

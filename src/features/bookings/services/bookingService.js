@@ -12,25 +12,25 @@ const bookingService = {
     params.append('page', page);
     params.append('size', size);
 
-    const response = await axiosInstance.get(`/api/admin/bookings?${params.toString()}`);
+    const response = await axiosInstance.get(`/admin/bookings?${params.toString()}`);
     return response.data;
   },
 
   // Get booking by ID
   getBookingById: async (id) => {
-    const response = await axiosInstance.get(`/api/bookings/${id}`);
+    const response = await axiosInstance.get(`/bookings/${id}`);
     return response.data;
   },
 
   // Create booking
   createBooking: async (bookingData) => {
-    const response = await axiosInstance.post('/api/bookings', bookingData);
+    const response = await axiosInstance.post('/bookings', bookingData);
     return response.data;
   },
 
   // Admin: Force mark as paid
   forceMarkPaid: async (id) => {
-    const response = await axiosInstance.patch(`/api/admin/bookings/${id}/force-pay`);
+    const response = await axiosInstance.patch(`/admin/bookings/${id}/force-pay`);
     return response.data;
   },
 };
