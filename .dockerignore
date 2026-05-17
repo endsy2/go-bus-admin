@@ -13,3 +13,4 @@ coverage
 .idea
 *.md
 .DS_Store
+.claude
