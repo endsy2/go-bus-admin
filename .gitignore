@@ -25,3 +25,7 @@ yarn-error.log*
 # Claude Code
 CLAUDE.md
 *.md
+.env
+
+# Keep .env.production for Railway deployment
+# !.env.production
