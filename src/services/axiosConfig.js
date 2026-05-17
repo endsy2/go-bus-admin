@@ -6,7 +6,7 @@ console.log('REACT_APP_BASE_URL:', process.env.REACT_APP_BASE_URL);
 console.log('REACT_APP_WS_URL:', process.env.REACT_APP_WS_URL);
 console.log('NODE_ENV:', process.env.NODE_ENV);
 
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'https://go-bus-gateway-service-production.up.railway.app';
+const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
 console.log('✅ Using BASE_URL:', BASE_URL);
 
