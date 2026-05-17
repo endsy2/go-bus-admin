@@ -3,7 +3,7 @@ import { NavItem } from './NavItem';
 import { Icon } from 'shared/components/common/Icon';
 import { Button } from 'shared/components/ui/button';
 import { Avatar, AvatarFallback } from 'shared/components/ui/avatar';
-import { LogOut } from 'lucide-react';
+import { LogOut, Menu, X } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,7 @@ import { hasPermission } from 'shared/utils/permissions';
 
 export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { locale } = useLocale();
   
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
@@ -117,113 +118,155 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
     setShowLogoutDialog(false);
   };
 
-  return (
+  const handleNavItemClick = (id) => {
+    setActiveTab(id);
+    setIsMobileMenuOpen(false); // Close mobile menu after navigation
+  };
+
+  const SidebarContent = () => (
     <>
-      <div className="w-[260px] h-screen bg-white dark:bg-[#0A0E1A] text-gray-900 dark:text-white flex flex-col shadow-xl border-r border-gray-200 dark:border-gray-800 fixed left-0 top-0 z-[100] transition-colors duration-200">
-        {/* Header */}
-        <div className="px-6 py-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
-          <div className="mb-3 flex items-center justify-center">
-            <img 
-              src="/Blue Minimal Idea Free Education Logo.png" 
-              alt="GoBus Logo" 
-              className="max-w-[160px] h-auto max-h-16 object-contain rounded-xl" 
-            />
+      {/* Header */}
+      <div className="px-6 py-6 border-b border-gray-200 dark:border-gray-800 flex-shrink-0">
+        <div className="mb-3 flex items-center justify-center">
+          <img 
+            src="/Blue Minimal Idea Free Education Logo.png" 
+            alt="GoBus Logo" 
+            className="max-w-[160px] h-auto max-h-16 object-contain rounded-xl" 
+          />
+        </div>
+        <p className="text-sm text-center text-gray-600 dark:text-gray-400 font-medium">Go Bus Admin</p>
+      </div>
+
+      {/* Navigation */}
+      <nav className="py-4 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+        <div className="mb-5">
+          <div className="px-5 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
+            MAIN
           </div>
-          <p className="text-sm text-center text-gray-600 dark:text-gray-400 font-medium">Go Bus Admin</p>
+          <div className="space-y-1">
+            {menuItems.map(item => (
+              <NavItem
+                key={item.id}
+                icon={item.icon}
+                label={item.label}
+                active={activeTab === item.id}
+                onClick={() => handleNavItemClick(item.id)}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Navigation */}
-        <nav className="py-4 flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar">
+        {teamItems.length > 0 && (
           <div className="mb-5">
             <div className="px-5 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
-              MAIN
+              TEAM
             </div>
             <div className="space-y-1">
-              {menuItems.map(item => (
+              {teamItems.map(item => (
                 <NavItem
                   key={item.id}
                   icon={item.icon}
                   label={item.label}
                   active={activeTab === item.id}
-                  onClick={() => setActiveTab(item.id)}
+                  onClick={() => handleNavItemClick(item.id)}
                 />
               ))}
             </div>
           </div>
+        )}
+      </nav>
 
-          {teamItems.length > 0 && (
-            <div className="mb-5">
-              <div className="px-5 py-2 text-xs font-bold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-2">
-                TEAM
-              </div>
-              <div className="space-y-1">
-                {teamItems.map(item => (
-                  <NavItem
-                    key={item.id}
-                    icon={item.icon}
-                    label={item.label}
-                    active={activeTab === item.id}
-                    onClick={() => setActiveTab(item.id)}
-                  />
-                ))}
-              </div>
+      {/* User Profile Footer */}
+      <div className="p-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50 backdrop-blur-sm">
+        <button
+          onClick={() => handleNavItemClick('profile')}
+          className="w-full flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl mb-3 hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer"
+        >
+          <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-gray-300 dark:ring-gray-700">
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-base font-bold">
+              {user?.fullName ? user.fullName.charAt(0).toUpperCase() : '👤'}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex-1 overflow-hidden text-left">
+            <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+              {user?.userName || 'User'}
             </div>
-          )}
-        </nav>
-
-        {/* User Profile Footer */}
-        <div className="p-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50 backdrop-blur-sm">
-          <button
-            onClick={() => setActiveTab('profile')}
-            className="w-full flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl mb-3 hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer"
-          >
-            <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-gray-300 dark:ring-gray-700">
-              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-base font-bold">
-                {user?.fullName ? user.fullName.charAt(0).toUpperCase() : '👤'}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 overflow-hidden text-left">
-              <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                {user?.userName || 'User'}
-              </div>
-              <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                {user?.email || 'email'}
-              </div>
+            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+              {user?.email || 'email'}
             </div>
-          </button>
-          <Button 
-            variant="destructive" 
-            className="w-full bg-red-500/10 hover:bg-red-500/20 dark:bg-red-500/20 dark:hover:bg-red-500/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 transition-all duration-200"
-            onClick={handleLogoutClick}
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            {t('logout')}
-          </Button>
-        </div>
+          </div>
+        </button>
+        <Button 
+          variant="destructive" 
+          className="w-full bg-red-500/10 hover:bg-red-500/20 dark:bg-red-500/20 dark:hover:bg-red-500/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 transition-all duration-200"
+          onClick={handleLogoutClick}
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          {t('logout')}
+        </Button>
+      </div>
 
-        {/* Custom Scrollbar Styles */}
-        <style>{`
-          .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-            border-radius: 10px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(156, 163, 175, 0.3);
-            border-radius: 10px;
-          }
-          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(156, 163, 175, 0.5);
-          }
-          [data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: rgba(75, 85, 99, 0.5);
-          }
-          [data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: rgba(75, 85, 99, 0.7);
-          }
-        `}</style>
+      {/* Custom Scrollbar Styles */}
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(156, 163, 175, 0.3);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(156, 163, 175, 0.5);
+        }
+        [data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(75, 85, 99, 0.5);
+        }
+        [data-theme="dark"] .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(75, 85, 99, 0.7);
+        }
+      `}</style>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile Menu Button */}
+      <button
+        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        className="lg:hidden fixed top-4 left-4 z-[150] p-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700"
+        aria-label="Toggle menu"
+      >
+        {isMobileMenuOpen ? (
+          <X className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+        ) : (
+          <Menu className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+        )}
+      </button>
+
+      {/* Mobile Overlay */}
+      {isMobileMenuOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/50 z-[110] backdrop-blur-sm"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex w-[260px] h-screen bg-white dark:bg-[#0A0E1A] text-gray-900 dark:text-white flex-col shadow-xl border-r border-gray-200 dark:border-gray-800 fixed left-0 top-0 z-[100] transition-colors duration-200">
+        <SidebarContent />
+      </div>
+
+      {/* Mobile Sidebar */}
+      <div
+        className={`lg:hidden fixed left-0 top-0 h-screen w-[280px] bg-white dark:bg-[#0A0E1A] text-gray-900 dark:text-white flex flex-col shadow-2xl border-r border-gray-200 dark:border-gray-800 z-[120] transition-transform duration-300 ease-in-out ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <SidebarContent />
       </div>
 
       <Dialog open={showLogoutDialog} onOpenChange={cancelLogout}>

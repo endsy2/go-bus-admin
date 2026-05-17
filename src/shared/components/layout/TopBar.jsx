@@ -80,39 +80,42 @@ export const TopBar = () => {
   };
 
   return (
-    <div className="h-[60px] bg-background border-b flex items-center justify-between px-8 shadow-sm sticky top-0 z-[100]">
-      <div className="flex-1" />
+    <div className="h-[60px] bg-background border-b flex items-center justify-between px-4 sm:px-6 lg:px-8 shadow-sm sticky top-0 z-[100]">
+      {/* Spacer for mobile menu button */}
+      <div className="lg:hidden w-12" />
+      <div className="hidden lg:block flex-1" />
       
-      <div className="flex items-center gap-5">
+      <div className="flex items-center gap-3 sm:gap-5">
         {/* Language Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <Button
             variant="outline"
-            className="flex items-center gap-2.5 min-w-[140px]"
+            className="flex items-center gap-1.5 sm:gap-2.5 min-w-[100px] sm:min-w-[140px] text-xs sm:text-sm"
             onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
           >
-            <div className="flex items-center flex-shrink-0">{currentLanguage?.flag}</div>
-            <span className="flex-1 text-left">{currentLanguage?.name}</span>
+            <div className="flex items-center flex-shrink-0 scale-75 sm:scale-100">{currentLanguage?.flag}</div>
+            <span className="hidden sm:inline flex-1 text-left">{currentLanguage?.name}</span>
+            <span className="sm:hidden flex-1 text-left">{currentLanguage?.code.toUpperCase()}</span>
             <ChevronDown className={cn(
-              "h-3.5 w-3.5 transition-transform",
+              "h-3 w-3 sm:h-3.5 sm:w-3.5 transition-transform",
               isLangDropdownOpen && "rotate-180"
             )} />
           </Button>
           
           {isLangDropdownOpen && (
-            <div className="absolute top-[calc(100%+8px)] right-0 bg-background border rounded-lg shadow-lg min-w-[160px] overflow-hidden z-[1000]">
+            <div className="absolute top-[calc(100%+8px)] right-0 bg-background border rounded-lg shadow-lg min-w-[140px] sm:min-w-[160px] overflow-hidden z-[1000]">
               {languages.map(lang => (
                 <button
                   key={lang.code}
                   className={cn(
-                    "flex items-center gap-3 w-full px-4 py-3 text-sm font-medium transition-colors hover:bg-accent",
+                    "flex items-center gap-2 sm:gap-3 w-full px-3 sm:px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-medium transition-colors hover:bg-accent",
                     locale === lang.code && "bg-primary/10 text-primary"
                   )}
                   onClick={() => handleLanguageSelect(lang.code)}
                 >
-                  <div className="flex items-center flex-shrink-0">{lang.flag}</div>
+                  <div className="flex items-center flex-shrink-0 scale-75 sm:scale-100">{lang.flag}</div>
                   <span className="flex-1 text-left">{lang.name}</span>
-                  {locale === lang.code && <Check className="h-4 w-4" />}
+                  {locale === lang.code && <Check className="h-3 w-3 sm:h-4 sm:w-4" />}
                 </button>
               ))}
             </div>
@@ -120,9 +123,9 @@ export const TopBar = () => {
         </div>
 
         {/* Theme Toggle */}
-        <div className="flex items-center gap-2.5 text-muted-foreground">
-          <Sun className={cn("h-4 w-4 transition-opacity", isDark ? "opacity-40" : "opacity-100 text-orange-500")} />
-          <label className="relative inline-block w-11 h-6 cursor-pointer">
+        <div className="flex items-center gap-1.5 sm:gap-2.5 text-muted-foreground">
+          <Sun className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4 transition-opacity", isDark ? "opacity-40" : "opacity-100 text-orange-500")} />
+          <label className="relative inline-block w-9 h-5 sm:w-11 sm:h-6 cursor-pointer">
             <input 
               type="checkbox" 
               checked={isDark} 
@@ -134,12 +137,12 @@ export const TopBar = () => {
               isDark ? "bg-primary" : "bg-gray-300"
             )}>
               <span className={cn(
-                "absolute h-[18px] w-[18px] left-[3px] bottom-[3px] bg-white rounded-full transition-transform shadow-sm",
-                isDark && "translate-x-5"
+                "absolute h-[14px] w-[14px] sm:h-[18px] sm:w-[18px] left-[3px] bottom-[3px] bg-white rounded-full transition-transform shadow-sm",
+                isDark && "translate-x-4 sm:translate-x-5"
               )} />
             </span>
           </label>
-          <Moon className={cn("h-4 w-4 transition-opacity", isDark ? "opacity-100 text-yellow-400" : "opacity-40")} />
+          <Moon className={cn("h-3.5 w-3.5 sm:h-4 sm:w-4 transition-opacity", isDark ? "opacity-100 text-yellow-400" : "opacity-40")} />
         </div>
       </div>
     </div>
