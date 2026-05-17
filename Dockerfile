@@ -31,11 +31,8 @@ RUN echo "Building with:" && \
 # Build the application with environment variables
 RUN npm run build
 
-# Railway provides PORT environment variable
-ENV PORT=3000
-
 # Expose the port
-EXPOSE ${PORT}
+EXPOSE 3000
 
-# Serve the build folder using serve with Railway's PORT
-CMD ["sh", "-c", "serve -s build -l $PORT"]
+# Serve the build folder - Railway sets PORT at runtime
+CMD serve -s build -p ${PORT:-3000}
