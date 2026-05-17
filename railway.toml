@@ -1,0 +1,14 @@
+[build]
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
+
+[build.buildArgs]
+REACT_APP_BASE_URL = "${{REACT_APP_BASE_URL}}"
+REACT_APP_WS_URL = "${{REACT_APP_WS_URL}}"
+
+[deploy]
+startCommand = "serve -s build -l $PORT"
+healthcheckPath = "/"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
