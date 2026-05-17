@@ -1,6 +1,14 @@
 import axios from 'axios';
 
+// Debug: Log environment variables
+console.log('🔍 Environment Check:');
+console.log('REACT_APP_BASE_URL:', process.env.REACT_APP_BASE_URL);
+console.log('REACT_APP_WS_URL:', process.env.REACT_APP_WS_URL);
+console.log('NODE_ENV:', process.env.NODE_ENV);
+
 const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
+
+console.log('✅ Using BASE_URL:', BASE_URL);
 
 // Create axios instance with /api prefix
 const axiosInstance = axios.create({
