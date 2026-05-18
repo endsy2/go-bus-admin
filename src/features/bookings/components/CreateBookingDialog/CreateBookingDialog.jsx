@@ -697,10 +697,10 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-4xl min-h-[600px] max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
+      <DialogContent className="sm:max-w-4xl min-h-[500px] sm:min-h-[600px] max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-slate-900 dark:text-white">
-            <Ticket className="w-5 h-5 text-blue-500" />
+          <DialogTitle className="flex items-center gap-2 text-base sm:text-lg text-slate-900 dark:text-white">
+            <Ticket className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
             {t('createBooking') || 'Create Booking'} - Step {step} of 3
             {/* WebSocket Status Indicator (only show on step 2) */}
             {step === 2 && (
@@ -765,9 +765,9 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                 </div>
 
                 {/* Date and Price Filters */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <Label className="text-slate-700 dark:text-slate-300">{t('fromDate') || 'From Date'}</Label>
+                    <Label className="text-sm text-slate-700 dark:text-slate-300">{t('fromDate') || 'From Date'}</Label>
                     <DateTimePicker
                       value={scheduleFilters.fromDate}
                       onChange={(value) => {
@@ -785,7 +785,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                     {errors.fromDate && <p className="text-sm text-red-400 mt-1">{errors.fromDate}</p>}
                   </div>
                   <div>
-                    <Label className="text-slate-700 dark:text-slate-300">{t('toDate') || 'To Date'}</Label>
+                    <Label className="text-sm text-slate-700 dark:text-slate-300">{t('toDate') || 'To Date'}</Label>
                     <DateTimePicker
                       value={scheduleFilters.toDate}
                       onChange={(value) => {
@@ -818,10 +818,10 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
             </div>
 
             <div className="border-t border-slate-200 dark:border-slate-800 pt-4">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3">
+              <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white mb-3">
                 {t('availableSchedules') || 'Available Schedules'}
               </h3>
-              <div className="space-y-2 h-64 overflow-y-auto">
+              <div className="space-y-2 h-48 sm:h-64 overflow-y-auto">
                 {loadingSchedules ? (
                   <div className="text-center py-8 text-slate-600 dark:text-slate-400">
                     <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
@@ -842,41 +842,41 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                           : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
                       }`}
                     >
-                      <div className="flex justify-between items-start gap-4">
-                        <div className="flex-1">
+                      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-3 sm:gap-4">
+                        <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2 mb-2">
-                            <Bus className="w-4 h-4 text-blue-400" />
-                            <p className="font-semibold text-slate-900 dark:text-white">Bus #{schedule.busNumber}</p>
+                            <Bus className="w-4 h-4 text-blue-400 flex-shrink-0" />
+                            <p className="font-semibold text-sm sm:text-base text-slate-900 dark:text-white">Bus #{schedule.busNumber}</p>
                           </div>
                           
                           {schedule.route && (
-                            <div className="flex items-center gap-2 mb-2">
-                              <MapPin className="w-3 h-3 text-green-400" />
-                              <p className="text-sm text-slate-700 dark:text-slate-300">
-                                {schedule.route.origin} → {schedule.route.destination}
-                              </p>
-                              <span className="text-xs text-slate-500">
-                                ({schedule.route.distanceKm} km)
-                              </span>
+                            <div className="flex items-start gap-2 mb-2">
+                              <MapPin className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 break-words">
+                                  {schedule.route.origin} → {schedule.route.destination}
+                                </p>
+                                <span className="text-xs text-slate-500">
+                                  ({schedule.route.distanceKm} km)
+                                </span>
+                              </div>
                             </div>
                           )}
                           
-                          <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400">
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-green-400" />
-                              <span>Depart: {new Date(schedule.departureDateTime).toLocaleString()}</span>
+                          <div className="space-y-1">
+                            <div className="flex items-start gap-1 text-xs text-slate-600 dark:text-slate-400">
+                              <Clock className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
+                              <span className="break-words">Depart: {new Date(schedule.departureDateTime).toLocaleString()}</span>
                             </div>
-                          </div>
-                          <div className="flex items-center gap-4 text-xs text-slate-600 dark:text-slate-400 mt-1">
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-3 h-3 text-orange-400" />
-                              <span>Arrive: {new Date(schedule.arrivalDateTime).toLocaleString()}</span>
+                            <div className="flex items-start gap-1 text-xs text-slate-600 dark:text-slate-400">
+                              <Clock className="w-3 h-3 text-orange-400 flex-shrink-0 mt-0.5" />
+                              <span className="break-words">Arrive: {new Date(schedule.arrivalDateTime).toLocaleString()}</span>
                             </div>
                           </div>
                         </div>
                         
-                        <div className="text-right flex-shrink-0">
-                          <p className="text-2xl font-bold text-green-400">${schedule.price}</p>
+                        <div className="text-left sm:text-right flex-shrink-0">
+                          <p className="text-xl sm:text-2xl font-bold text-green-400">${schedule.price}</p>
                           <p className="text-xs text-slate-500">per seat</p>
                         </div>
                       </div>
@@ -886,12 +886,12 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
               </div>
             </div>
 
-            <DialogFooter className="gap-2">
+            <DialogFooter className="flex-col sm:flex-row gap-2">
               <Button
                 type="button"
                 variant="secondary"
                 onClick={handleClose}
-                className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white w-full sm:w-auto"
               >
                 {t('cancel') || 'Cancel'}
               </Button>
@@ -899,7 +899,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                 type="button"
                 onClick={handleNext}
                 disabled={!formData.scheduleId}
-                className="bg-blue-500 hover:bg-blue-600 text-white"
+                className="bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto"
               >
                 {t('next') || 'Next'}
               </Button>
@@ -917,75 +917,77 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
               </div>
             ) : busDetails ? (
               <>
-                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-slate-200 dark:border-slate-700">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                        <Bus className="w-5 h-5 text-blue-500" />
-                        Bus #{busDetails.busNumber}
+                <div className="bg-slate-50 dark:bg-slate-800 p-3 sm:p-4 rounded-lg border border-slate-200 dark:border-slate-700">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <Bus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 flex-shrink-0" />
+                        <span className="truncate">Bus #{busDetails.busNumber}</span>
                       </h3>
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs text-slate-500 mt-1 truncate">
                         {busDetails.plate} • {busDetails.model} • {busDetails.busType}
                       </p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
+                      <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-2">
                         {busDetails.totalSeats} total seats
                       </p>
                       {busDetails.route && (
-                        <p className="text-sm text-slate-700 dark:text-slate-300 mt-1 flex items-center gap-1">
-                          <MapPin className="w-3 h-3 text-green-400" />
-                          {busDetails.route.origin} → {busDetails.route.destination}
-                          <span className="text-xs text-slate-500">({busDetails.route.distanceKm} km)</span>
+                        <p className="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mt-1 flex items-start gap-1">
+                          <MapPin className="w-3 h-3 text-green-400 flex-shrink-0 mt-0.5" />
+                          <span className="break-words">
+                            {busDetails.route.origin} → {busDetails.route.destination}
+                            <span className="text-xs text-slate-500 ml-1">({busDetails.route.distanceKm} km)</span>
+                          </span>
                         </p>
                       )}
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-green-400">${selectedSchedule?.price}</p>
+                    <div className="text-left sm:text-right flex-shrink-0">
+                      <p className="text-xl sm:text-2xl font-bold text-green-400">${selectedSchedule?.price}</p>
                       <p className="text-xs text-slate-500">per seat</p>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
-                    <Armchair className="w-5 h-5 text-blue-500" />
-                    {t('selectSeats') || 'Select Seats'} ({selectedSeats.length} selected)
+                  <h3 className="text-base sm:text-lg font-semibold text-slate-900 dark:text-white mb-3 flex items-center gap-2">
+                    <Armchair className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
+                    <span className="text-sm sm:text-base">{t('selectSeats') || 'Select Seats'} ({selectedSeats.length} selected)</span>
                   </h3>
                   {errors.seats && (
-                    <p className="text-sm text-red-400 mb-2">{errors.seats}</p>
+                    <p className="text-xs sm:text-sm text-red-400 mb-2">{errors.seats}</p>
                   )}
                   
                   {/* Legend */}
-                  <div className="bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-3 mb-4">
-                    <div className="flex flex-wrap gap-4 text-xs">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-green-500 rounded flex items-center justify-center">
-                          <Armchair className="w-4 h-4 text-white" />
+                  <div className="bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-lg p-2 sm:p-3 mb-3 sm:mb-4">
+                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap gap-2 sm:gap-4 text-xs">
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded flex items-center justify-center flex-shrink-0">
+                          <Armchair className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                         </div>
-                        <span className="text-slate-700 dark:text-slate-300">Available</span>
+                        <span className="text-slate-700 dark:text-slate-300 text-xs">Available</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-blue-500 rounded flex items-center justify-center animate-pulse">
-                          <Armchair className="w-4 h-4 text-white" />
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-blue-500 rounded flex items-center justify-center animate-pulse flex-shrink-0">
+                          <Armchair className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                         </div>
-                        <span className="text-slate-700 dark:text-slate-300">Your Selection</span>
+                        <span className="text-slate-700 dark:text-slate-300 text-xs">Your Selection</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-orange-500 rounded flex items-center justify-center">
-                          <Armchair className="w-4 h-4 text-white" />
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-orange-500 rounded flex items-center justify-center flex-shrink-0">
+                          <Armchair className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                         </div>
-                        <span className="text-slate-700 dark:text-slate-300">Being Selected</span>
+                        <span className="text-slate-700 dark:text-slate-300 text-xs">Being Selected</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 bg-slate-300 dark:bg-slate-700 rounded flex items-center justify-center">
-                          <X className="w-4 h-4 text-slate-500" />
+                      <div className="flex items-center gap-1.5 sm:gap-2">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 bg-slate-300 dark:bg-slate-700 rounded flex items-center justify-center flex-shrink-0">
+                          <X className="w-3 h-3 sm:w-4 sm:h-4 text-slate-500" />
                         </div>
-                        <span className="text-slate-700 dark:text-slate-300">Booked</span>
+                        <span className="text-slate-700 dark:text-slate-300 text-xs">Booked</span>
                       </div>
                     </div>
                   </div>
 
                   {/* Seat Grid - Layout with Driver and Aisles */}
-                  <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-6">
+                  <div className="bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg p-3 sm:p-6">
                     {scheduleSeats.length > 0 && busDetails.layout ? (
                       (() => {
                         try {
@@ -1007,10 +1009,10 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                           });
                           
                           return (
-                            <div className="overflow-x-auto pb-6">
+                            <div className="overflow-x-auto pb-4 sm:pb-6">
                               {/* Driver Row */}
                               {driverColumn && (
-                                <div className="mb-4 flex gap-2 justify-center">
+                                <div className="mb-3 sm:mb-4 flex gap-1 sm:gap-2 justify-center">
                                   {Array.from({ length: columns || 0 }).map((_, colIndex) => {
                                     const isDriver = driverColumn === colIndex + 1;
                                     const isAisle = aisleColsArray.includes(colIndex);
@@ -1018,15 +1020,15 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                                     return (
                                       <div key={`driver-${colIndex}`}>
                                         {isDriver ? (
-                                          <div className="w-16 h-16 bg-slate-800 dark:bg-slate-700 rounded-lg flex items-center justify-center text-white font-bold text-2xl border-2 border-slate-600">
+                                          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-800 dark:bg-slate-700 rounded-lg flex items-center justify-center text-white font-bold text-xl sm:text-2xl border-2 border-slate-600">
                                             🚗
                                           </div>
                                         ) : isAisle ? (
-                                          <div className="w-16 h-16 bg-slate-100 dark:bg-slate-700 border-2 border-dashed border-slate-400 dark:border-slate-500 rounded-lg flex items-center justify-center">
-                                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">AISLE</span>
+                                          <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 dark:bg-slate-700 border-2 border-dashed border-slate-400 dark:border-slate-500 rounded-lg flex items-center justify-center">
+                                            <span className="text-[8px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-bold">AISLE</span>
                                           </div>
                                         ) : (
-                                          <div className="w-16 h-16"></div>
+                                          <div className="w-12 h-12 sm:w-16 sm:h-16"></div>
                                         )}
                                       </div>
                                     );
@@ -1035,9 +1037,9 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                               )}
 
                               {/* Customer Seats Grid */}
-                              <div className="flex flex-col gap-2 items-center">
+                              <div className="flex flex-col gap-1 sm:gap-2 items-center">
                                 {layoutSeats.map((row, rowIndex) => (
-                                  <div key={rowIndex} className="flex gap-2">
+                                  <div key={rowIndex} className="flex gap-1 sm:gap-2">
                                     {row.map((seat, colIndex) => {
                                       const isAisle = aisleColsArray.includes(colIndex);
                                       const scheduleSeat = seatMap[seat.seatNumber];
@@ -1073,7 +1075,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                                         return (
                                           <div
                                             key={`${rowIndex}-${colIndex}`}
-                                            className="w-16 h-16 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900/50"
+                                            className="w-12 h-12 sm:w-16 sm:h-16 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-900/50"
                                           />
                                         );
                                       }
@@ -1082,9 +1084,9 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                                         return (
                                           <div
                                             key={`${rowIndex}-${colIndex}`}
-                                            className="w-16 h-16 bg-slate-100 dark:bg-slate-700 border-2 border-dashed border-slate-400 dark:border-slate-500 rounded-lg flex items-center justify-center"
+                                            className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 dark:bg-slate-700 border-2 border-dashed border-slate-400 dark:border-slate-500 rounded-lg flex items-center justify-center"
                                           >
-                                            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold">AISLE</span>
+                                            <span className="text-[8px] sm:text-[10px] text-slate-500 dark:text-slate-400 font-bold">AISLE</span>
                                           </div>
                                         );
                                       }
@@ -1093,10 +1095,10 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                                         return (
                                           <div
                                             key={`${rowIndex}-${colIndex}`}
-                                            className="w-16 h-16 bg-slate-300 dark:bg-slate-600 rounded-lg flex flex-col items-center justify-center opacity-50"
+                                            className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-300 dark:bg-slate-600 rounded-lg flex flex-col items-center justify-center opacity-50"
                                           >
-                                            <X className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-                                            <span className="text-xs font-mono mt-1 text-slate-600 dark:text-slate-300">{seat.seatNumber}</span>
+                                            <X className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-300" />
+                                            <span className="text-[10px] sm:text-xs font-mono mt-0.5 sm:mt-1 text-slate-600 dark:text-slate-300">{seat.seatNumber}</span>
                                           </div>
                                         );
                                       }
@@ -1112,15 +1114,15 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                                               }
                                             }}
                                             disabled={isBooked || isPendingByOther}
-                                            className={`w-16 h-16 rounded-lg flex flex-col items-center justify-center transition-all ${seatColor}`}
+                                            className={`w-12 h-12 sm:w-16 sm:h-16 rounded-lg flex flex-col items-center justify-center transition-all ${seatColor}`}
                                           >
                                             {isBooked ? (
-                                              <X className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                                              <X className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-300" />
                                             ) : (
-                                              <Armchair className="w-6 h-6" />
+                                              <Armchair className="w-4 h-4 sm:w-6 sm:h-6" />
                                             )}
                                           </button>
-                                          <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 text-[10px] font-mono text-slate-600 dark:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                                          <div className="absolute -bottom-4 sm:-bottom-5 left-1/2 -translate-x-1/2 text-[8px] sm:text-[10px] font-mono text-slate-600 dark:text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                                             {scheduleSeat.seatNumber}
                                             {isPendingByOther && ' (Locked)'}
                                           </div>
@@ -1142,7 +1144,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                         }
                       })()
                     ) : scheduleSeats.length > 0 ? (
-                      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2">
+                      <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-1.5 sm:gap-2">
                         {scheduleSeats.map((scheduleSeat) => {
                           const isSelected = selectedSeats.find(s => s.id === scheduleSeat.id);
                           const isAvailable = scheduleSeat.status === 'AVAILABLE';
@@ -1182,14 +1184,14 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                                 }
                               }}
                               disabled={isBooked || isPendingByOther}
-                              className={`h-16 rounded-lg flex flex-col items-center justify-center transition-all relative group ${seatColor}`}
+                              className={`h-12 sm:h-16 rounded-lg flex flex-col items-center justify-center transition-all relative group ${seatColor}`}
                             >
                               {isBooked ? (
-                                <X className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+                                <X className="w-4 h-4 sm:w-5 sm:h-5 text-slate-600 dark:text-slate-300" />
                               ) : (
-                                <Armchair className="w-5 h-5" />
+                                <Armchair className="w-4 h-4 sm:w-5 sm:h-5" />
                               )}
-                              <span className="text-xs font-mono mt-1">{scheduleSeat.seatNumber}</span>
+                              <span className="text-[10px] sm:text-xs font-mono mt-0.5 sm:mt-1">{scheduleSeat.seatNumber}</span>
                               {isPendingByOther && (
                                 <span className="absolute top-0 right-0 text-[8px] bg-red-500 text-white px-1 rounded">🔒</span>
                               )}
@@ -1206,16 +1208,16 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                   </div>
                 </div>
 
-                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-700 dark:text-slate-300">Selected Seats:</span>
-                    <span className="font-semibold text-slate-900 dark:text-white">
+                <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-3 sm:p-4">
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
+                    <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">Selected Seats:</span>
+                    <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white break-words">
                       {selectedSeats.map(s => s.seatNumber).join(', ') || 'None'}
                     </span>
                   </div>
-                  <div className="flex justify-between items-center mt-2">
-                    <span className="text-slate-700 dark:text-slate-300">Total Amount:</span>
-                    <span className="text-xl font-bold text-green-400">${totalAmount.toFixed(2)}</span>
+                  <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1 sm:gap-2 mt-2 pt-2 border-t border-blue-500/20">
+                    <span className="text-xs sm:text-sm text-slate-700 dark:text-slate-300">Total Amount:</span>
+                    <span className="text-lg sm:text-xl font-bold text-green-400">${totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
               </>
@@ -1225,12 +1227,12 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
               </div>
             )}
 
-            <DialogFooter className="gap-2">
+            <DialogFooter className="flex-col sm:flex-row gap-2">
               <Button
                 type="button"
                 variant="secondary"
                 onClick={handleBack}
-                className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white w-full sm:w-auto"
               >
                 {t('back') || 'Back'}
               </Button>
@@ -1238,7 +1240,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                 type="button"
                 onClick={handleNext}
                 disabled={selectedSeats.length === 0}
-                className="bg-blue-500 hover:bg-blue-600 text-white"
+                className="bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto"
               >
                 {t('next') || 'Next'}
               </Button>
