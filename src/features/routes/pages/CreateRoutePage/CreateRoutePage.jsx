@@ -19,8 +19,10 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
     destination: '',
     distanceKm: '',
     durationMinutes: '',
-    lat: '',
-    lng: '',
+    originLat: '',
+    originLng: '',
+    destLat: '',
+    destLng: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -56,11 +58,13 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
         if (isNaN(value) || parseInt(value) <= 0) return t('durationInvalid') || 'Enter a valid positive number';
         if (parseInt(value) > 10080) return t('durationTooLarge') || 'Duration exceeds 1 week';
         return '';
-      case 'lat':
+      case 'originLat':
+      case 'destLat':
         if (value && (isNaN(value) || parseFloat(value) < -90 || parseFloat(value) > 90))
           return t('latInvalid') || 'Latitude must be between -90 and 90';
         return '';
-      case 'lng':
+      case 'originLng':
+      case 'destLng':
         if (value && (isNaN(value) || parseFloat(value) < -180 || parseFloat(value) > 180))
           return t('lngInvalid') || 'Longitude must be between -180 and 180';
         return '';
@@ -105,8 +109,12 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
 
     setSubmitting(true);
     try {
-      const locationValue = formData.lat && formData.lng
-        ? JSON.stringify({ lat: parseFloat(formData.lat), lng: parseFloat(formData.lng) })
+      const originLocationValue = formData.originLat && formData.originLng
+        ? JSON.stringify({ lat: parseFloat(formData.originLat), lng: parseFloat(formData.originLng) })
+        : null;
+
+      const destinationLocationValue = formData.destLat && formData.destLng
+        ? JSON.stringify({ lat: parseFloat(formData.destLat), lng: parseFloat(formData.destLng) })
         : null;
 
       const payload = {
@@ -114,7 +122,8 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
         destination: formData.destination.trim(),
         distanceKm: parseFloat(formData.distanceKm),
         durationMinutes: parseInt(formData.durationMinutes),
-        ...(locationValue && { location: locationValue }),
+        ...(originLocationValue && { originLocation: originLocationValue }),
+        ...(destinationLocationValue && { destinationLocation: destinationLocationValue }),
       };
 
       const response = await apiRequest(`${BASE_URL}/api/routes`, {
@@ -137,7 +146,8 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
   };
 
   const durationPreview = formatDurationPreview(formData.durationMinutes);
-  const hasCoords = formData.lat && formData.lng;
+  const hasOriginCoords = formData.originLat && formData.originLng;
+  const hasDestCoords = formData.destLat && formData.destLng;
   const requiredFields = 4;
   const progress = Math.min(
     Math.round((Object.entries(formData)
@@ -373,78 +383,161 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                     {t('locationCoordinates') || 'GPS Coordinates'}
                     <span className="text-xs font-semibold bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded-full uppercase tracking-wide">{t('optional') || 'Optional'}</span>
                   </h2>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('coordsDesc') || 'Add coordinates to show this route on an interactive map'}</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">{t('coordsDesc') || 'Add coordinates for origin and destination to show on map'}</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-gray-900 dark:text-white">Latitude</label>
-                  <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-500/10 transition-all">
-                    <span className="px-3 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LAT</span>
-                    <input
-                      type="number"
-                      name="lat"
-                      value={formData.lat}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      placeholder="e.g. 11.5564"
-                      step="0.0001"
-                      className={`flex-1 px-3 py-3 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${errors.lat ? 'text-red-600' : ''}`}
-                    />
+              {/* Origin Coordinates */}
+              <div className="mb-5">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_0_3px_rgba(59,130,246,0.2)]"></span>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t('originCoordinates') || 'Origin Coordinates'}</h3>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-gray-900 dark:text-white">Latitude</label>
+                    <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
+                      <span className="px-3 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LAT</span>
+                      <input
+                        type="number"
+                        name="originLat"
+                        value={formData.originLat}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="e.g. 11.5564"
+                        step="0.0001"
+                        className={`flex-1 px-3 py-3 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${errors.originLat ? 'text-red-600' : ''}`}
+                      />
+                    </div>
+                    {touched.originLat && errors.originLat && (
+                      <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        {errors.originLat}
+                      </span>
+                    )}
                   </div>
-                  {touched.lat && errors.lat && (
-                    <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-                      </svg>
-                      {errors.lat}
-                    </span>
-                  )}
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-gray-900 dark:text-white">Longitude</label>
+                    <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/10 transition-all">
+                      <span className="px-3 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LNG</span>
+                      <input
+                        type="number"
+                        name="originLng"
+                        value={formData.originLng}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="e.g. 104.9282"
+                        step="0.0001"
+                        className={`flex-1 px-3 py-3 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${errors.originLng ? 'text-red-600' : ''}`}
+                      />
+                    </div>
+                    {touched.originLng && errors.originLng && (
+                      <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        {errors.originLng}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex flex-col gap-1.5">
-                  <label className="text-sm font-semibold text-gray-900 dark:text-white">Longitude</label>
-                  <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-purple-500 focus-within:ring-4 focus-within:ring-purple-500/10 transition-all">
-                    <span className="px-3 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LNG</span>
-                    <input
-                      type="number"
-                      name="lng"
-                      value={formData.lng}
-                      onChange={handleChange}
-                      onBlur={handleBlur}
-                      placeholder="e.g. 104.9282"
-                      step="0.0001"
-                      className={`flex-1 px-3 py-3 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${errors.lng ? 'text-red-600' : ''}`}
+                {hasOriginCoords && !errors.originLat && !errors.originLng && (
+                  <div className="mt-3 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden animate-[fadeIn_0.3s_ease]">
+                    <div className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 font-semibold text-sm text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                      </svg>
+                      {t('originMapPreview') || 'Origin Map Preview'}
+                    </div>
+                    <iframe
+                      title="Origin Coordinate Preview"
+                      className="w-full h-50 border-0"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(formData.originLng) - 0.1},${parseFloat(formData.originLat) - 0.08},${parseFloat(formData.originLng) + 0.1},${parseFloat(formData.originLat) + 0.08}&layer=mapnik&marker=${formData.originLat},${formData.originLng}`}
+                      loading="lazy"
                     />
                   </div>
-                  {touched.lng && errors.lng && (
-                    <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
-                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
-                      </svg>
-                      {errors.lng}
-                    </span>
-                  )}
-                </div>
+                )}
               </div>
 
-              {hasCoords && !errors.lat && !errors.lng && (
-                <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden animate-[fadeIn_0.3s_ease]">
-                  <div className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 font-semibold text-sm text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700">
-                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
-                    </svg>
-                    {t('mapPreview') || 'Map Preview'}
-                  </div>
-                  <iframe
-                    title="Coordinate Preview"
-                    className="w-full h-50 border-0"
-                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(formData.lng) - 0.1},${parseFloat(formData.lat) - 0.08},${parseFloat(formData.lng) + 0.1},${parseFloat(formData.lat) + 0.08}&layer=mapnik&marker=${formData.lat},${formData.lng}`}
-                    loading="lazy"
-                  />
+              {/* Destination Coordinates */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]"></span>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t('destinationCoordinates') || 'Destination Coordinates'}</h3>
                 </div>
-              )}
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-gray-900 dark:text-white">Latitude</label>
+                    <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all">
+                      <span className="px-3 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LAT</span>
+                      <input
+                        type="number"
+                        name="destLat"
+                        value={formData.destLat}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="e.g. 13.3671"
+                        step="0.0001"
+                        className={`flex-1 px-3 py-3 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${errors.destLat ? 'text-red-600' : ''}`}
+                      />
+                    </div>
+                    {touched.destLat && errors.destLat && (
+                      <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        {errors.destLat}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex flex-col gap-1.5">
+                    <label className="text-sm font-semibold text-gray-900 dark:text-white">Longitude</label>
+                    <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-500/10 transition-all">
+                      <span className="px-3 py-3 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LNG</span>
+                      <input
+                        type="number"
+                        name="destLng"
+                        value={formData.destLng}
+                        onChange={handleChange}
+                        onBlur={handleBlur}
+                        placeholder="e.g. 103.8448"
+                        step="0.0001"
+                        className={`flex-1 px-3 py-3 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${errors.destLng ? 'text-red-600' : ''}`}
+                      />
+                    </div>
+                    {touched.destLng && errors.destLng && (
+                      <span className="flex items-center gap-1.5 text-xs text-red-600 dark:text-red-400 font-medium">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" />
+                        </svg>
+                        {errors.destLng}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {hasDestCoords && !errors.destLat && !errors.destLng && (
+                  <div className="mt-3 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden animate-[fadeIn_0.3s_ease]">
+                    <div className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 font-semibold text-sm text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                      </svg>
+                      {t('destinationMapPreview') || 'Destination Map Preview'}
+                    </div>
+                    <iframe
+                      title="Destination Coordinate Preview"
+                      className="w-full h-50 border-0"
+                      src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(formData.destLng) - 0.1},${parseFloat(formData.destLat) - 0.08},${parseFloat(formData.destLng) + 0.1},${parseFloat(formData.destLat) + 0.08}&layer=mapnik&marker=${formData.destLat},${formData.destLng}`}
+                      loading="lazy"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
 
             <div className="flex justify-end gap-3 pt-1">
@@ -541,10 +634,21 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 flex-shrink-0">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
                   </svg>
-                  <span className="text-sm text-gray-600 dark:text-gray-400 font-medium flex-1">GPS</span>
+                  <span className="text-sm text-gray-600 dark:text-gray-400 font-medium flex-1">Origin GPS</span>
                   <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
-                    {hasCoords
-                      ? `${parseFloat(formData.lat).toFixed(4)}, ${parseFloat(formData.lng).toFixed(4)}`
+                    {hasOriginCoords
+                      ? `${parseFloat(formData.originLat).toFixed(4)}, ${parseFloat(formData.originLng).toFixed(4)}`
+                      : <span className="text-gray-400 dark:text-gray-500">—</span>}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 flex-shrink-0">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+                  </svg>
+                  <span className="text-sm text-gray-600 dark:text-gray-400 font-medium flex-1">Dest GPS</span>
+                  <span className="text-sm font-bold text-gray-900 dark:text-white font-mono">
+                    {hasDestCoords
+                      ? `${parseFloat(formData.destLat).toFixed(4)}, ${parseFloat(formData.destLng).toFixed(4)}`
                       : <span className="text-gray-400 dark:text-gray-500">—</span>}
                   </span>
                 </div>

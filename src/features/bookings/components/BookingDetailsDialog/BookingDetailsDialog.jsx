@@ -72,9 +72,9 @@ const BookingDetailsDialog = ({ open, onClose, bookingId }) => {
     <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-3xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-2xl">
-            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-2 rounded-lg">
-              <Bus className="w-6 h-6 text-white" />
+          <DialogTitle className="flex items-center gap-2 text-xl sm:text-2xl">
+            <div className="bg-gradient-to-br from-indigo-500 to-purple-600 p-1.5 sm:p-2 rounded-lg">
+              <Bus className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             {t('bookingDetails') || 'Booking Details'}
           </DialogTitle>
@@ -92,21 +92,21 @@ const BookingDetailsDialog = ({ open, onClose, bookingId }) => {
         ) : booking ? (
           <div className="space-y-6">
             {/* Booking Status */}
-            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-5 border border-indigo-200 dark:border-indigo-800">
-              <div className="flex justify-between items-center">
+            <div className="bg-gradient-to-br from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 rounded-xl p-4 sm:p-5 border border-indigo-200 dark:border-indigo-800">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
                 <div>
-                  <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">
+                  <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 mb-1">
                     {t('bookingId') || 'Booking ID'}: #{booking.id}
                   </h3>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">
+                  <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400">
                     {t('createdAt') || 'Created'}: {booking.createdAt ? new Date(booking.createdAt).toLocaleString() : 'N/A'}
                   </p>
                 </div>
-                <div className="flex gap-2">
-                  <Badge variant={getStatusColor(booking.bookingStatus)}>
+                <div className="flex gap-2 flex-wrap">
+                  <Badge variant={getStatusColor(booking.bookingStatus)} className="text-xs">
                     {booking.bookingStatus}
                   </Badge>
-                  <Badge variant={getPaymentStatusColor(booking.paymentStatus)}>
+                  <Badge variant={getPaymentStatusColor(booking.paymentStatus)} className="text-xs">
                     {booking.paymentStatus}
                   </Badge>
                 </div>
@@ -114,12 +114,12 @@ const BookingDetailsDialog = ({ open, onClose, bookingId }) => {
             </div>
 
             {/* Customer Information */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <User className="w-5 h-5 text-indigo-600" />
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 sm:p-5 border border-slate-200 dark:border-slate-700">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 mb-3 sm:mb-4 flex items-center gap-2">
+                <User className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                 {t('customerInformation') || 'Customer Information'}
               </h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">
                     {t('name') || 'Name'}
@@ -150,12 +150,12 @@ const BookingDetailsDialog = ({ open, onClose, bookingId }) => {
             </div>
 
             {/* Schedule Information */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-indigo-600" />
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 sm:p-5 border border-slate-200 dark:border-slate-700">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 mb-3 sm:mb-4 flex items-center gap-2">
+                <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                 {t('scheduleInformation') || 'Schedule Information'}
               </h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">
                     {t('scheduleId') || 'Schedule ID'}
@@ -216,12 +216,12 @@ const BookingDetailsDialog = ({ open, onClose, bookingId }) => {
 
             {/* Seat Information */}
             {booking.seats && booking.seats.length > 0 && (
-              <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                  <Armchair className="w-5 h-5 text-indigo-600" />
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-4 sm:p-5 border border-slate-200 dark:border-slate-700">
+                <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 mb-3 sm:mb-4 flex items-center gap-2">
+                  <Armchair className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                   {t('seatInformation') || 'Seat Information'}
                 </h3>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {booking.seats.map((seat, index) => (
                     <div 
                       key={index}
@@ -238,12 +238,12 @@ const BookingDetailsDialog = ({ open, onClose, bookingId }) => {
             )}
 
             {/* Payment Information */}
-            <div className="bg-white dark:bg-slate-800 rounded-xl p-5 border border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-4 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-indigo-600" />
+            <div className="bg-white dark:bg-slate-800 rounded-xl p-4 sm:p-5 border border-slate-200 dark:border-slate-700">
+              <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 mb-3 sm:mb-4 flex items-center gap-2">
+                <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" />
                 {t('paymentInformation') || 'Payment Information'}
               </h3>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                 <div>
                   <p className="text-sm text-slate-600 dark:text-slate-400 mb-1">
                     {t('paymentMethod') || 'Payment Method'}

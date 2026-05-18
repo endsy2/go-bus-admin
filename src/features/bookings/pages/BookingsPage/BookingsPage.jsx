@@ -149,30 +149,31 @@ const BookingsPage = () => {
   };
 
   return (
-    <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
-      <div className="flex justify-between items-center mb-8">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6 sm:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-3">
-            <Ticket className="w-7 h-7 text-blue-500" />
-            {t('bookingsManagement') || 'Bookings Management'}
-            <span className="flex items-center gap-2 text-sm font-normal">
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2 sm:gap-3 flex-wrap">
+            <Ticket className="w-6 h-6 sm:w-7 sm:h-7 text-blue-500" />
+            <span>{t('bookingsManagement') || 'Bookings Management'}</span>
+            <span className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-normal">
               {wsConnected ? (
                 <>
-                  <Wifi className="w-4 h-4 text-green-500" />
-                  <span className="text-green-500">Live</span>
+                  <Wifi className="w-3 h-3 sm:w-4 sm:h-4 text-green-500" />
+                  <span className="text-green-500 hidden sm:inline">Live</span>
                 </>
               ) : (
                 <>
-                  <WifiOff className="w-4 h-4 text-slate-400" />
-                  <span className="text-slate-400">Offline</span>
+                  <WifiOff className="w-3 h-3 sm:w-4 sm:h-4 text-slate-400" />
+                  <span className="text-slate-400 hidden sm:inline">Offline</span>
                 </>
               )}
             </span>
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-base">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
             {t('manageAllBusTicketBookings') || 'Manage all bus ticket bookings'}
             {wsConnected && (
-              <span className="ml-2 text-xs text-green-500">
+              <span className="ml-2 text-xs text-green-500 hidden sm:inline">
                 • Real-time updates enabled
               </span>
             )}
@@ -181,62 +182,78 @@ const BookingsPage = () => {
         <Button
           variant="primary"
           onClick={() => setCreateDialogOpen(true)}
-          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+          className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white w-full sm:w-auto"
         >
-          <Plus className="w-5 h-5" />
-          {t('createBooking') || 'Create Booking'}
+          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+          <span>{t('createBooking') || 'Create Booking'}</span>
         </Button>
       </div>
 
-      {/* Filters — always mounted so local state is preserved across fetches */}
+      {/* Filters */}
       <BookingFilters
         onFilterChange={handleFilterChange}
         onReset={handleResetFilters}
       />
 
-      {/* Bookings Table */}
+      {/* Bookings Content */}
       {loading ? (
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-                <tr>
-                  {['Booking ID', 'Customer', 'Destination', 'Created Date', 'Status', 'Payment', 'Total', 'Actions'].map(col => (
-                    <th key={col} className="px-4 py-3">
-                      <Skeleton className="h-4 w-20" />
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                {[1, 2, 3, 4, 5].map(i => (
-                  <tr key={i}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(j => (
-                      <td key={j} className="px-4 py-4">
-                        <Skeleton className="h-5 w-full" />
-                      </td>
+        <>
+          {/* Desktop Skeleton */}
+          <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+                  <tr>
+                    {['Booking ID', 'Customer', 'Destination', 'Created Date', 'Status', 'Payment', 'Total', 'Actions'].map(col => (
+                      <th key={col} className="px-4 py-3">
+                        <Skeleton className="h-4 w-20" />
+                      </th>
                     ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                  {[1, 2, 3, 4, 5].map(i => (
+                    <tr key={i}>
+                      {[1, 2, 3, 4, 5, 6, 7, 8].map(j => (
+                        <td key={j} className="px-4 py-4">
+                          <Skeleton className="h-5 w-full" />
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+          
+          {/* Mobile Skeleton */}
+          <div className="md:hidden space-y-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
+                <Skeleton className="h-6 w-32 mb-3" />
+                <Skeleton className="h-4 w-full mb-2" />
+                <Skeleton className="h-4 w-3/4 mb-2" />
+                <Skeleton className="h-4 w-1/2" />
+              </div>
+            ))}
+          </div>
+        </>
       ) : bookings.length === 0 ? (
-        <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-          <div className="bg-slate-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Ticket className="w-10 h-10 text-slate-400 dark:text-slate-500" />
+        <div className="text-center py-12 sm:py-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="bg-slate-100 dark:bg-slate-800 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <Ticket className="w-8 h-8 sm:w-10 sm:h-10 text-slate-400 dark:text-slate-500" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+          <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-2">
             {t('noBookingsFound') || 'No bookings found'}
           </h3>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 px-4">
             {t('noBookingsMatchFilters') || 'No bookings match your current filters'}
           </p>
         </div>
       ) : (
         <>
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
@@ -315,7 +332,6 @@ const BookingsPage = () => {
                       </td>
                       <td className="px-4 py-4">
                         <div className="grid grid-cols-2 gap-2 w-20">
-                          {/* Force Pay button - Left column */}
                           {booking.paymentStatus === 'PENDING' && booking.bookingStatus !== 'CANCELLED' && booking.bookingStatus !== 'COMPLETED' ? (
                             <Button 
                               variant="success"
@@ -329,7 +345,6 @@ const BookingsPage = () => {
                             <div className="w-9"></div>
                           )}
                           
-                          {/* View button - Right column - Always visible */}
                           <Button 
                             variant="secondary" 
                             className="w-9 h-9 p-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white transition-all duration-200"
@@ -347,20 +362,107 @@ const BookingsPage = () => {
             </div>
           </div>
 
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-4">
+            {bookings.map(booking => (
+              <div 
+                key={booking.id} 
+                className={`bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden ${getRowBackgroundColor(booking.bookingStatus)}`}
+              >
+                {/* Card Header */}
+                <div className="p-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-blue-500/10 p-2 rounded-lg">
+                        <Ticket className="w-4 h-4 text-blue-500" />
+                      </div>
+                      <span className="font-bold text-slate-900 dark:text-white">#{booking.id}</span>
+                    </div>
+                    <span className="font-bold text-lg text-green-400">
+                      ${booking.totalAmount?.toFixed(2)}
+                    </span>
+                  </div>
+                  <div className="flex gap-2 flex-wrap">
+                    <Badge variant={getStatusColor(booking.bookingStatus)} className="text-xs">
+                      {booking.bookingStatus}
+                    </Badge>
+                    <Badge variant={getPaymentStatusColor(booking.paymentStatus)} className="text-xs">
+                      {booking.paymentStatus}
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Card Body */}
+                <div className="p-4 space-y-3">
+                  <div className="flex items-start gap-2 text-sm">
+                    <User className="w-4 h-4 text-purple-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-slate-600 dark:text-slate-400 block text-xs mb-0.5">Customer</span>
+                      <span className="text-slate-900 dark:text-white font-medium block truncate">{booking.fullName || 'N/A'}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-2 text-sm">
+                    <MapPin className="w-4 h-4 text-orange-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-slate-600 dark:text-slate-400 block text-xs mb-0.5">Destination</span>
+                      <span className="text-slate-900 dark:text-white font-medium block truncate">{booking.destination || 'N/A'}</span>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-start gap-2 text-sm">
+                    <Calendar className="w-4 h-4 text-pink-400 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1 min-w-0">
+                      <span className="text-slate-600 dark:text-slate-400 block text-xs mb-0.5">Created</span>
+                      <span className="text-slate-900 dark:text-white font-medium block">
+                        {booking.createdAt ? new Date(booking.createdAt).toLocaleDateString() : 'N/A'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Actions */}
+                <div className="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+                  <div className="flex gap-2">
+                    {booking.paymentStatus === 'PENDING' && booking.bookingStatus !== 'CANCELLED' && booking.bookingStatus !== 'COMPLETED' && (
+                      <Button 
+                        variant="success"
+                        className="flex-1 flex items-center justify-center gap-2 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20 text-sm py-2"
+                        onClick={() => handleMarkPaidClick(booking)}
+                      >
+                        <Banknote className="w-4 h-4" />
+                        <span className="font-medium">Mark Paid</span>
+                      </Button>
+                    )}
+                    
+                    <Button 
+                      variant="secondary" 
+                      className="flex-1 flex items-center justify-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-sm py-2"
+                      onClick={() => handleViewDetails(booking.id)}
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span className="font-medium">View Details</span>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Pagination */}
           {pagination.totalPages > 1 && (
-            <div className="mt-8 flex justify-center items-center gap-4">
+            <div className="mt-6 sm:mt-8 flex flex-col sm:flex-row justify-center items-center gap-3 sm:gap-4">
               <Button
                 variant="secondary"
                 onClick={() => goToPage(pagination.currentPage - 1)}
                 disabled={pagination.currentPage === 0}
-                className="flex items-center gap-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
               >
                 <ChevronLeft className="w-4 h-4" />
                 {t('previous') || 'Previous'}
               </Button>
               
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto max-w-full px-2">
                 {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
                   let pageNum;
                   if (pagination.totalPages <= 5) {
@@ -377,7 +479,7 @@ const BookingsPage = () => {
                     <button
                       key={pageNum}
                       onClick={() => goToPage(pageNum)}
-                      className={`w-10 h-10 rounded-lg font-semibold transition-all ${
+                      className={`w-10 h-10 rounded-lg font-semibold transition-all flex-shrink-0 text-sm ${
                         pageNum === pagination.currentPage
                           ? 'bg-blue-500 text-white'
                           : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
@@ -393,7 +495,7 @@ const BookingsPage = () => {
                 variant="secondary"
                 onClick={() => goToPage(pagination.currentPage + 1)}
                 disabled={pagination.currentPage >= pagination.totalPages - 1}
-                className="flex items-center gap-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
               >
                 {t('next') || 'Next'}
                 <ChevronRight className="w-4 h-4" />
