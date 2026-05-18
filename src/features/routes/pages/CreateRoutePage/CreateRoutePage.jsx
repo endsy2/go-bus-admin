@@ -391,7 +391,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
               <div className="mb-5">
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_0_3px_rgba(59,130,246,0.2)]"></span>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t('originCoordinates') || 'Origin Coordinates'}</h3>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t('Origin Coordinates') || 'Origin Coordinates'}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">
@@ -467,7 +467,7 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]"></span>
-                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t('destinationCoordinates') || 'Destination Coordinates'}</h3>
+                  <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t('Destination Coordinates') || 'Destination Coordinates'}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="flex flex-col gap-1.5">

@@ -27,8 +27,10 @@ const RouteDetailPage = ({ routeId, onBack }) => {
     destination: '',
     distanceKm: '',
     durationMinutes: '',
-    lat: '',
-    lng: '',
+    originLat: '',
+    originLng: '',
+    destLat: '',
+    destLng: '',
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -57,14 +59,17 @@ const RouteDetailPage = ({ routeId, onBack }) => {
         const result = await response.json();
         const routeData = result.data || result;
         setRoute(routeData);
-        const loc = parseLocation(routeData.location);
+        const originLoc = parseLocation(routeData.originLocation);
+        const destLoc = parseLocation(routeData.destinationLocation);
         setFormData({
           origin: routeData.origin || '',
           destination: routeData.destination || '',
           distanceKm: routeData.distanceKm?.toString() || '',
           durationMinutes: routeData.durationMinutes?.toString() || '',
-          lat: loc?.lat?.toString() || '',
-          lng: loc?.lng?.toString() || '',
+          originLat: originLoc?.lat?.toString() || '',
+          originLng: originLoc?.lng?.toString() || '',
+          destLat: destLoc?.lat?.toString() || '',
+          destLng: destLoc?.lng?.toString() || '',
         });
         setError('');
       } else {
@@ -92,8 +97,14 @@ const RouteDetailPage = ({ routeId, onBack }) => {
       errors.distanceKm = 'Valid distance is required';
     if (!formData.durationMinutes || isNaN(formData.durationMinutes) || parseInt(formData.durationMinutes) <= 0)
       errors.durationMinutes = 'Valid duration is required';
-    if (formData.lat && isNaN(parseFloat(formData.lat))) errors.lat = 'Invalid latitude';
-    if (formData.lng && isNaN(parseFloat(formData.lng))) errors.lng = 'Invalid longitude';
+    if (formData.originLat && (isNaN(parseFloat(formData.originLat)) || parseFloat(formData.originLat) < -90 || parseFloat(formData.originLat) > 90))
+      errors.originLat = 'Latitude must be between -90 and 90';
+    if (formData.originLng && (isNaN(parseFloat(formData.originLng)) || parseFloat(formData.originLng) < -180 || parseFloat(formData.originLng) > 180))
+      errors.originLng = 'Longitude must be between -180 and 180';
+    if (formData.destLat && (isNaN(parseFloat(formData.destLat)) || parseFloat(formData.destLat) < -90 || parseFloat(formData.destLat) > 90))
+      errors.destLat = 'Latitude must be between -90 and 90';
+    if (formData.destLng && (isNaN(parseFloat(formData.destLng)) || parseFloat(formData.destLng) < -180 || parseFloat(formData.destLng) > 180))
+      errors.destLng = 'Longitude must be between -180 and 180';
     return errors;
   };
 
@@ -103,16 +114,21 @@ const RouteDetailPage = ({ routeId, onBack }) => {
 
     setSaving(true);
     try {
-      const locationValue = formData.lat && formData.lng
-        ? JSON.stringify({ lat: parseFloat(formData.lat), lng: parseFloat(formData.lng) })
-        : route?.location || '';
+      const originLocationValue = formData.originLat && formData.originLng
+        ? JSON.stringify({ lat: parseFloat(formData.originLat), lng: parseFloat(formData.originLng) })
+        : null;
+
+      const destinationLocationValue = formData.destLat && formData.destLng
+        ? JSON.stringify({ lat: parseFloat(formData.destLat), lng: parseFloat(formData.destLng) })
+        : null;
 
       const updateData = {
         origin: formData.origin,
         destination: formData.destination,
         distanceKm: parseFloat(formData.distanceKm),
         durationMinutes: parseInt(formData.durationMinutes),
-        location: locationValue,
+        ...(originLocationValue && { originLocation: originLocationValue }),
+        ...(destinationLocationValue && { destinationLocation: destinationLocationValue }),
       };
 
       const response = await apiRequest(`${BASE_URL}/api/routes/${routeId}`, {
@@ -156,14 +172,17 @@ const RouteDetailPage = ({ routeId, onBack }) => {
 
   const handleCancel = () => {
     if (route) {
-      const loc = parseLocation(route.location);
+      const originLoc = parseLocation(route.originLocation);
+      const destLoc = parseLocation(route.destinationLocation);
       setFormData({
         origin: route.origin || '',
         destination: route.destination || '',
         distanceKm: route.distanceKm?.toString() || '',
         durationMinutes: route.durationMinutes?.toString() || '',
-        lat: loc?.lat?.toString() || '',
-        lng: loc?.lng?.toString() || '',
+        originLat: originLoc?.lat?.toString() || '',
+        originLng: originLoc?.lng?.toString() || '',
+        destLat: destLoc?.lat?.toString() || '',
+        destLng: destLoc?.lng?.toString() || '',
       });
     }
     setFormErrors({});
@@ -226,6 +245,8 @@ const RouteDetailPage = ({ routeId, onBack }) => {
   }
 
   const location = parseLocation(route.location);
+  const originLocation = parseLocation(route.originLocation);
+  const destinationLocation = parseLocation(route.destinationLocation);
 
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -377,66 +398,139 @@ const RouteDetailPage = ({ routeId, onBack }) => {
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
                     <circle cx="12" cy="10" r="3"/>
                   </svg>
-                  {t('locationCoordinates') || 'Location Coordinates'}
+                  {t('locationCoordinates') || 'GPS Coordinates'}
                 </div>
               </div>
 
-              {location ? (
-                <div>
-                  <div className="grid grid-cols-2 gap-4 mb-5">
-                    <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-500 transition-colors">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                        </svg>
-                        Latitude
+              {(originLocation || destinationLocation) ? (
+                <div className="space-y-6">
+                  {/* Origin Coordinates */}
+                  {originLocation && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_0_3px_rgba(59,130,246,0.2)]"></span>
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t('originCoordinates') || 'Origin Coordinates'}</h3>
                       </div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white font-mono tracking-tight">{location.lat.toFixed(6)}°</div>
-                      <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold mt-1">{location.lat >= 0 ? 'North' : 'South'}</div>
-                    </div>
-                    <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-500 transition-colors">
-                      <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                        </svg>
-                        Longitude
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-500 transition-colors">
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                            Latitude
+                          </div>
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white font-mono tracking-tight">{originLocation.lat.toFixed(6)}°</div>
+                          <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold mt-1">{originLocation.lat >= 0 ? 'North' : 'South'}</div>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-blue-500 transition-colors">
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                            Longitude
+                          </div>
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white font-mono tracking-tight">{originLocation.lng.toFixed(6)}°</div>
+                          <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold mt-1">{originLocation.lng >= 0 ? 'East' : 'West'}</div>
+                        </div>
                       </div>
-                      <div className="text-2xl font-bold text-gray-900 dark:text-white font-mono tracking-tight">{location.lng.toFixed(6)}°</div>
-                      <div className="text-xs text-blue-600 dark:text-blue-400 font-semibold mt-1">{location.lng >= 0 ? 'East' : 'West'}</div>
-                    </div>
-                  </div>
 
-                  <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
-                    <div className="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
-                      <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
-                        </svg>
-                        Map Preview
-                      </span>
-                      <button onClick={() => openInMaps(location.lat, location.lng)} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-all hover:-translate-y-0.5 shadow-sm hover:shadow-md">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
-                        </svg>
-                        Open in Google Maps
-                      </button>
+                      <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                        <div className="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                          <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+                            </svg>
+                            Origin Map Preview
+                          </span>
+                          <button onClick={() => openInMaps(originLocation.lat, originLocation.lng)} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-all hover:-translate-y-0.5 shadow-sm hover:shadow-md">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                            Open in Google Maps
+                          </button>
+                        </div>
+                        <div className="relative w-full h-64 bg-gray-100 dark:bg-gray-800">
+                          <iframe
+                            title="Origin Location Map"
+                            className="w-full h-full border-0"
+                            src={`https://www.openstreetmap.org/export/embed.html?bbox=${originLocation.lng - 0.1},${originLocation.lat - 0.08},${originLocation.lng + 0.1},${originLocation.lat + 0.08}&layer=mapnik&marker=${originLocation.lat},${originLocation.lng}`}
+                            allowFullScreen
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 font-mono">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 flex-shrink-0">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                          </svg>
+                          {originLocation.lat.toFixed(4)}, {originLocation.lng.toFixed(4)}
+                        </div>
+                      </div>
                     </div>
-                    <div className="relative w-full h-96 bg-gray-100 dark:bg-gray-800">
-                      <iframe
-                        title="Route Location Map"
-                        className="w-full h-full border-0"
-                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${location.lng - 0.15},${location.lat - 0.1},${location.lng + 0.15},${location.lat + 0.1}&layer=mapnik&marker=${location.lat},${location.lng}`}
-                        allowFullScreen
-                        loading="lazy"
-                      />
+                  )}
+
+                  {/* Destination Coordinates */}
+                  {destinationLocation && (
+                    <div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]"></span>
+                        <h3 className="text-sm font-bold text-gray-900 dark:text-white">{t('destinationCoordinates') || 'Destination Coordinates'}</h3>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4 mb-4">
+                        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-emerald-500 transition-colors">
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                            </svg>
+                            Latitude
+                          </div>
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white font-mono tracking-tight">{destinationLocation.lat.toFixed(6)}°</div>
+                          <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-1">{destinationLocation.lat >= 0 ? 'North' : 'South'}</div>
+                        </div>
+                        <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-4 hover:border-emerald-500 transition-colors">
+                          <div className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-1.5">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                            </svg>
+                            Longitude
+                          </div>
+                          <div className="text-2xl font-bold text-gray-900 dark:text-white font-mono tracking-tight">{destinationLocation.lng.toFixed(6)}°</div>
+                          <div className="text-xs text-emerald-600 dark:text-emerald-400 font-semibold mt-1">{destinationLocation.lng >= 0 ? 'East' : 'West'}</div>
+                        </div>
+                      </div>
+
+                      <div className="border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                        <div className="flex justify-between items-center px-4 py-3 bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700">
+                          <span className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/>
+                            </svg>
+                            Destination Map Preview
+                          </span>
+                          <button onClick={() => openInMaps(destinationLocation.lat, destinationLocation.lng)} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 transition-all hover:-translate-y-0.5 shadow-sm hover:shadow-md">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+                            </svg>
+                            Open in Google Maps
+                          </button>
+                        </div>
+                        <div className="relative w-full h-64 bg-gray-100 dark:bg-gray-800">
+                          <iframe
+                            title="Destination Location Map"
+                            className="w-full h-full border-0"
+                            src={`https://www.openstreetmap.org/export/embed.html?bbox=${destinationLocation.lng - 0.1},${destinationLocation.lat - 0.08},${destinationLocation.lng + 0.1},${destinationLocation.lat + 0.08}&layer=mapnik&marker=${destinationLocation.lat},${destinationLocation.lng}`}
+                            allowFullScreen
+                            loading="lazy"
+                          />
+                        </div>
+                        <div className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 font-mono">
+                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-600 flex-shrink-0">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                          </svg>
+                          {destinationLocation.lat.toFixed(4)}, {destinationLocation.lng.toFixed(4)}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1.5 px-4 py-2.5 bg-gray-50 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-600 dark:text-gray-400 font-mono">
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600 flex-shrink-0">
-                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-                      </svg>
-                      {location.lat.toFixed(4)}, {location.lng.toFixed(4)}
-                    </div>
-                  </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex flex-col items-center text-center py-10 px-6 bg-gray-50 dark:bg-gray-900 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-xl text-gray-500 dark:text-gray-400 gap-2">
@@ -504,49 +598,118 @@ const RouteDetailPage = ({ routeId, onBack }) => {
                 />
               </div>
 
-              <div className="col-span-2 bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5 flex flex-col gap-3">
-                <label className="flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  {t('locationCoordinates') || 'Location Coordinates'}
-                  <span className="text-xs font-normal text-gray-500 dark:text-gray-400">({t('optional') || 'optional'})</span>
-                </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
-                    <span className="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LAT</span>
-                    <input
-                      type="number"
-                      name="lat"
-                      value={formData.lat}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 11.5564"
-                      step="0.0001"
-                      className={`flex-1 px-3 py-2.5 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${formErrors.lat ? 'text-red-600' : ''}`}
-                    />
+              <div className="col-span-2 space-y-5">
+                {/* Origin Coordinates */}
+                <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-blue-600 shadow-[0_0_0_3px_rgba(59,130,246,0.2)]"></span>
+                    <label className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {t('originCoordinates') || 'Origin Coordinates'}
+                      <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">({t('optional') || 'optional'})</span>
+                    </label>
                   </div>
-                  <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
-                    <span className="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LNG</span>
-                    <input
-                      type="number"
-                      name="lng"
-                      value={formData.lng}
-                      onChange={handleInputChange}
-                      placeholder="e.g. 104.9282"
-                      step="0.0001"
-                      className={`flex-1 px-3 py-2.5 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${formErrors.lng ? 'text-red-600' : ''}`}
-                    />
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                      <span className="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LAT</span>
+                      <input
+                        type="number"
+                        name="originLat"
+                        value={formData.originLat}
+                        onChange={handleInputChange}
+                        placeholder="e.g. 11.5564"
+                        step="0.0001"
+                        className={`flex-1 px-3 py-2.5 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${formErrors.originLat ? 'text-red-600' : ''}`}
+                      />
+                    </div>
+                    <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20 transition-all">
+                      <span className="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LNG</span>
+                      <input
+                        type="number"
+                        name="originLng"
+                        value={formData.originLng}
+                        onChange={handleInputChange}
+                        placeholder="e.g. 104.9282"
+                        step="0.0001"
+                        className={`flex-1 px-3 py-2.5 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${formErrors.originLng ? 'text-red-600' : ''}`}
+                      />
+                    </div>
                   </div>
+                  {(formErrors.originLat || formErrors.originLng) && (
+                    <span className="text-xs text-red-600 dark:text-red-400 font-medium mt-2 block">{formErrors.originLat || formErrors.originLng}</span>
+                  )}
+                  {formData.originLat && formData.originLng && !formErrors.originLat && !formErrors.originLng && (
+                    <div className="mt-3 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                      <div className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 font-semibold text-sm text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                        </svg>
+                        Origin Map Preview
+                      </div>
+                      <iframe
+                        title="Origin Coordinate Preview"
+                        className="w-full h-48 border-0"
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(formData.originLng) - 0.1},${parseFloat(formData.originLat) - 0.08},${parseFloat(formData.originLng) + 0.1},${parseFloat(formData.originLat) + 0.08}&layer=mapnik&marker=${formData.originLat},${formData.originLng}`}
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
                 </div>
-                {(formErrors.lat || formErrors.lng) && (
-                  <span className="text-xs text-red-600 dark:text-red-400 font-medium">{formErrors.lat || formErrors.lng}</span>
-                )}
-                <span className="flex items-start gap-1.5 text-xs text-gray-500 dark:text-gray-400 leading-relaxed">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-0.5">
-                    <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-                  </svg>
-                  Coordinates will be shown on an interactive map on the detail page.
-                </span>
+
+                {/* Destination Coordinates */}
+                <div className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl p-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-600 shadow-[0_0_0_3px_rgba(16,185,129,0.2)]"></span>
+                    <label className="text-sm font-semibold text-gray-900 dark:text-white">
+                      {t('destinationCoordinates') || 'Destination Coordinates'}
+                      <span className="text-xs font-normal text-gray-500 dark:text-gray-400 ml-2">({t('optional') || 'optional'})</span>
+                    </label>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                      <span className="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LAT</span>
+                      <input
+                        type="number"
+                        name="destLat"
+                        value={formData.destLat}
+                        onChange={handleInputChange}
+                        placeholder="e.g. 13.3633"
+                        step="0.0001"
+                        className={`flex-1 px-3 py-2.5 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${formErrors.destLat ? 'text-red-600' : ''}`}
+                      />
+                    </div>
+                    <div className="flex items-center border-2 border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden bg-white dark:bg-gray-800 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-500/20 transition-all">
+                      <span className="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-bold tracking-wider border-r border-gray-200 dark:border-gray-600 font-mono">LNG</span>
+                      <input
+                        type="number"
+                        name="destLng"
+                        value={formData.destLng}
+                        onChange={handleInputChange}
+                        placeholder="e.g. 103.8448"
+                        step="0.0001"
+                        className={`flex-1 px-3 py-2.5 border-0 outline-none bg-transparent text-gray-900 dark:text-white text-sm font-mono min-w-0 ${formErrors.destLng ? 'text-red-600' : ''}`}
+                      />
+                    </div>
+                  </div>
+                  {(formErrors.destLat || formErrors.destLng) && (
+                    <span className="text-xs text-red-600 dark:text-red-400 font-medium mt-2 block">{formErrors.destLat || formErrors.destLng}</span>
+                  )}
+                  {formData.destLat && formData.destLng && !formErrors.destLat && !formErrors.destLng && (
+                    <div className="mt-3 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden">
+                      <div className="flex items-center gap-1.5 px-3.5 py-2.5 bg-gray-50 dark:bg-gray-900 font-semibold text-sm text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21" />
+                        </svg>
+                        Destination Map Preview
+                      </div>
+                      <iframe
+                        title="Destination Coordinate Preview"
+                        className="w-full h-48 border-0"
+                        src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(formData.destLng) - 0.1},${parseFloat(formData.destLat) - 0.08},${parseFloat(formData.destLng) + 0.1},${parseFloat(formData.destLat) + 0.08}&layer=mapnik&marker=${formData.destLat},${formData.destLng}`}
+                        loading="lazy"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
