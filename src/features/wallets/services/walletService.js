@@ -3,19 +3,19 @@ import axiosInstance from 'services/axiosConfig';
 const walletService = {
   // Create wallet for user
   createWallet: async (userId) => {
-    const response = await axiosInstance.post(`/api/admin/wallets/${userId}`);
+    const response = await axiosInstance.post(`/admin/wallets/${userId}`);
     return response.data;
   },
 
   // Get wallet by user ID
   getWalletByUser: async (userId) => {
-    const response = await axiosInstance.get(`/api/admin/wallets/${userId}`);
+    const response = await axiosInstance.get(`/admin/wallets/${userId}`);
     return response.data;
   },
 
   // Get wallet by ID
   getWalletById: async (walletId) => {
-    const response = await axiosInstance.get(`/api/wallets/${walletId}`);
+    const response = await axiosInstance.get(`/wallets/${walletId}`);
     return response.data.data; // Extract data from ApiResponse wrapper
   },
 
@@ -32,7 +32,7 @@ const walletService = {
     params.append('page', page);
     params.append('size', size);
 
-    const response = await axiosInstance.get(`/api/admin/wallets/specification?${params.toString()}`);
+    const response = await axiosInstance.get(`/admin/wallets/specification?${params.toString()}`);
     return response.data;
   },
 
@@ -47,7 +47,7 @@ const walletService = {
     params.append('page', page);
     params.append('size', size);
 
-    const response = await axiosInstance.get(`/api/wallets/transactions?${params.toString()}`);
+    const response = await axiosInstance.get(`/wallets/transactions?${params.toString()}`);
     return response.data;
   },
 };
