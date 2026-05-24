@@ -73,16 +73,16 @@ const EditScheduleDialog = ({ open, schedule, onClose, onSuccess }) => {
       schedule?.arrivalTime
     );
 
-    const payload = {
+     const payload = {
       busId: formData.busId || schedule?.busId || schedule?.bus?.id,
       price: parseFloat(formData.price),
-      departureDate: toIsoWithSeconds(departureDateTime),
-      departureTime: normalizeTime(departureDateTime),
-      arrivalTime: normalizeTime(arrivalDateTime),
+      departureDateTime: toIsoWithSeconds(departureDateTime),
+      // departureTime: normalizeTime(departureDateTime),
+      arrivalDateTime: toIsoWithSeconds(arrivalDateTime),
     };
 
-    if (!payload.busId || !payload.departureDate || !payload.departureTime || !payload.arrivalTime || Number.isNaN(payload.price)) {
-      alert('Please provide departure date/time, arrival time, and a valid price.');
+    if (!payload.busId || !payload.departureDateTime || !payload.arrivalDateTime || Number.isNaN(payload.price)) {
+      alert('Please provide departure date/time, arrival date/time, and a valid price.');
       return;
     }
 
