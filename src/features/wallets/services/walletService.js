@@ -15,7 +15,7 @@ const walletService = {
 
   // Get wallet by ID
   getWalletById: async (walletId) => {
-    const response = await axiosInstance.get(`/wallets/${walletId}`);
+    const response = await axiosInstance.get(`/admin/wallets/${walletId}`);
     return response.data.data; // Extract data from ApiResponse wrapper
   },
 
