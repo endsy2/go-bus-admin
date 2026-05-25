@@ -47,7 +47,7 @@ const walletService = {
     params.append('page', page);
     params.append('size', size);
 
-    const response = await axiosInstance.get(`/wallets/transactions?${params.toString()}`);
+    const response = await axiosInstance.get(`/admin/wallets/transactions?${params.toString()}`);
     return response.data;
   },
 };
