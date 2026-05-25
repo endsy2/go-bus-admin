@@ -32,7 +32,7 @@ const walletService = {
     params.append('page', page);
     params.append('size', size);
 
-    const response = await axiosInstance.get(`/admin/wallets/specification?${params.toString()}`);
+    const response = await axiosInstance.get(`/admin/wallets?${params.toString()}`);
     return response.data;
   },
 
