@@ -37,7 +37,7 @@ const walletService = {
   },
 
   // Get transactions with filters and pagination
-  getTransactions: async (filters = {}, page = 0, size = 10) => {
+  getTransactions: async (filters = {}, page = 1, size = 10) => {
     const params = new URLSearchParams();
     
     if (filters.walletId) params.append('walletId', filters.walletId);
