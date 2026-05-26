@@ -1,64 +1,68 @@
 import { useState, useEffect, useCallback } from 'react';
 import walletService from '../services/walletService';
+import { DEFAULT_PAGE_SIZE } from 'shared/hooks/usePagination';
 
-export const useWallets = (initialFilters = {}, initialPage = 0, initialSize = 10) => {
+/**
+ * useWallets — server-side paginated wallet data with filters.
+ *
+ * Pattern matches useBookings: all state lives as separate useState entries;
+ * fetchWallets depends on all of them via useCallback, and useEffect([fetchWallets])
+ * fires exactly once per dependency change — no stale-closure issues.
+ */
+export const useWallets = (initialFilters = {}, initialPage = 0, initialSize = DEFAULT_PAGE_SIZE) => {
   const [wallets, setWallets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState({
-    currentPage: initialPage,
-    totalPages: 0,
-    totalElements: 0,
-    size: initialSize,
-  });
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [pageSize, setPageSize] = useState(initialSize);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [filters, setFilters] = useState(initialFilters);
 
-  const fetchWallets = useCallback(async (page = pagination.currentPage, size = pagination.size) => {
+  const fetchWallets = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await walletService.getWallets(filters, page, size);
-      
       // Handle PagedResponse structure: { content, page, size, totalElements, totalPages }
+      const response = await walletService.getWallets(filters, currentPage, pageSize);
       setWallets(response.content || []);
-      setPagination({
-        currentPage: response.page || page,
-        totalPages: response.totalPages || 0,
-        totalElements: response.totalElements || 0,
-        size: response.size || size,
-      });
+      setTotalPages(response.totalPages || 0);
+      setTotalElements(response.totalElements || 0);
+      // Do NOT sync currentPage from response — that causes a second fetch on every page change.
     } catch (err) {
       setError(err.message || 'Failed to fetch wallets');
       setWallets([]);
     } finally {
       setLoading(false);
     }
-  }, [filters, pagination.currentPage, pagination.size]);
+  }, [filters, currentPage, pageSize]);
 
   useEffect(() => {
     fetchWallets();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [fetchWallets]);
 
   const updateFilters = (newFilters) => {
+    setCurrentPage(0);
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setPagination(prev => ({ ...prev, currentPage: 0 }));
   };
 
-  const goToPage = (page) => {
-    fetchWallets(page, pagination.size);
-  };
+  const goToPage = (page) => setCurrentPage(page);
 
   const changePageSize = (size) => {
-    setPagination(prev => ({ ...prev, size, currentPage: 0 }));
-    fetchWallets(0, size);
+    setCurrentPage(0);
+    setPageSize(size);
   };
 
   return {
     wallets,
     loading,
     error,
-    pagination,
+    pagination: {
+      currentPage,
+      totalPages,
+      totalElements,
+      size: pageSize,
+    },
     filters,
     updateFilters,
     goToPage,

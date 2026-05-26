@@ -1,13 +1,14 @@
 import React, { useState, useCallback } from 'react';
 import { useWallets } from '../../hooks/useWallets';
 import { useTransactions } from '../../hooks/useTransactions';
-import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
+import { Card, CardContent } from 'shared/components/ui/card';
 import { Badge } from 'shared/components/common/Badge';
 import { Button } from 'shared/components/common/Button';
 import { Input } from 'shared/components/common/Input';
 import { Label } from 'shared/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { Skeleton } from 'shared/components/ui/skeleton';
+import { Pagination } from 'shared/components/feedback/Pagination';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import WalletDetailsDialog from '../../components/WalletDetailsDialog/WalletDetailsDialog';
@@ -17,9 +18,6 @@ import {
   User,
   DollarSign,
   TrendingUp,
-  TrendingDown,
-  ChevronLeft,
-  ChevronRight,
   Filter,
   X,
   Search,
@@ -73,8 +71,15 @@ const WalletsPage = () => {
     status: '',
   });
 
-  const { wallets, loading: walletsLoading, pagination: walletPagination, updateFilters: updateWalletFilters, goToPage: goToWalletPage, refetch: refetchWallets } = useWallets();
-  const { transactions, loading: txLoading, pagination: txPagination, updateFilters: updateTxFilters, goToPage: goToTxPage } = useTransactions();
+  const {
+    wallets, loading: walletsLoading, pagination: walletPagination,
+    updateFilters: updateWalletFilters, goToPage: goToWalletPage, changePageSize: changeWalletPageSize,
+    refetch: refetchWallets,
+  } = useWallets();
+  const {
+    transactions, loading: txLoading, pagination: txPagination,
+    updateFilters: updateTxFilters, goToPage: goToTxPage, changePageSize: changeTxPageSize,
+  } = useTransactions();
 
   const handleWalletFilterChange = (e) => {
     const { name, value } = e.target;
@@ -436,57 +441,15 @@ const WalletsPage = () => {
               </div>
 
               {/* Pagination */}
-              {walletPagination.totalPages > 1 && (
-                <div className="mt-4 sm:mt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => goToWalletPage(walletPagination.currentPage - 2)}
-                    disabled={walletPagination.currentPage === 1}
-                    className="flex items-center gap-1 sm:gap-2"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span className="hidden sm:inline">{t('previous') || 'Previous'}</span>
-                  </Button>
-
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    {Array.from({ length: Math.min(walletPagination.totalPages, 5) }, (_, i) => {
-                      let pageNum;
-                      if (walletPagination.totalPages <= 5) {
-                        pageNum = i + 1;
-                      } else if (walletPagination.currentPage <= 3) {
-                        pageNum = i + 1;
-                      } else if (walletPagination.currentPage > walletPagination.totalPages - 3) {
-                        pageNum = walletPagination.totalPages - 4 + i;
-                      } else {
-                        pageNum = walletPagination.currentPage - 2 + i;
-                      }
-
-                      return (
-                        <Button
-                          key={pageNum}
-                          variant={pageNum === walletPagination.currentPage ? 'primary' : 'outline'}
-                          size="icon"
-                          className="w-8 h-8 sm:w-9 sm:h-9"
-                          onClick={() => goToWalletPage(pageNum - 1)}
-                        >
-                          {pageNum}
-                        </Button>
-                      );
-                    })}
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => goToWalletPage(walletPagination.currentPage)}
-                    disabled={walletPagination.currentPage >= walletPagination.totalPages}
-                    className="flex items-center gap-1 sm:gap-2"
-                  >
-                    <span className="hidden sm:inline">{t('next') || 'Next'}</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+              {wallets.length > 0 && (
+                <Pagination
+                  currentPage={walletPagination.currentPage}
+                  totalPages={walletPagination.totalPages}
+                  pageSize={walletPagination.size}
+                  totalElements={walletPagination.totalElements}
+                  onPageChange={goToWalletPage}
+                  onPageSizeChange={changeWalletPageSize}
+                />
               )}
             </>
           )}
@@ -654,57 +617,15 @@ const WalletsPage = () => {
               </div>
 
               {/* Pagination */}
-              {txPagination.totalPages > 1 && (
-                <div className="mt-4 sm:mt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-4">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => goToTxPage(txPagination.currentPage - 1)}
-                    disabled={txPagination.currentPage === 0}
-                    className="flex items-center gap-1 sm:gap-2"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                    <span className="hidden sm:inline">{t('previous') || 'Previous'}</span>
-                  </Button>
-
-                  <div className="flex items-center gap-1 sm:gap-2">
-                    {Array.from({ length: Math.min(txPagination.totalPages, 5) }, (_, i) => {
-                      let pageNum;
-                      if (txPagination.totalPages <= 5) {
-                        pageNum = i;
-                      } else if (txPagination.currentPage < 3) {
-                        pageNum = i;
-                      } else if (txPagination.currentPage > txPagination.totalPages - 3) {
-                        pageNum = txPagination.totalPages - 5 + i;
-                      } else {
-                        pageNum = txPagination.currentPage - 2 + i;
-                      }
-
-                      return (
-                        <Button
-                          key={pageNum}
-                          variant={pageNum === txPagination.currentPage ? 'primary' : 'outline'}
-                          size="icon"
-                          className="w-8 h-8 sm:w-9 sm:h-9"
-                          onClick={() => goToTxPage(pageNum)}
-                        >
-                          {pageNum + 1}
-                        </Button>
-                      );
-                    })}
-                  </div>
-
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => goToTxPage(txPagination.currentPage + 1)}
-                    disabled={txPagination.currentPage >= txPagination.totalPages - 1}
-                    className="flex items-center gap-1 sm:gap-2"
-                  >
-                    <span className="hidden sm:inline">{t('next') || 'Next'}</span>
-                    <ChevronRight className="w-4 h-4" />
-                  </Button>
-                </div>
+              {transactions.length > 0 && (
+                <Pagination
+                  currentPage={txPagination.currentPage}
+                  totalPages={txPagination.totalPages}
+                  pageSize={txPagination.size}
+                  totalElements={txPagination.totalElements}
+                  onPageChange={goToTxPage}
+                  onPageSizeChange={changeTxPageSize}
+                />
               )}
             </>
           )}

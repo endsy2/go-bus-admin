@@ -1,46 +1,47 @@
 import { useState, useEffect, useCallback } from 'react';
 import refundService from '../services/refundService';
+import { DEFAULT_PAGE_SIZE } from 'shared/hooks/usePagination';
 
-export const useRefunds = (initialFilters = {}, initialPage = 0, initialSize = 10) => {
+/**
+ * useRefunds — server-side paginated refund data with filters.
+ *
+ * Pattern matches useBookings: all state lives as separate useState entries;
+ * fetchRefunds depends on all of them via useCallback, and useEffect([fetchRefunds])
+ * fires exactly once per dependency change — no stale-closure issues.
+ */
+export const useRefunds = (initialFilters = {}, initialPage = 0, initialSize = DEFAULT_PAGE_SIZE) => {
   const [refunds, setRefunds] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState({
-    currentPage: initialPage,
-    totalPages: 0,
-    totalElements: 0,
-    size: initialSize,
-  });
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [pageSize, setPageSize] = useState(initialSize);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [filters, setFilters] = useState(initialFilters);
 
-  const fetchRefunds = useCallback(async (page = pagination.currentPage, size = pagination.size) => {
+  const fetchRefunds = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       let response;
       if (filters.fromDate && filters.toDate && filters.status) {
         response = await refundService.getRefundsByDateRange(
           filters.status,
           filters.fromDate,
           filters.toDate,
-          page,
-          size
+          currentPage,
+          pageSize
         );
       } else {
-        response = await refundService.getAllRefunds(filters.status, page, size);
+        response = await refundService.getAllRefunds(filters.status, currentPage, pageSize);
       }
-      
+
       const pagedData = response.data || {};
-      const refundsData = pagedData.content || [];
-      
-      setRefunds(refundsData);
-      setPagination({
-        currentPage: pagedData.number !== undefined ? pagedData.number : page,
-        totalPages: pagedData.totalPages || 0,
-        totalElements: pagedData.totalElements || 0,
-        size: pagedData.size || size,
-      });
+      setRefunds(pagedData.content || []);
+      setTotalPages(pagedData.totalPages || 0);
+      setTotalElements(pagedData.totalElements || 0);
+      // Do NOT sync currentPage from response — that causes a second fetch on every page change.
     } catch (err) {
       console.error('Error fetching refunds:', err);
       setError(err.message || 'Failed to fetch refunds');
@@ -48,37 +49,39 @@ export const useRefunds = (initialFilters = {}, initialPage = 0, initialSize = 1
     } finally {
       setLoading(false);
     }
-  }, [filters, pagination.currentPage, pagination.size]);
+  }, [filters, currentPage, pageSize]);
 
   useEffect(() => {
     fetchRefunds();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [fetchRefunds]);
 
   const updateFilters = (newFilters) => {
+    setCurrentPage(0);
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setPagination(prev => ({ ...prev, currentPage: 0 }));
   };
 
   const resetFilters = () => {
+    setCurrentPage(0);
     setFilters({});
-    setPagination(prev => ({ ...prev, currentPage: 0 }));
   };
 
-  const goToPage = (page) => {
-    fetchRefunds(page, pagination.size);
-  };
+  const goToPage = (page) => setCurrentPage(page);
 
   const changePageSize = (size) => {
-    setPagination(prev => ({ ...prev, size, currentPage: 0 }));
-    fetchRefunds(0, size);
+    setCurrentPage(0);
+    setPageSize(size);
   };
 
   return {
     refunds,
     loading,
     error,
-    pagination,
+    pagination: {
+      currentPage,
+      totalPages,
+      totalElements,
+      size: pageSize,
+    },
     filters,
     updateFilters,
     resetFilters,

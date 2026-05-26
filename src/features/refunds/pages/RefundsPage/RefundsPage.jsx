@@ -3,18 +3,16 @@ import { useRefunds } from '../../hooks/useRefunds';
 import { Badge } from 'shared/components/common/Badge';
 import { Button } from 'shared/components/common/Button';
 import { Skeleton } from 'shared/components/ui/skeleton';
+import { Pagination } from 'shared/components/feedback/Pagination';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import { useToast } from 'shared/components/ui/toast';
-import { 
-  DollarSign, 
-  User, 
-  Calendar, 
-  ChevronLeft,
-  ChevronRight,
+import {
+  DollarSign,
+  User,
+  Calendar,
   FileText,
   CheckCircle,
-  XCircle
 } from 'lucide-react';
 import RefundFilters from '../../components/RefundFilters/RefundFilters';
 import ProcessRefundDialog from '../../components/ProcessRefundDialog/ProcessRefundDialog';
@@ -25,7 +23,7 @@ const RefundsPage = () => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const { addToast } = useToast();
-  const { refunds, loading, pagination, filters, updateFilters, resetFilters, goToPage, refetch } = useRefunds();
+  const { refunds, loading, pagination, filters, updateFilters, resetFilters, goToPage, changePageSize, refetch } = useRefunds();
   
   const [processDialogOpen, setProcessDialogOpen] = useState(false);
   const [selectedRefund, setSelectedRefund] = useState(null);
@@ -303,57 +301,15 @@ const RefundsPage = () => {
           </div>
 
           {/* Pagination */}
-          {pagination.totalPages > 1 && (
-            <div className="mt-4 sm:mt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-4">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => goToPage(pagination.currentPage - 1)}
-                disabled={pagination.currentPage === 0}
-                className="flex items-center gap-1 sm:gap-2"
-              >
-                <ChevronLeft className="w-4 h-4" />
-                <span className="hidden sm:inline">{t('previous') || 'Previous'}</span>
-              </Button>
-
-              <div className="flex items-center gap-1 sm:gap-2">
-                {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
-                  let pageNum;
-                  if (pagination.totalPages <= 5) {
-                    pageNum = i;
-                  } else if (pagination.currentPage < 3) {
-                    pageNum = i;
-                  } else if (pagination.currentPage > pagination.totalPages - 3) {
-                    pageNum = pagination.totalPages - 5 + i;
-                  } else {
-                    pageNum = pagination.currentPage - 2 + i;
-                  }
-
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={pageNum === pagination.currentPage ? 'default' : 'outline'}
-                      size="icon"
-                      className="w-8 h-8 sm:w-9 sm:h-9"
-                      onClick={() => goToPage(pageNum)}
-                    >
-                      {pageNum + 1}
-                    </Button>
-                  );
-                })}
-              </div>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => goToPage(pagination.currentPage + 1)}
-                disabled={pagination.currentPage >= pagination.totalPages - 1}
-                className="flex items-center gap-1 sm:gap-2"
-              >
-                <span className="hidden sm:inline">{t('next') || 'Next'}</span>
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+          {refunds.length > 0 && (
+            <Pagination
+              currentPage={pagination.currentPage}
+              totalPages={pagination.totalPages}
+              pageSize={pagination.size}
+              totalElements={pagination.totalElements}
+              onPageChange={goToPage}
+              onPageSizeChange={changePageSize}
+            />
           )}
         </>
       )}

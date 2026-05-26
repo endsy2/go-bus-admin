@@ -48,8 +48,10 @@ const CustomersPage = () => {
     isActive: 'all',
     isDeleted: 'all'
   });
+  // currentPage is 0-based (matches <Pagination> convention).
+  // The service expects 1-based pageStart, so we add +1 at the call site.
   const [pagination, setPagination] = useState({
-    currentPage: 1,
+    currentPage: 0,
     pageSize: 15,
     totalPages: 0,
     totalElements: 0
@@ -71,17 +73,19 @@ const CustomersPage = () => {
     if (!hasFilters) return;
 
     const timeoutId = setTimeout(() => {
-      fetchCustomers(filters, 1, pagination.pageSize);
+      // Reset to first page (0-based) when filters change
+      fetchCustomers(filters, 0, pagination.pageSize);
     }, 500);
 
     return () => clearTimeout(timeoutId);
   }, [filters]);
 
-  const fetchCustomers = async (filterParams = null, page = 1, size = 15) => {
+  // page is 0-based; the service expects 1-based pageStart, so we add +1 here.
+  const fetchCustomers = async (filterParams = null, page = 0, size = 15) => {
     try {
       setLoading(true);
 
-      const params = { pageStart: page, pageSize: size, isEmployee: false };
+      const params = { pageStart: page + 1, pageSize: size, isEmployee: false };
 
       if (filterParams) {
         Object.entries(filterParams).forEach(([key, value]) => {
@@ -100,7 +104,7 @@ const CustomersPage = () => {
       const pageData = result.data || {};
       setCustomers(pageData.content || []);
       setPagination({
-        currentPage: page,
+        currentPage: page,                      // store as 0-based
         pageSize: pageData.size || size,
         totalPages: pageData.totalPages || 1,
         totalElements: pageData.totalElements || 0,
@@ -135,15 +139,16 @@ const CustomersPage = () => {
       isActive: 'all',
       isDeleted: 'all'
     });
-    fetchCustomers(null, 1, pagination.pageSize);
+    fetchCustomers(null, 0, pagination.pageSize);
   };
 
+  // newPage arrives 0-based from <Pagination>
   const handlePageChange = (newPage) => {
     fetchCustomers(filters, newPage, pagination.pageSize);
   };
 
   const handlePageSizeChange = (newSize) => {
-    fetchCustomers(filters, 1, newSize);
+    fetchCustomers(filters, 0, newSize);
   };
 
   const handleCopyToClipboard = (text, label) => {
@@ -180,7 +185,7 @@ const CustomersPage = () => {
   const handleBackFromDetail = () => {
     setShowDetailView(false);
     setSelectedCustomerId(null);
-    // Refresh the customer list when coming back from detail
+    // Refresh the customer list when coming back from detail (currentPage is 0-based)
     fetchCustomers(filters, pagination.currentPage, pagination.pageSize);
   };
 
@@ -221,8 +226,8 @@ const CustomersPage = () => {
   const handleCreateSuccess = () => {
     setShowCreateForm(false);
     addToast({ message: 'Customer created successfully!', type: 'success' });
-    // Refresh the customer list
-    fetchCustomers(filters, pagination.currentPage, pagination.pageSize);
+    // Go back to first page after creation to show the new customer
+    fetchCustomers(filters, 0, pagination.pageSize);
   };
 
   const confirmToggleStatus = async () => {
@@ -624,16 +629,14 @@ const CustomersPage = () => {
         
         </div>
         {customers.length > 0 && (
-          <div className="p-4">
-            <Pagination
-              currentPage={pagination.currentPage}
-              totalPages={pagination.totalPages}
-              pageSize={pagination.pageSize}
-              totalElements={pagination.totalElements}
-              onPageChange={handlePageChange}
-              onPageSizeChange={handlePageSizeChange}
-            />
-          </div>
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            pageSize={pagination.pageSize}
+            totalElements={pagination.totalElements}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
         )}
       </Card>
 

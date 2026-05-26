@@ -1,64 +1,68 @@
 import { useState, useEffect, useCallback } from 'react';
 import walletService from '../services/walletService';
+import { DEFAULT_PAGE_SIZE } from 'shared/hooks/usePagination';
 
-export const useTransactions = (initialFilters = {}, initialPage = 0, initialSize = 10) => {
+/**
+ * useTransactions — server-side paginated transaction data with filters.
+ *
+ * Pattern matches useBookings: all state lives as separate useState entries;
+ * fetchTransactions depends on all of them via useCallback, and useEffect([fetchTransactions])
+ * fires exactly once per dependency change — no stale-closure issues.
+ */
+export const useTransactions = (initialFilters = {}, initialPage = 0, initialSize = DEFAULT_PAGE_SIZE) => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState({
-    currentPage: initialPage,
-    totalPages: 0,
-    totalElements: 0,
-    size: initialSize,
-  });
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [pageSize, setPageSize] = useState(initialSize);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [filters, setFilters] = useState(initialFilters);
 
-  const fetchTransactions = useCallback(async (page = pagination.currentPage, size = pagination.size) => {
+  const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await walletService.getTransactions(filters, page, size);
-      
       // Handle PagedResponse structure: { content, page, size, totalElements, totalPages }
+      const response = await walletService.getTransactions(filters, currentPage, pageSize);
       setTransactions(response.content || []);
-    setPagination({
-        currentPage: response.page || page,
-        totalPages: response.totalPages || 0,
-        totalElements: response.totalElements || 0,
-        size: response.size || size,
-      });
+      setTotalPages(response.totalPages || 0);
+      setTotalElements(response.totalElements || 0);
+      // Do NOT sync currentPage from response — that causes a second fetch on every page change.
     } catch (err) {
       setError(err.message || 'Failed to fetch transactions');
       setTransactions([]);
     } finally {
       setLoading(false);
     }
-  }, [filters, pagination.currentPage, pagination.size]);
+  }, [filters, currentPage, pageSize]);
 
   useEffect(() => {
     fetchTransactions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [fetchTransactions]);
 
   const updateFilters = (newFilters) => {
+    setCurrentPage(0);
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setPagination(prev => ({ ...prev, currentPage: 0 }));
   };
 
-  const goToPage = (page) => {
-    fetchTransactions(page, pagination.size);
-  };
+  const goToPage = (page) => setCurrentPage(page);
 
   const changePageSize = (size) => {
-    setPagination(prev => ({ ...prev, size, currentPage: 0 }));
-    fetchTransactions(0, size);
+    setCurrentPage(0);
+    setPageSize(size);
   };
 
   return {
     transactions,
     loading,
     error,
-    pagination,
+    pagination: {
+      currentPage,
+      totalPages,
+      totalElements,
+      size: pageSize,
+    },
     filters,
     updateFilters,
     goToPage,

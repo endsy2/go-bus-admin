@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
 import { Label } from 'shared/components/ui/label';
@@ -43,33 +43,39 @@ const SchedulesPage = () => {
   const [deleteScheduleId, setDeleteScheduleId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [filters, setFilters] = useState(initialFilters);
-  const isInitialMount = useRef(true);
-  const [pagination, setPagination] = useState({
-    pageNo: 1,
-    pageSize: 15,
-    totalPages: 0,
-    totalElements: 0,
-  });
+  // currentPage is 0-based. The service expects 1-based pageNo, so we add +1 at the call site.
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(15);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
 
-  // Fetch buses on component mount and load initial schedules
-  React.useEffect(() => {
-    fetchBuses();
-    fetchRoutes();
-    fetchSchedules(1); // Load all schedules initially
-  }, []);
+  // Fetch schedules — depends on filters, currentPage, pageSize.
+  // useEffect([fetchSchedules]) ensures exactly one fetch per dependency change.
+  const fetchSchedules = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await scheduleService.filterSchedules(
+        filters.routeId || null,
+        filters.fromDate || null,
+        filters.toDate || null,
+        filters.maxPrice || null,
+        currentPage + 1,   // service is 1-based
+        pageSize
+      );
 
-  // Auto-search when filters change (skip on initial mount — mount effect already fetches)
-  React.useEffect(() => {
-    if (isInitialMount.current) {
-      isInitialMount.current = false;
-      return;
+      const scheduleData = response.data?.content || response.content || [];
+      setSchedules(Array.isArray(scheduleData) ? scheduleData : []);
+      setTotalPages(response.data?.totalPages || 0);
+      setTotalElements(response.data?.totalElements || 0);
+    } catch (error) {
+      console.error('Failed to fetch schedules:', error);
+      setSchedules([]);
+    } finally {
+      setLoading(false);
     }
-    const timeoutId = setTimeout(() => {
-      fetchSchedules(1);
-    }, 500);
+  }, [filters, currentPage, pageSize]);
 
-    return () => clearTimeout(timeoutId);
-  }, [filters.routeId, filters.busId, filters.fromDate, filters.toDate, filters.maxPrice]);
+  // ── Dropdown data fetchers (mount-only, independent of schedule pagination) ──
 
   const fetchBuses = async () => {
     setLoadingBuses(true);
@@ -103,37 +109,16 @@ const SchedulesPage = () => {
     }
   };
 
-  const fetchSchedules = async (pageNo = 1, overrideFilters = null, overridePageSize = null) => {
-    const activeFilters = overrideFilters || filters;
-    const activePageSize = overridePageSize || pagination.pageSize;
+  // Fetch buses and routes on mount (independent of pagination state)
+  useEffect(() => {
+    fetchBuses();
+    fetchRoutes();
+  }, []);
 
-    try {
-      setLoading(true);
-      const response = await scheduleService.filterSchedules(
-        activeFilters.routeId || null,
-        activeFilters.fromDate || null,
-        activeFilters.toDate || null,
-        activeFilters.maxPrice || null,
-        pageNo,
-        activePageSize
-      );
-
-      const scheduleData = response.data?.content || response.content || [];
-      setSchedules(Array.isArray(scheduleData) ? scheduleData : []);
-
-      setPagination({
-        pageNo: response.data?.number + 1 || pageNo,
-        pageSize: response.data?.size || activePageSize,
-        totalPages: response.data?.totalPages || 0,
-        totalElements: response.data?.totalElements || 0,
-      });
-    } catch (error) {
-      console.error('Failed to fetch schedules:', error);
-      setSchedules([]);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Trigger a schedule fetch whenever fetchSchedules changes (i.e., whenever any dep changes)
+  useEffect(() => {
+    fetchSchedules();
+  }, [fetchSchedules]);
 
   const handleDelete = (id) => {
     setDeleteScheduleId(id);
@@ -141,12 +126,13 @@ const SchedulesPage = () => {
 
   const handleConfirmDelete = async () => {
     if (!deleteScheduleId) return;
-
     try {
       setDeleting(true);
       await scheduleService.deleteSchedule(deleteScheduleId);
       setDeleteScheduleId(null);
-      fetchSchedules(pagination.pageNo);
+      // fetchSchedules will re-run because its identity doesn't change here;
+      // call it explicitly to refresh after delete.
+      fetchSchedules();
     } catch (error) {
       console.error('Failed to delete schedule:', error);
       addToast({ message: error.response?.data?.message || 'Failed to delete schedule', type: 'error' });
@@ -155,21 +141,26 @@ const SchedulesPage = () => {
     }
   };
 
+  // newPage arrives 0-based from <Pagination>
   const handlePageChange = (newPage) => {
-    fetchSchedules(newPage + 1);
+    setCurrentPage(newPage);
   };
 
   const handlePageSizeChange = (newSize) => {
-    setPagination((prev) => ({
-      ...prev,
-      pageNo: 1,
-      pageSize: newSize,
-    }));
-    fetchSchedules(1, null, newSize);
+    setCurrentPage(0);
+    setPageSize(newSize);
   };
 
+  // Reset to first page when filters change (called inline on filter updates below)
   const handleClearFilters = () => {
+    setCurrentPage(0);
     setFilters(initialFilters);
+  };
+
+  // Helper: update a single filter key and reset to first page
+  const updateFilter = (key, value) => {
+    setCurrentPage(0);
+    setFilters(prev => ({ ...prev, [key]: value }));
   };
 
   return (
@@ -203,7 +194,7 @@ const SchedulesPage = () => {
             <Label>Route</Label>
             <Select
               value={filters.routeId || '__all__'}
-              onValueChange={(value) => setFilters({ ...filters, routeId: value === '__all__' ? '' : value })}
+              onValueChange={(value) => updateFilter('routeId', value === '__all__' ? '' : value)}
               disabled={loadingRoutes}
             >
               <SelectTrigger>
@@ -225,7 +216,7 @@ const SchedulesPage = () => {
             <Label>Bus</Label>
             <Select
               value={filters.busId || '__all__'}
-              onValueChange={(value) => setFilters({ ...filters, busId: value === '__all__' ? '' : value })}
+              onValueChange={(value) => updateFilter('busId', value === '__all__' ? '' : value)}
               disabled={loadingBuses}
             >
               <SelectTrigger>
@@ -247,7 +238,7 @@ const SchedulesPage = () => {
             <Label>From Date</Label>
             <DatePicker
               value={filters.fromDate}
-              onChange={(value) => setFilters({ ...filters, fromDate: value })}
+              onChange={(value) => updateFilter('fromDate', value)}
               placeholder="Select from date"
               className="h-[42px] rounded-xl"
             />
@@ -258,7 +249,7 @@ const SchedulesPage = () => {
             <Label>To Date</Label>
             <DatePicker
               value={filters.toDate}
-              onChange={(value) => setFilters({ ...filters, toDate: value })}
+              onChange={(value) => updateFilter('toDate', value)}
               placeholder="Select to date"
               className="h-[42px] rounded-xl"
             />
@@ -273,7 +264,7 @@ const SchedulesPage = () => {
               step="0.01"
               min="0"
               value={filters.maxPrice}
-              onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+              onChange={(e) => updateFilter('maxPrice', e.target.value)}
               placeholder="Any price"
             />
           </div>
@@ -371,10 +362,10 @@ const SchedulesPage = () => {
         {/* Pagination */}
         {schedules.length > 0 && (
           <Pagination
-            currentPage={pagination.pageNo - 1}
-            totalPages={pagination.totalPages}
-            pageSize={pagination.pageSize}
-            totalElements={pagination.totalElements}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            pageSize={pageSize}
+            totalElements={totalElements}
             onPageChange={handlePageChange}
             onPageSizeChange={handlePageSizeChange}
           />
@@ -388,7 +379,7 @@ const SchedulesPage = () => {
           onClose={() => setShowCreateDialog(false)}
           onSuccess={() => {
             setShowCreateDialog(false);
-            fetchSchedules(pagination.pageNo);
+            fetchSchedules();
           }}
         />
       )}
@@ -400,7 +391,7 @@ const SchedulesPage = () => {
           onClose={() => setEditingSchedule(null)}
           onSuccess={() => {
             setEditingSchedule(null);
-            fetchSchedules(pagination.pageNo);
+            fetchSchedules();
           }}
         />
       )}

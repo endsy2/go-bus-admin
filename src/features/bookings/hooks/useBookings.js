@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import bookingService from '../services/bookingService';
-
-const DEFAULT_PAGE_SIZE = 15;
+import { DEFAULT_PAGE_SIZE } from 'shared/hooks/usePagination';
 
 export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = DEFAULT_PAGE_SIZE) => {
   const [bookings, setBookings] = useState([]);

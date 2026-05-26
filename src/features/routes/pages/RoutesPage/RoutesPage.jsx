@@ -35,16 +35,23 @@ const RoutesPage = () => {
     totalElements: 0
   });
 
+  // Fetch paginated route list whenever page or page-size changes
   useEffect(() => {
     fetchRoutes();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pagination.currentPage, pagination.pageSize]);
 
+  // Fetch the full route list for the dropdown only on mount (not on every page change)
+  useEffect(() => {
+    fetchAllRoutesForDropdown();
+  }, []);
+
+  // Fetches the current page of routes (uses 1-based page at the service boundary)
   const fetchRoutes = async () => {
     setLoading(true);
     try {
       const result = await routeService.getRoutesPaginated(
-        pagination.currentPage + 1,
+        pagination.currentPage + 1,  // service is 1-based
         pagination.pageSize
       );
       const data = result.data || result;
@@ -56,7 +63,6 @@ const RoutesPage = () => {
         totalElements: data.totalElements || 0,
       }));
       setError('');
-      fetchAllRoutesForDropdown();
     } catch (err) {
       setError(err.response?.data?.message || 'Network error. Please check your connection.');
     } finally {
@@ -64,6 +70,7 @@ const RoutesPage = () => {
     }
   };
 
+  // Fetches all routes (unpaginated) for the search dropdown — independent of pagination
   const fetchAllRoutesForDropdown = async () => {
     try {
       const result = await routeService.getRoutes();
@@ -80,8 +87,8 @@ const RoutesPage = () => {
 
     if (!origin && !destination) {
       if (!search.trim()) {
+        // Let the useEffect([pagination.currentPage]) handle the fetch
         setPagination(prev => ({ ...prev, currentPage: 0 }));
-        fetchRoutes();
         return;
       }
       const searchTerms = search.trim().split(/\s+/);
@@ -119,8 +126,8 @@ const RoutesPage = () => {
   const handleClearFilters = () => {
     if (search) {
       setSearch('');
+      // Reset to page 0 — the useEffect([pagination.currentPage]) will trigger fetchRoutes automatically
       setPagination(prev => ({ ...prev, currentPage: 0 }));
-      fetchRoutes();
     }
   };
 
@@ -152,6 +159,7 @@ const RoutesPage = () => {
   const handleCreateSuccess = () => {
     setShowCreateRoute(false);
     fetchRoutes();
+    fetchAllRoutesForDropdown();
   };
 
   const handleDeleteRoute = (route) => {

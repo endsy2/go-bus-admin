@@ -28,8 +28,10 @@ const TeamPage = () => {
   // Members state
   const [teamMembers, setTeamMembers] = useState([]);
   const [membersLoading, setMembersLoading] = useState(true);
+  // currentPage is 0-based (matches <Pagination> convention).
+  // The service expects 1-based pageStart, so we add +1 at the call site.
   const [membersPagination, setMembersPagination] = useState({
-    currentPage: 1,
+    currentPage: 0,
     pageSize: 15,
     totalPages: 0,
     totalElements: 0
@@ -92,14 +94,15 @@ const TeamPage = () => {
     });
   }, [rolePermissions, allPermissions, roles]);
 
-  const fetchTeamMembers = async (page = 1, size = 15) => {
+  // page is 0-based; the service expects 1-based pageStart, so we add +1 here.
+  const fetchTeamMembers = async (page = 0, size = 15) => {
     try {
       setMembersLoading(true);
-      const result = await userService.getBySpecification({ pageStart: page, pageSize: size, isEmployee: true });
+      const result = await userService.getBySpecification({ pageStart: page + 1, pageSize: size, isEmployee: true });
       const pageData = result.data || {};
       setTeamMembers(pageData.content || []);
       setMembersPagination({
-        currentPage: page,
+        currentPage: page,                      // store as 0-based
         pageSize: pageData.size || size,
         totalPages: pageData.totalPages || 1,
         totalElements: pageData.totalElements || 0,
@@ -156,18 +159,20 @@ const TeamPage = () => {
       await adminService.users.assignRoles(selectedUser.id, { roles });
       setShowAssignRoleDialog(false);
       addToast({ message: 'Roles updated successfully!', type: 'success' });
+      // Stay on the current page after assigning a role (currentPage is 0-based)
       fetchTeamMembers(membersPagination.currentPage, membersPagination.pageSize);
     } catch (err) {
       addToast({ message: err.response?.data?.message || 'Failed to update roles', type: 'error' });
     }
   };
 
+  // newPage arrives 0-based from <Pagination>
   const handleMembersPageChange = (newPage) => {
     fetchTeamMembers(newPage, membersPagination.pageSize);
   };
 
   const handleMembersPageSizeChange = (newSize) => {
-    fetchTeamMembers(1, newSize);
+    fetchTeamMembers(0, newSize);
   };
 
   const cancelAssignRole = () => {
@@ -178,7 +183,8 @@ const TeamPage = () => {
   const handleCreateMemberSuccess = () => {
     setShowCreateMember(false);
     addToast({ message: 'Team member created successfully!', type: 'success' });
-    fetchTeamMembers(membersPagination.currentPage, membersPagination.pageSize);
+    // Go back to first page after creation to show the new member
+    fetchTeamMembers(0, membersPagination.pageSize);
   };
 
   const handleCreateMemberCancel = () => {
@@ -200,7 +206,12 @@ const TeamPage = () => {
         message: `${selectedUser.fullName || selectedUser.userName} has been deleted successfully!`,
         type: 'success',
       });
-      fetchTeamMembers(membersPagination.currentPage, membersPagination.pageSize);
+      // Stay on the current page after deletion if still valid, else go back one
+      const pageAfterDelete =
+        teamMembers.length === 1 && membersPagination.currentPage > 0
+          ? membersPagination.currentPage - 1
+          : membersPagination.currentPage;
+      fetchTeamMembers(pageAfterDelete, membersPagination.pageSize);
     } catch (err) {
       addToast({ message: err.response?.data?.message || 'Failed to delete team member', type: 'error' });
     } finally {
@@ -449,16 +460,14 @@ const TeamPage = () => {
           
           </div>
           {teamMembers.length > 0 && (
-            <div className="p-4">
-              <Pagination
-                currentPage={membersPagination.currentPage}
-                totalPages={membersPagination.totalPages}
-                pageSize={membersPagination.pageSize}
-                totalElements={membersPagination.totalElements}
-                onPageChange={handleMembersPageChange}
-                onPageSizeChange={handleMembersPageSizeChange}
-              />
-            </div>
+            <Pagination
+              currentPage={membersPagination.currentPage}
+              totalPages={membersPagination.totalPages}
+              pageSize={membersPagination.pageSize}
+              totalElements={membersPagination.totalElements}
+              onPageChange={handleMembersPageChange}
+              onPageSizeChange={handleMembersPageSizeChange}
+            />
           )}
         </Card>
       </div>

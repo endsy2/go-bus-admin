@@ -42,109 +42,14 @@ const BusesPage = () => {
     totalElements: 0
   });
 
-  useEffect(() => {
-    fetchAll();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (!loading) {
-      fetchBuses();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pagination.currentPage, pagination.pageSize]);
-
-  // Auto-fetch when dropdown filters change (uses shared ref so search debounce cancels this if both fire)
-  useEffect(() => {
-    if (!loading) {
-      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-      searchDebounceRef.current = setTimeout(() => {
-        setPagination(prev => ({ ...prev, currentPage: 0 }));
-        fetchBuses();
-      }, 0);
-    }
-    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filterRoute, filterType, filterStatus, minSeats, maxSeats]);
-
-  // Debounced auto-fetch when search text changes (cancels the dropdown 0ms timer if both fire together)
-  useEffect(() => {
-    if (!loading) {
-      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-      searchDebounceRef.current = setTimeout(() => {
-        setPagination(prev => ({ ...prev, currentPage: 0 }));
-        fetchBuses();
-      }, 500);
-    }
-    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [search]);
-
-  const fetchAll = async () => {
-    setLoading(true);
-    await Promise.all([fetchAllBuses(), fetchRoutes()]);
-    setLoading(false);
-  };
-
-  const fetchAllBuses = async () => {
+  /**
+   * Single bus-fetch function that always includes all active filters.
+   * Accepts explicit page/size so callers can pass a freshly computed value
+   * without waiting for a React state update to land.
+   */
+  const fetchBuses = async (page = pagination.currentPage, size = pagination.pageSize) => {
     try {
-      const params = { pageNo: pagination.currentPage + 1, pageSize: pagination.pageSize };
-      const result = await busService.getBuses(params);
-      const data = result.data || result;
-      const busData = data.content || data;
-      setBuses(Array.isArray(busData) ? busData : []);
-      
-      // Update pagination info
-      setPagination(prev => ({
-        ...prev,
-        totalPages: data.totalPages || 1,
-        totalElements: data.totalElements || (Array.isArray(busData) ? busData.length : 0)
-      }));
-      
-      setError('');
-    } catch (err) {
-      const errorMessage = err.response?.data?.message || err.response?.data?.data?.message || 'Failed to fetch buses';
-      setError(errorMessage);
-      console.error('Error fetching buses:', err);
-    }
-  };
-
-  const handleSearch = () => {
-    setPagination(prev => ({ ...prev, currentPage: 0 }));
-    setSearching(true);
-    fetchBuses().finally(() => setSearching(false));
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'Enter') {
-      setPagination(prev => ({ ...prev, currentPage: 0 }));
-      setSearching(true);
-      fetchBuses().finally(() => setSearching(false));
-    }
-  };
-
-  const handleClearFilters = () => {
-    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
-    setFilterStatus('ALL');
-    setFilterType('ALL');
-    setFilterRoute('ALL');
-    setSearch('');
-    setMinSeats('');
-    setMaxSeats('');
-    setPagination(prev => ({ ...prev, currentPage: 0 }));
-  };
-
-  const handlePageChange = (newPage) => {
-    setPagination(prev => ({ ...prev, currentPage: newPage }));
-  };
-
-  const handlePageSizeChange = (newSize) => {
-    setPagination(prev => ({ ...prev, currentPage: 0, pageSize: newSize }));
-  };
-
-  const fetchBuses = async () => {
-    try {
-      const params = { pageNo: pagination.currentPage + 1, pageSize: pagination.pageSize };
+      const params = { pageNo: page + 1, pageSize: size };  // service is 1-based
       if (filterRoute !== 'ALL' && filterRoute) params.routeId = filterRoute;
       if (filterType !== 'ALL' && filterType) params.busType = filterType;
       if (filterStatus !== 'ALL' && filterStatus) params.status = filterStatus;
@@ -156,20 +61,98 @@ const BusesPage = () => {
       const data = result.data || result;
       const busData = data.content || data;
       setBuses(Array.isArray(busData) ? busData : []);
-      
-      // Update pagination info
       setPagination(prev => ({
         ...prev,
+        currentPage: page,
+        pageSize: size,
         totalPages: data.totalPages || 1,
-        totalElements: data.totalElements || (Array.isArray(busData) ? busData.length : 0)
+        totalElements: data.totalElements || (Array.isArray(busData) ? busData.length : 0),
       }));
-      
       setError('');
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.response?.data?.data?.message || 'Failed to fetch buses';
       setError(errorMessage);
       console.error('Error fetching buses:', err);
     }
+  };
+
+  // Initial load: fetch buses and routes in parallel
+  useEffect(() => {
+    const init = async () => {
+      setLoading(true);
+      await Promise.all([fetchBuses(0, pagination.pageSize), fetchRoutes()]);
+      setLoading(false);
+    };
+    init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Re-fetch when page or page-size changes (skip during initial load)
+  useEffect(() => {
+    if (!loading) {
+      fetchBuses(pagination.currentPage, pagination.pageSize);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pagination.currentPage, pagination.pageSize]);
+
+  // Auto-fetch when dropdown filters change — reset to page 0
+  useEffect(() => {
+    if (!loading) {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      searchDebounceRef.current = setTimeout(() => {
+        fetchBuses(0, pagination.pageSize);
+        setPagination(prev => ({ ...prev, currentPage: 0 }));
+      }, 0);
+    }
+    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filterRoute, filterType, filterStatus, minSeats, maxSeats]);
+
+  // Debounced auto-fetch when search text changes — reset to page 0
+  useEffect(() => {
+    if (!loading) {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+      searchDebounceRef.current = setTimeout(() => {
+        fetchBuses(0, pagination.pageSize);
+        setPagination(prev => ({ ...prev, currentPage: 0 }));
+      }, 500);
+    }
+    return () => { if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
+  const handleSearch = () => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    setSearching(true);
+    fetchBuses(0, pagination.pageSize).finally(() => {
+      setPagination(prev => ({ ...prev, currentPage: 0 }));
+      setSearching(false);
+    });
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') handleSearch();
+  };
+
+  const handleClearFilters = () => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    setFilterStatus('ALL');
+    setFilterType('ALL');
+    setFilterRoute('ALL');
+    setSearch('');
+    setMinSeats('');
+    setMaxSeats('');
+    // fetchBuses will be called by the filter effects above
+    setPagination(prev => ({ ...prev, currentPage: 0 }));
+  };
+
+  // newPage arrives 0-based from <Pagination>
+  const handlePageChange = (newPage) => {
+    setPagination(prev => ({ ...prev, currentPage: newPage }));
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPagination(prev => ({ ...prev, currentPage: 0, pageSize: newSize }));
   };
 
   const fetchRoutes = async () => {
@@ -229,7 +212,9 @@ const BusesPage = () => {
         onBack={() => setShowCreatePage(false)}
         onSuccess={() => {
           setShowCreatePage(false);
-          fetchAll();
+          // Go to first page so the newly created bus is visible
+          fetchBuses(0, pagination.pageSize);
+          setPagination(prev => ({ ...prev, currentPage: 0 }));
           addToast({ message: t('busCreated') || 'Bus created successfully', type: 'success' });
         }}
       />
@@ -237,7 +222,10 @@ const BusesPage = () => {
   }
 
   if (selectedBusId) {
-    return <BusDetailPage busId={selectedBusId} onBack={() => { setSelectedBusId(null); fetchAll(); }} />;
+    return <BusDetailPage busId={selectedBusId} onBack={() => {
+      setSelectedBusId(null);
+      fetchBuses(pagination.currentPage, pagination.pageSize);
+    }} />;
   }
 
   if (loading) {

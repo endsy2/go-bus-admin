@@ -11,7 +11,8 @@
       "Bash(perl -i -ne 'print unless /^\\\\s*console\\\\.log\\\\\\(/' \"src/features/bookings/components/CreateBookingDialog/CreateBookingDialog.jsx\")",
       "Bash(perl -i -ne 'print unless /^\\\\s*console\\\\.log\\\\\\(/' \"src/features/profile/pages/ProfilePage/ProfilePage.jsx\")",
       "Bash(perl -i -ne 'print unless /^\\\\s*console\\\\.log\\\\\\(/' \"src/features/bookings/components/BookingTable/BookingTable.js\")",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m 'refactor: consolidate HTTP clients, clean logs, fix duplicate translation keys *)"
     ]
   }
 }
