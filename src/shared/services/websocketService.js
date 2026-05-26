@@ -12,7 +12,7 @@ class WebSocketService {
 
   connect(url) {
     // Use provided URL or construct from environment variable or default to localhost
-    const wsUrl = url || process.env.REACT_APP_WS_URL || 'wss://go-bus-gateway-service-production.up.railway.app/bus-service/ws/bus';
+    const wsUrl = url || process.env.REACT_APP_WS_URL || 'https://go-bus-gateway-service-production.up.railway.app/bus-service/ws/bus';
     
     if (this.client?.connected) {
       console.log('[WebSocket] Already connected');

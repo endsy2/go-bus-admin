@@ -2,11 +2,14 @@ import React, { useState, useRef } from 'react';
 import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
 import { Label } from 'shared/components/ui/label';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from 'shared/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
+import { Input } from 'shared/components/common/Input';
+import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
 import { DatePicker } from 'shared/components/ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
 import { Pagination } from 'shared/components/feedback/Pagination';
-import { Calendar, Bus, DollarSign, Plus, Edit, Trash2, Search, Loader2 } from 'lucide-react';
+import { useToast } from 'shared/components/ui/toast';
+import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import scheduleService from '../../services/scheduleService';
 import busService from '../../../buses/services/busService';
 import routeService from '../../../routes/services/routeService';
@@ -14,6 +17,7 @@ import CreateScheduleDialog from '../../components/CreateScheduleDialog/CreateSc
 import EditScheduleDialog from '../../components/EditScheduleDialog/EditScheduleDialog';
 
 const SchedulesPage = () => {
+  const { addToast } = useToast();
   const getTodayStartISO = () => {
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of day
@@ -145,7 +149,7 @@ const SchedulesPage = () => {
       fetchSchedules(pagination.pageNo);
     } catch (error) {
       console.error('Failed to delete schedule:', error);
-      alert('Failed to delete schedule');
+      addToast({ message: error.response?.data?.message || 'Failed to delete schedule', type: 'error' });
     } finally {
       setDeleting(false);
     }
@@ -169,19 +173,18 @@ const SchedulesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-100 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 p-6">
+    <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-background min-h-screen">
       {/* Header */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white flex items-center gap-3">
-            <Calendar className="w-8 h-8 text-blue-500 dark:text-blue-400" />
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-1">
             Schedules Management
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-1">Manage bus schedules and timetables</p>
+          <p className="text-sm text-muted-foreground">Manage bus schedules and timetables</p>
         </div>
         <Button
           onClick={() => setShowCreateDialog(true)}
-          className="bg-blue-500 hover:bg-blue-600 text-white flex items-center gap-2 shadow-lg shadow-blue-500/20"
+          className="flex items-center gap-2 w-full sm:w-auto justify-center sm:justify-start"
         >
           <Plus className="w-4 h-4" />
           Create Schedule
@@ -189,62 +192,59 @@ const SchedulesPage = () => {
       </div>
 
       {/* Filters Card */}
-      <Card className="p-6 mb-6 bg-white dark:bg-slate-900/50 backdrop-blur-xl border-slate-200 dark:border-slate-700/50 shadow-xl dark:shadow-2xl">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-          <Search className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+      <Card className="p-4 sm:p-6 mb-4 sm:mb-6">
+        <h2 className="text-sm font-medium text-muted-foreground mb-3 sm:mb-4">
           Filter Schedules
         </h2>
-        <div className="flex flex-wrap items-end gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-end gap-3 sm:gap-4">
 
           {/* Route Filter */}
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
-            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Route</Label>
-            <div className="relative">
-              <select
-                value={filters.routeId}
-                onChange={(e) => setFilters({ ...filters, routeId: e.target.value })}
-                disabled={loadingRoutes}
-                className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-700/50 rounded-xl bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none cursor-pointer"
-              >
-                <option value="">All Routes</option>
+          <div className="flex flex-col gap-1.5 w-full lg:flex-1 lg:min-w-[140px]">
+            <Label>Route</Label>
+            <Select
+              value={filters.routeId || '__all__'}
+              onValueChange={(value) => setFilters({ ...filters, routeId: value === '__all__' ? '' : value })}
+              disabled={loadingRoutes}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All Routes" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All Routes</SelectItem>
                 {routes.map(route => (
-                  <option key={route.id} value={route.id}>
-                    {route.origin} -&gt; {route.destination}
-                  </option>
+                  <SelectItem key={route.id} value={String(route.id)}>
+                    {route.origin} → {route.destination}
+                  </SelectItem>
                 ))}
-              </select>
-              <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Bus Filter */}
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
-            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Bus</Label>
-            <div className="relative">
-              <select
-                value={filters.busId}
-                onChange={(e) => setFilters({ ...filters, busId: e.target.value })}
-                disabled={loadingBuses}
-                className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-700/50 rounded-xl bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none cursor-pointer"
-              >
-                <option value="">All Buses</option>
+          <div className="flex flex-col gap-1.5 w-full lg:flex-1 lg:min-w-[140px]">
+            <Label>Bus</Label>
+            <Select
+              value={filters.busId || '__all__'}
+              onValueChange={(value) => setFilters({ ...filters, busId: value === '__all__' ? '' : value })}
+              disabled={loadingBuses}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="All Buses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="__all__">All Buses</SelectItem>
                 {buses.map(bus => (
-                  <option key={bus.id} value={bus.id}>
+                  <SelectItem key={bus.id} value={String(bus.id)}>
                     {bus.busNumber} | {bus.busType}
-                  </option>
+                  </SelectItem>
                 ))}
-              </select>
-              <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* From Date */}
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
-            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">From Date</Label>
+          <div className="flex flex-col gap-1.5 w-full lg:flex-1 lg:min-w-[140px]">
+            <Label>From Date</Label>
             <DatePicker
               value={filters.fromDate}
               onChange={(value) => setFilters({ ...filters, fromDate: value })}
@@ -254,8 +254,8 @@ const SchedulesPage = () => {
           </div>
 
           {/* To Date */}
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[140px]">
-            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">To Date</Label>
+          <div className="flex flex-col gap-1.5 w-full lg:flex-1 lg:min-w-[140px]">
+            <Label>To Date</Label>
             <DatePicker
               value={filters.toDate}
               onChange={(value) => setFilters({ ...filters, toDate: value })}
@@ -265,27 +265,26 @@ const SchedulesPage = () => {
           </div>
 
           {/* Max Price */}
-          <div className="flex flex-col gap-1.5 flex-1 min-w-[120px]">
-            <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Max Price</Label>
-            <input
+          <div className="flex flex-col gap-1.5 w-full lg:flex-1 lg:min-w-[120px]">
+            <Input
+              label="Max Price"
+              name="maxPrice"
               type="number"
               step="0.01"
               min="0"
               value={filters.maxPrice}
               onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
               placeholder="Any price"
-              className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-700/50 rounded-xl bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50 placeholder:text-slate-400 dark:placeholder:text-slate-500"
             />
           </div>
 
           {/* Clear Button — no label, aligned to bottom via items-end on parent */}
-          <div className="flex items-center gap-2 shrink-0">
+          <div className="flex items-center gap-2 shrink-0 sm:col-span-2 lg:col-span-1">
             <Button
               type="button"
               variant="outline"
               onClick={handleClearFilters}
               disabled={loading}
-              className="h-[42px] px-5 rounded-xl border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-slate-800"
             >
               Clear
             </Button>
@@ -295,69 +294,70 @@ const SchedulesPage = () => {
       </Card>
 
       {/* Results Card */}
-      <Card className="bg-white dark:bg-slate-900/50 backdrop-blur-xl border-slate-200 dark:border-slate-700/50 shadow-xl dark:shadow-2xl overflow-hidden">
+      <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
-              <TableRow className="border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">ID</TableHead>
-                <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">Bus Number</TableHead>
-                <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">Route</TableHead>
-                <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">Departure</TableHead>
-                <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">Arrival</TableHead>
-                <TableHead className="text-slate-700 dark:text-slate-300 font-semibold">Price</TableHead>
-                <TableHead className="text-slate-700 dark:text-slate-300 font-semibold text-right">Actions</TableHead>
+              <TableRow className="hover:bg-muted/50">
+                <TableHead className="font-medium">ID</TableHead>
+                <TableHead className="font-medium">Bus Number</TableHead>
+                <TableHead className="font-medium">Route</TableHead>
+                <TableHead className="font-medium">Departure</TableHead>
+                <TableHead className="font-medium">Arrival</TableHead>
+                <TableHead className="font-medium">Price</TableHead>
+                <TableHead className="font-medium text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {loading ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-slate-600 dark:text-slate-400">
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                     <Loader2 className="w-6 h-6 animate-spin mx-auto mb-2" />
                     Loading schedules...
                   </TableCell>
                 </TableRow>
               ) : schedules.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="text-center py-12 text-slate-600 dark:text-slate-400">
+                  <TableCell colSpan={7} className="text-center py-12 text-muted-foreground">
                     No schedules found. Try adjusting your filters.
                   </TableCell>
                 </TableRow>
               ) : (
                 schedules.map((schedule) => (
-                  <TableRow key={schedule.id} className="border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                    <TableCell className="text-slate-900 dark:text-white font-medium">#{schedule.id}</TableCell>
-                    <TableCell className="text-slate-700 dark:text-slate-300">{schedule.busNumber || 'N/A'}</TableCell>
-                    <TableCell className="text-slate-700 dark:text-slate-300">
+                  <TableRow key={schedule.id} className="hover:bg-muted/50 transition-colors">
+                    <TableCell className="font-medium">#{schedule.id}</TableCell>
+                    <TableCell>{schedule.busNumber || 'N/A'}</TableCell>
+                    <TableCell>
                       {schedule.route?.origin && schedule.route?.destination
-                        ? `${schedule.route.origin} -> ${schedule.route.destination}`
+                        ? `${schedule.route.origin} → ${schedule.route.destination}`
                         : 'Route not assigned'}
                     </TableCell>
-                    <TableCell className="text-slate-700 dark:text-slate-300">
+                    <TableCell>
                       {schedule.departureDateTime ? new Date(schedule.departureDateTime).toLocaleString() : 'N/A'}
                     </TableCell>
-                    <TableCell className="text-slate-700 dark:text-slate-300">
+                    <TableCell>
                       {schedule.arrivalDateTime ? new Date(schedule.arrivalDateTime).toLocaleString() : schedule.arrivalTime || 'N/A'}
                     </TableCell>
-                    <TableCell className="text-emerald-600 dark:text-emerald-400 font-semibold">${schedule.price?.toFixed(2) || '0.00'}</TableCell>
+                    <TableCell className="font-medium">${schedule.price?.toFixed(2) || '0.00'}</TableCell>
                     <TableCell className="text-right">
                       <div className="flex gap-2 justify-end">
                         <Button
                           size="sm"
+                          variant="outline"
                           onClick={() => setEditingSchedule(schedule)}
-                          className="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-900 dark:text-white"
+                          title="Edit"
                         >
-                          <Edit className="w-3 h-3 mr-1" />
-                          Edit
+                          <Edit className="w-3 h-3 sm:mr-1" />
+                          <span className="hidden sm:inline">Edit</span>
                         </Button>
                         <Button
                           size="sm"
                           variant="destructive"
                           onClick={() => handleDelete(schedule.id)}
-                          className="bg-red-100 dark:bg-red-500/20 hover:bg-red-200 dark:hover:bg-red-500/30 text-red-600 dark:text-red-400 border border-red-300 dark:border-red-500/50"
+                          title="Delete"
                         >
-                          <Trash2 className="w-3 h-3 mr-1" />
-                          Delete
+                          <Trash2 className="w-3 h-3 sm:mr-1" />
+                          <span className="hidden sm:inline">Delete</span>
                         </Button>
                       </div>
                     </TableCell>
@@ -405,50 +405,16 @@ const SchedulesPage = () => {
         />
       )}
 
-      <Dialog
-        open={deleteScheduleId !== null}
-        onOpenChange={(open) => {
-          if (!open && !deleting) {
-            setDeleteScheduleId(null);
-          }
-        }}
-      >
-        <DialogContent className="bg-slate-900 border-slate-800 text-white max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-white">Delete Schedule</DialogTitle>
-            <DialogDescription className="text-slate-300">
-              Are you sure you want to delete schedule #{deleteScheduleId}? This action cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="mt-4">
-            <Button
-              type="button"
-              variant="outline"
-              disabled={deleting}
-              onClick={() => setDeleteScheduleId(null)}
-              className="bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              disabled={deleting}
-              onClick={handleConfirmDelete}
-              className="bg-red-600 hover:bg-red-700 text-white"
-            >
-              {deleting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                'Confirm Delete'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <ConfirmDialog
+        isOpen={deleteScheduleId !== null}
+        onConfirm={handleConfirmDelete}
+        onCancel={() => { if (!deleting) setDeleteScheduleId(null); }}
+        title="Delete Schedule"
+        message={`Are you sure you want to delete schedule #${deleteScheduleId}?`}
+        confirmText={deleting ? 'Deleting...' : 'Delete'}
+        cancelText="Cancel"
+        type="danger"
+      />
     </div>
   );
 };

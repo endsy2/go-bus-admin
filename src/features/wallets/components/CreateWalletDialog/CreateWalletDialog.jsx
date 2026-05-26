@@ -181,7 +181,7 @@ const CreateWalletDialog = ({ open, onClose, onSuccess }) => {
 
         <DialogFooter>
           {success ? (
-            <Button onClick={handleClose} className="bg-blue-500 hover:bg-blue-600 text-white">
+            <Button onClick={handleClose}>
               Close
             </Button>
           ) : (

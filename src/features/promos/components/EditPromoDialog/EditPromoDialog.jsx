@@ -9,6 +9,7 @@ import {
 import { Input } from 'shared/components/common/Input';
 import { Button } from 'shared/components/common/Button';
 import { Label } from 'shared/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { DateTimePicker } from 'shared/components/ui/datetime-picker';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
@@ -120,9 +121,9 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto bg-slate-900 border-slate-800">
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-white">
+          <DialogTitle className="flex items-center gap-2">
             <Edit className="w-5 h-5 text-blue-500" />
             {t('editPromo') || 'Edit Promo Code'}
           </DialogTitle>
@@ -137,37 +138,38 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
             placeholder="SUMMER2024"
             error={errors.code}
             required
-            className="bg-slate-800 border-slate-700 text-white uppercase"
           />
 
-          <div>
-            <label className="block text-sm font-medium text-slate-300 mb-2">
-              {t('description') || 'Description'}
-            </label>
+          <div className="space-y-2">
+            <Label>{t('description') || 'Description'}</Label>
             <textarea
               name="description"
               value={formData.description}
               onChange={handleChange}
               placeholder={t('enterDescription') || 'Enter description...'}
               rows={3}
-              className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2 border border-input rounded-lg bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring resize-none"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-slate-300 mb-2">
-                {t('discountType') || 'Discount Type'}
-              </label>
-              <select
-                name="discountType"
+            <div className="space-y-2">
+              <Label>{t('discountType') || 'Discount Type'}</Label>
+              <Select
                 value={formData.discountType}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onValueChange={(value) => {
+                  setFormData(prev => ({ ...prev, discountType: value }));
+                  if (errors.discountType) setErrors(prev => ({ ...prev, discountType: '' }));
+                }}
               >
-                <option value="PERCENTAGE">PERCENTAGE</option>
-                <option value="FIXED_AMOUNT">FIXED AMOUNT</option>
-              </select>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="PERCENTAGE">PERCENTAGE</SelectItem>
+                  <SelectItem value="FIXED_AMOUNT">FIXED AMOUNT</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <Input
@@ -181,7 +183,6 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
               placeholder={formData.discountType === 'PERCENTAGE' ? '10' : '5.00'}
               error={errors.discountValue}
               required
-              className="bg-slate-800 border-slate-700 text-white"
             />
           </div>
 
@@ -193,28 +194,27 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
             value={formData.maxUses}
             onChange={handleChange}
             placeholder="100"
-            className="bg-slate-800 border-slate-700 text-white"
           />
 
           <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label className="text-slate-300">{t('validFrom') || 'Valid From'}</Label>
+            <div className="space-y-2">
+              <Label>{t('validFrom') || 'Valid From'}</Label>
               <DateTimePicker
                 value={formData.validFrom}
                 onChange={(value) => setFormData(prev => ({ ...prev, validFrom: value }))}
                 placeholder="Select start date and time"
               />
-              {errors.validFrom && <p className="text-sm text-red-400 mt-1">{errors.validFrom}</p>}
+              {errors.validFrom && <p className="text-sm text-destructive mt-1">{errors.validFrom}</p>}
             </div>
 
-            <div>
-              <Label className="text-slate-300">{t('validUntil') || 'Valid Until (Optional)'}</Label>
+            <div className="space-y-2">
+              <Label>{t('validUntil') || 'Valid Until (Optional)'}</Label>
               <DateTimePicker
                 value={formData.validTo}
                 onChange={(value) => setFormData(prev => ({ ...prev, validTo: value }))}
                 placeholder="No expiration"
               />
-              {errors.validTo && <p className="text-sm text-red-400 mt-1">{errors.validTo}</p>}
+              {errors.validTo && <p className="text-sm text-destructive mt-1">{errors.validTo}</p>}
             </div>
           </div>
 
@@ -224,7 +224,6 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
               variant="secondary"
               onClick={handleClose}
               disabled={loading}
-              className="bg-slate-800 hover:bg-slate-700 border-slate-700 text-white"
             >
               {t('cancel') || 'Cancel'}
             </Button>
@@ -232,7 +231,7 @@ const EditPromoDialog = ({ open, onClose, promo, onSuccess }) => {
               type="submit"
               variant="primary"
               disabled={loading}
-              className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+              className="flex items-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
               {loading ? (t('updating') || 'Updating...') : (t('update') || 'Update')}

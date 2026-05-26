@@ -177,28 +177,28 @@ export const Sidebar = ({ activeTab, setActiveTab, user, onLogout }) => {
       </nav>
 
       {/* User Profile Footer */}
-      <div className="p-4 border-t border-gray-200 dark:border-gray-800 flex-shrink-0 bg-gray-50 dark:bg-gray-900/50 backdrop-blur-sm">
+      <div className="p-4 border-t border-border flex-shrink-0">
         <button
           onClick={() => handleNavItemClick('profile')}
-          className="w-full flex items-center gap-3 p-3 bg-gray-100 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl mb-3 hover:bg-gray-200 dark:hover:bg-gray-800 transition-all duration-200 cursor-pointer"
+          className="w-full flex items-center gap-3 p-3 bg-muted rounded-lg mb-3 hover:bg-muted/80 transition-colors cursor-pointer"
         >
-          <Avatar className="h-10 w-10 flex-shrink-0 ring-2 ring-gray-300 dark:ring-gray-700">
-            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-blue-600 text-white text-base font-bold">
-              {user?.fullName ? user.fullName.charAt(0).toUpperCase() : '👤'}
+          <Avatar className="h-9 w-9 flex-shrink-0">
+            <AvatarFallback className="bg-primary/10 text-primary font-medium text-sm">
+              {user?.fullName ? user.fullName.charAt(0).toUpperCase() : 'U'}
             </AvatarFallback>
           </Avatar>
           <div className="flex-1 overflow-hidden text-left">
-            <div className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+            <div className="text-sm font-medium text-foreground truncate">
               {user?.userName || 'User'}
             </div>
-            <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
+            <div className="text-xs text-muted-foreground truncate">
               {user?.email || 'email'}
             </div>
           </div>
         </button>
-        <Button 
-          variant="destructive" 
-          className="w-full bg-red-500/10 hover:bg-red-500/20 dark:bg-red-500/20 dark:hover:bg-red-500/30 text-red-600 dark:text-red-400 border border-red-200 dark:border-red-800 hover:border-red-300 dark:hover:border-red-700 transition-all duration-200"
+        <Button
+          variant="outline"
+          className="w-full text-destructive hover:text-destructive hover:bg-destructive/10 border-border"
           onClick={handleLogoutClick}
         >
           <LogOut className="mr-2 h-4 w-4" />

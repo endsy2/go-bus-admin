@@ -4,7 +4,8 @@
       "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\MSI63\\\\Videos\\\\Captures\\\\OneDrive\\\\Pictures\\\\XML\\\\GoBusAdmin\\\\bus-booking-admin\" -Recurse -Force)",
       "Bash(Select-Object FullName)",
       "Bash(Sort-Object FullName)",
-      "Bash(Get-ChildItem *)"
+      "Bash(Get-ChildItem *)",
+      "Bash(npx eslint *)"
     ]
   }
 }

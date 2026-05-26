@@ -1,36 +1,31 @@
 import { useState, useEffect, useCallback } from 'react';
 import bookingService from '../services/bookingService';
 
-export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 10) => {
+const DEFAULT_PAGE_SIZE = 15;
+
+export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = DEFAULT_PAGE_SIZE) => {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [pagination, setPagination] = useState({
-    currentPage: initialPage,
-    totalPages: 0,
-    totalElements: 0,
-    size: initialSize,
-  });
+  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [pageSize, setPageSize] = useState(initialSize);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
   const [filters, setFilters] = useState(initialFilters);
 
-  const fetchBookings = useCallback(async (page = pagination.currentPage, size = pagination.size) => {
+  const fetchBookings = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await bookingService.filterBookings(filters, page, size);
-      
-      // Handle Spring Pageable response structure
-      // response.data.content contains the bookings array
+      // Backend uses 0-based pagination — send currentPage directly.
+      const response = await bookingService.filterBookings(filters, currentPage, pageSize);
+
       const pagedData = response.data || {};
-      const bookingsData = pagedData.content || [];
-      
-      setBookings(bookingsData);
-      setPagination({
-        currentPage: pagedData.number !== undefined ? pagedData.number : page,
-        totalPages: pagedData.totalPages || 0,
-        totalElements: pagedData.totalElements || 0,
-        size: pagedData.size || size,
-      });
+      setBookings(pagedData.content || []);
+      setTotalPages(pagedData.totalPages || 0);
+      setTotalElements(pagedData.totalElements || 0);
+      // Do NOT sync currentPage from the response — that would mutate a dependency
+      // of this callback and trigger a second fetch on every page change.
     } catch (err) {
       console.error('Error fetching bookings:', err);
       setError(err.message || 'Failed to fetch bookings');
@@ -38,37 +33,41 @@ export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 
     } finally {
       setLoading(false);
     }
-  }, [filters, pagination.currentPage, pagination.size]);
+  }, [filters, currentPage, pageSize]);
 
   useEffect(() => {
     fetchBookings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters]);
+  }, [fetchBookings]);
 
   const updateFilters = (newFilters) => {
+    setCurrentPage(0);
     setFilters(prev => ({ ...prev, ...newFilters }));
-    setPagination(prev => ({ ...prev, currentPage: 0 }));
   };
 
   const resetFilters = () => {
+    setCurrentPage(0);
     setFilters({});
-    setPagination(prev => ({ ...prev, currentPage: 0 }));
   };
 
   const goToPage = (page) => {
-    fetchBookings(page, pagination.size);
+    setCurrentPage(page);
   };
 
   const changePageSize = (size) => {
-    setPagination(prev => ({ ...prev, size, currentPage: 0 }));
-    fetchBookings(0, size);
+    setCurrentPage(0);
+    setPageSize(size);
   };
 
   return {
     bookings,
     loading,
     error,
-    pagination,
+    pagination: {
+      currentPage,
+      totalPages,
+      totalElements,
+      size: pageSize,
+    },
     filters,
     updateFilters,
     resetFilters,

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Plus, Search, X, Eye, Trash2, AlertCircle, Bus as BusIcon, Users, MapPin } from 'lucide-react';
+import { Plus, Search, X, Eye, Trash2, AlertCircle, Bus as BusIcon, Users, MapPin, CheckCircle, PauseCircle, Wrench, XCircle, PlayCircle } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
+import { Badge } from 'shared/components/common/Badge';
 import { Card, CardContent } from 'shared/components/ui/card';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { useToast } from 'shared/components/ui/toast';
@@ -241,16 +242,16 @@ const BusesPage = () => {
 
   if (loading) {
     return (
-      <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-purple-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
-        <div className="flex justify-between items-center mb-8">
+      <div className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto bg-background min-h-screen">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6 lg:mb-8">
           <div className="space-y-2">
-            <Skeleton className="h-10 w-64" />
-            <Skeleton className="h-4 w-96" />
+            <Skeleton className="h-8 sm:h-10 w-48 sm:w-64" />
+            <Skeleton className="h-4 w-64 sm:w-96" />
           </div>
-          <Skeleton className="h-10 w-40" />
+          <Skeleton className="h-10 w-full sm:w-40" />
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 md:gap-6 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-6 mb-4 sm:mb-6 lg:mb-8">
           {[...Array(6)].map((_, i) => (
             <Card key={i}>
               <CardContent className="p-6">
@@ -282,18 +283,17 @@ const BusesPage = () => {
   }
 
   return (
-    <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-purple-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto bg-background min-h-screen">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6 lg:mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent flex items-center gap-3">
-            <BusIcon className="h-8 w-8 text-purple-600 dark:text-purple-400" />
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-1">
             {t('busManagement') || 'Bus Management'}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground">
             {t('busManagementDesc') || 'Manage your fleet of buses, routes, and schedules'}
           </p>
         </div>
-        <Button onClick={() => setShowCreatePage(true)} className="gap-2">
+        <Button onClick={() => setShowCreatePage(true)} className="gap-2 w-full sm:w-auto justify-center">
           <Plus className="h-4 w-4" />
           {t('addNewBus') || 'Add New Bus'}
         </Button>
@@ -308,102 +308,86 @@ const BusesPage = () => {
         </Card>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4 md:gap-6 mb-8">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-purple-500 to-indigo-600 p-3 rounded-xl text-white">
-                <BusIcon className="h-6 w-6" />
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <Card>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md flex-shrink-0">
+                <BusIcon className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{buses.length}</div>
-                <div className="text-sm text-muted-foreground">{t('totalBuses') || 'Total Buses'}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-emerald-500 to-green-600 p-3 rounded-xl text-white">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                  <polyline points="22 4 12 14.01 9 11.01"/>
-                </svg>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{statusCounts.active}</div>
-                <div className="text-sm text-muted-foreground">{t('active') || 'Active'}</div>
+              <div className="min-w-0">
+                <div className="text-lg sm:text-xl font-semibold text-foreground">{buses.length}</div>
+                <div className="text-xs text-muted-foreground truncate">{t('totalBuses') || 'Total'}</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-3 rounded-xl text-white">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="10" y1="15" x2="10" y2="9"/>
-                  <line x1="14" y1="15" x2="14" y2="9"/>
-                </svg>
+        <Card>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-green-50 dark:bg-green-900/20 p-2 rounded-md flex-shrink-0">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
               </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{statusCounts.standby}</div>
-                <div className="text-sm text-muted-foreground">{t('standby') || 'Standby'}</div>
+              <div className="min-w-0">
+                <div className="text-lg sm:text-xl font-semibold text-foreground">{statusCounts.active}</div>
+                <div className="text-xs text-muted-foreground truncate">{t('active') || 'Active'}</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-purple-500 to-pink-600 p-3 rounded-xl text-white">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
-                </svg>
+        <Card>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-amber-50 dark:bg-amber-900/20 p-2 rounded-md flex-shrink-0">
+                <PauseCircle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{statusCounts.maintenance}</div>
-                <div className="text-sm text-muted-foreground">{t('maintenance') || 'Maintenance'}</div>
+              <div className="min-w-0">
+                <div className="text-lg sm:text-xl font-semibold text-foreground">{statusCounts.standby}</div>
+                <div className="text-xs text-muted-foreground truncate">{t('standby') || 'Standby'}</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-gray-500 to-gray-600 p-3 rounded-xl text-white">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <line x1="15" y1="9" x2="9" y2="15"/>
-                  <line x1="9" y1="9" x2="15" y2="15"/>
-                </svg>
+        <Card>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-purple-50 dark:bg-purple-900/20 p-2 rounded-md flex-shrink-0">
+                <Wrench className="h-4 w-4 text-purple-600 dark:text-purple-400" />
               </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{statusCounts.inactive}</div>
-                <div className="text-sm text-muted-foreground">{t('inactive') || 'Inactive'}</div>
+              <div className="min-w-0">
+                <div className="text-lg sm:text-xl font-semibold text-foreground">{statusCounts.maintenance}</div>
+                <div className="text-xs text-muted-foreground truncate">{t('maintenance') || 'Maint.'}</div>
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-cyan-500 to-blue-600 p-3 rounded-xl text-white">
-                <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="10"/>
-                  <polygon points="10 8 16 12 10 16 10 8"/>
-                </svg>
+        <Card>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-muted p-2 rounded-md flex-shrink-0">
+                <XCircle className="h-4 w-4 text-muted-foreground" />
               </div>
-              <div>
-                <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{statusCounts.inservice}</div>
-                <div className="text-sm text-muted-foreground">{t('inservice') || 'In Service'}</div>
+              <div className="min-w-0">
+                <div className="text-lg sm:text-xl font-semibold text-foreground">{statusCounts.inactive}</div>
+                <div className="text-xs text-muted-foreground truncate">{t('inactive') || 'Inactive'}</div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-3 sm:p-4">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="bg-blue-50 dark:bg-blue-900/20 p-2 rounded-md flex-shrink-0">
+                <PlayCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-lg sm:text-xl font-semibold text-foreground">{statusCounts.inservice}</div>
+                <div className="text-xs text-muted-foreground truncate">{t('inservice') || 'In Svc'}</div>
               </div>
             </div>
           </CardContent>
@@ -451,7 +435,7 @@ const BusesPage = () => {
             </Button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 mb-4 sm:mb-6">
             <div className="flex flex-col gap-2">
               <label className="text-sm font-medium">{t('route') || 'Route'}</label>
               <select
@@ -597,59 +581,53 @@ const BusesPage = () => {
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                            bus.busType === 'SLEEPER' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' :
-                            'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400'
-                          }`}>
+                          <Badge variant={bus.busType === 'SLEEPER' ? 'info' : 'default'}>
                             {bus.busType || 'N/A'}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-2 text-sm">
                             <MapPin className="h-4 w-4 text-muted-foreground" />
-                            <span className="text-blue-600 dark:text-blue-400 font-medium">{getRouteName(bus.routeId)}</span>
+                            <span className="text-foreground">{getRouteName(bus.routeId)}</span>
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex items-center gap-2 text-sm font-semibold">
+                          <div className="flex items-center gap-2 text-sm">
                             <Users className="h-4 w-4 text-muted-foreground" />
                             {bus.totalSeats ?? 'N/A'}
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <span className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold ${
-                            (bus.status || bus.busStatus) === 'Active' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' :
-                            (bus.status || bus.busStatus) === 'Standby' ? 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400' :
-                            (bus.status || bus.busStatus) === 'Maintenance' ? 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400' :
-                            (bus.status || bus.busStatus) === 'InService' ? 'bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-400' :
-                            'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-400'
-                          }`}>
-                            <div className={`w-2 h-2 rounded-full ${
-                              (bus.status || bus.busStatus) === 'Active' ? 'bg-emerald-500' :
-                              (bus.status || bus.busStatus) === 'Standby' ? 'bg-amber-500' :
-                              (bus.status || bus.busStatus) === 'Maintenance' ? 'bg-purple-500' :
-                              (bus.status || bus.busStatus) === 'InService' ? 'bg-cyan-500' :
-                              'bg-gray-500'
-                            }`} />
+                          <Badge variant={
+                            (bus.status || bus.busStatus) === 'Active' ? 'success' :
+                            (bus.status || bus.busStatus) === 'Standby' ? 'pending' :
+                            (bus.status || bus.busStatus) === 'Maintenance' ? 'info' :
+                            (bus.status || bus.busStatus) === 'InService' ? 'confirmed' :
+                            'default'
+                          }>
                             {bus.status || bus.busStatus}
-                          </span>
+                          </Badge>
                         </td>
                         <td className="py-4 px-4">
-                          <div className="flex items-center justify-center gap-2">
-                            <button
+                          <div className="flex items-center justify-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => setSelectedBusId(bus.id)}
-                              className="p-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
                               title={t('viewDetails') || 'View Details'}
+                              className="text-muted-foreground hover:text-foreground"
                             >
                               <Eye className="h-4 w-4" />
-                            </button>
-                            <button
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
                               onClick={() => handleDeleteBus(bus)}
-                              className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 rounded-lg transition-colors"
                               title={t('delete') || 'Delete'}
+                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="h-4 w-4" />
-                            </button>
+                            </Button>
                           </div>
                         </td>
                       </tr>

@@ -112,10 +112,10 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
     return (
       <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-900">
         <div className="mb-6">
-          <button className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-2.5 px-4 rounded-lg text-sm text-slate-900 dark:text-slate-100 cursor-pointer transition-all hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 mb-6" onClick={onBack}>
+          <Button variant="outline" onClick={onBack} className="flex items-center gap-2 mb-6">
             <Icon name="arrowLeft" size={20} />
             {t('backToCustomers')}
-          </button>
+          </Button>
         </div>
         <div className="bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300 p-4 rounded-lg border-l-4 border-red-600">{error}</div>
       </div>
@@ -126,10 +126,10 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
     return (
       <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-900">
         <div className="mb-6">
-          <button className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-2.5 px-4 rounded-lg text-sm text-slate-900 dark:text-slate-100 cursor-pointer transition-all hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 mb-6" onClick={onBack}>
+          <Button variant="outline" onClick={onBack} className="flex items-center gap-2 mb-6">
             <Icon name="arrowLeft" size={20} />
             {t('backToCustomers')}
-          </button>
+          </Button>
         </div>
         <div className="text-center py-16 text-slate-500 dark:text-slate-400 text-base">{t('customerNotFound')}</div>
       </div>
@@ -139,10 +139,10 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
   return (
     <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-900">
       <div className="mb-6">
-        <button className="flex items-center gap-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 py-2.5 px-4 rounded-lg text-sm text-slate-900 dark:text-slate-100 cursor-pointer transition-all hover:bg-slate-100 dark:hover:bg-slate-700 hover:border-slate-300 dark:hover:border-slate-600 mb-6" onClick={onBack}>
+        <Button variant="outline" onClick={onBack} className="flex items-center gap-2 mb-6">
           <Icon name="arrowLeft" size={20} />
           {t('backToCustomers')}
-        </button>
+        </Button>
       </div>
 
       <div className="max-w-6xl mx-auto">

@@ -84,14 +84,14 @@ const RefundsPage = () => {
   };
 
   return (
-    <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
-      <div className="flex justify-between items-center mb-8">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6 lg:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-3">
-            <DollarSign className="w-7 h-7 text-blue-500" />
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
+            <DollarSign className="w-6 h-6 sm:w-7 sm:h-7 text-blue-500 flex-shrink-0" />
             {t('refundsManagement') || 'Refunds Management'}
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-base">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
             {t('manageAllRefundRequests') || 'Manage all refund requests'}
           </p>
         </div>
@@ -137,20 +137,21 @@ const RefundsPage = () => {
           </div>
         </div>
       ) : refunds.length === 0 ? (
-        <div className="text-center py-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-          <div className="bg-slate-100 dark:bg-slate-800 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <DollarSign className="w-10 h-10 text-slate-400 dark:text-slate-500" />
+        <div className="text-center py-12 sm:py-20 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div className="bg-slate-100 dark:bg-slate-800 w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center mx-auto mb-4 sm:mb-6">
+            <DollarSign className="w-8 h-8 sm:w-10 sm:h-10 text-slate-400 dark:text-slate-500" />
           </div>
-          <h3 className="text-xl font-semibold text-slate-900 dark:text-white mb-2">
+          <h3 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white mb-2">
             {t('noRefundsFound') || 'No refunds found'}
           </h3>
-          <p className="text-slate-600 dark:text-slate-400">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 px-4">
             {t('noRefundsMatchFilters') || 'No refunds match your current filters'}
           </p>
         </div>
       ) : (
         <>
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
+          {/* Desktop Table View */}
+          <div className="hidden md:block bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
@@ -227,16 +228,14 @@ const RefundsPage = () => {
                       <td className="px-4 py-4">
                         <div className="flex justify-center gap-2">
                           {refund.status === 'PENDING' && (
-                            <>
-                              <Button 
-                                variant="success"
-                                className="w-9 h-9 p-0 flex items-center justify-center bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/20"
-                                onClick={() => handleProcessClick(refund)}
-                                title="Process Refund"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </Button>
-                            </>
+                            <Button
+                              variant="ghost"
+                              className="w-9 h-9 p-0 flex items-center justify-center text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                              onClick={() => handleProcessClick(refund)}
+                              title="Process Refund"
+                            >
+                              <CheckCircle className="w-4 h-4" />
+                            </Button>
                           )}
                         </div>
                       </td>
@@ -247,20 +246,77 @@ const RefundsPage = () => {
             </div>
           </div>
 
+          {/* Mobile Card View */}
+          <div className="md:hidden space-y-3">
+            {refunds.map(refund => (
+              <div
+                key={refund.id}
+                className={`bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden ${getRowBackgroundColor(refund.status)}`}
+              >
+                {/* Card Header */}
+                <div className="p-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className="bg-blue-500/10 p-1.5 rounded-lg">
+                        <FileText className="w-4 h-4 text-blue-500" />
+                      </div>
+                      <span className="font-bold text-slate-900 dark:text-white text-sm">#{refund.id}</span>
+                      <span className="text-xs text-slate-500 dark:text-slate-400">Booking #{refund.bookingId}</span>
+                    </div>
+                    <span className="font-bold text-base text-green-400">${refund.refundAmount?.toFixed(2)}</span>
+                  </div>
+                  <Badge variant={getStatusColor(refund.status)} className="text-xs">
+                    {refund.status}
+                  </Badge>
+                </div>
+
+                {/* Card Body */}
+                <div className="p-3 space-y-2">
+                  <div className="flex items-center gap-2 text-sm">
+                    <User className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+                    <span className="text-slate-900 dark:text-white font-medium truncate">{refund.customerName || 'N/A'}</span>
+                  </div>
+                  {refund.reason && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{refund.reason}</p>
+                  )}
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <Calendar className="w-3 h-3 text-pink-400" />
+                    <span>{refund.createdAt ? new Date(refund.createdAt).toLocaleDateString() : 'N/A'}</span>
+                  </div>
+                </div>
+
+                {/* Card Actions */}
+                {refund.status === 'PENDING' && (
+                  <div className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+                    <Button
+                      variant="secondary"
+                      className="w-full flex items-center justify-center gap-2 text-emerald-600 dark:text-emerald-400"
+                      onClick={() => handleProcessClick(refund)}
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                      <span className="font-medium">Process Refund</span>
+                    </Button>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
           {/* Pagination */}
           {pagination.totalPages > 1 && (
-            <div className="mt-8 flex justify-center items-center gap-4">
+            <div className="mt-4 sm:mt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-4">
               <Button
-                variant="secondary"
+                variant="outline"
+                size="sm"
                 onClick={() => goToPage(pagination.currentPage - 1)}
                 disabled={pagination.currentPage === 0}
-                className="flex items-center gap-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                className="flex items-center gap-1 sm:gap-2"
               >
                 <ChevronLeft className="w-4 h-4" />
-                {t('previous') || 'Previous'}
+                <span className="hidden sm:inline">{t('previous') || 'Previous'}</span>
               </Button>
-              
-              <div className="flex items-center gap-2">
+
+              <div className="flex items-center gap-1 sm:gap-2">
                 {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
                   let pageNum;
                   if (pagination.totalPages <= 5) {
@@ -272,30 +328,29 @@ const RefundsPage = () => {
                   } else {
                     pageNum = pagination.currentPage - 2 + i;
                   }
-                  
+
                   return (
-                    <button
+                    <Button
                       key={pageNum}
+                      variant={pageNum === pagination.currentPage ? 'default' : 'outline'}
+                      size="icon"
+                      className="w-8 h-8 sm:w-9 sm:h-9"
                       onClick={() => goToPage(pageNum)}
-                      className={`w-10 h-10 rounded-lg font-semibold transition-all ${
-                        pageNum === pagination.currentPage
-                          ? 'bg-blue-500 text-white'
-                          : 'bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-                      }`}
                     >
                       {pageNum + 1}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
 
               <Button
-                variant="secondary"
+                variant="outline"
+                size="sm"
                 onClick={() => goToPage(pagination.currentPage + 1)}
                 disabled={pagination.currentPage >= pagination.totalPages - 1}
-                className="flex items-center gap-2 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                className="flex items-center gap-1 sm:gap-2"
               >
-                {t('next') || 'Next'}
+                <span className="hidden sm:inline">{t('next') || 'Next'}</span>
                 <ChevronRight className="w-4 h-4" />
               </Button>
             </div>

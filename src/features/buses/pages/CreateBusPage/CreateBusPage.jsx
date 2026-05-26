@@ -154,10 +154,10 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
   return (
     <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-purple-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
       <div className="mb-6">
-        <button onClick={onBack} className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all hover:-translate-x-0.5">
+        <Button variant="outline" onClick={onBack} className="flex items-center gap-2 hover:-translate-x-0.5 transition-transform">
           <ArrowLeft className="h-4 w-4" />
           {t('buses') || 'Buses'}
-        </button>
+        </Button>
       </div>
 
       <div className="mb-8">

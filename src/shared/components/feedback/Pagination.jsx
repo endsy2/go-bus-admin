@@ -3,13 +3,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 's
 import { Button } from 'shared/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export const Pagination = ({ 
-  currentPage, 
-  totalPages, 
-  pageSize, 
+export const Pagination = ({
+  currentPage,
+  totalPages,
+  pageSize,
   totalElements,
-  onPageChange, 
-  onPageSizeChange 
+  onPageChange,
+  onPageSizeChange
 }) => {
   const pageSizeOptions = [15, 30, 50];
 
@@ -29,16 +29,18 @@ export const Pagination = ({
   const endItem = Math.min((currentPage + 1) * pageSize, totalElements);
 
   return (
-    <div className="flex justify-between items-center p-4 border-t bg-card rounded-b-lg">
-      <div className="text-sm text-muted-foreground">
-        Showing {startItem} to {endItem} of {totalElements} entries
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 p-3 sm:p-4 border-t bg-card rounded-b-lg">
+      {/* Entry count */}
+      <div className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
+        Showing {startItem}–{endItem} of {totalElements}
       </div>
 
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-2 text-sm">
-          <span>Show</span>
+      <div className="flex flex-col xs:flex-row items-center gap-3 sm:gap-6">
+        {/* Page size selector */}
+        <div className="flex items-center gap-2 text-xs sm:text-sm">
+          <span className="text-muted-foreground whitespace-nowrap">Show</span>
           <Select value={String(pageSize)} onValueChange={(val) => onPageSizeChange(Number(val))}>
-            <SelectTrigger className="w-[70px]">
+            <SelectTrigger className="w-[60px] sm:w-[70px] h-8">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -47,26 +49,29 @@ export const Pagination = ({
               ))}
             </SelectContent>
           </Select>
-          <span>per page</span>
+          <span className="text-muted-foreground whitespace-nowrap">per page</span>
         </div>
 
-        <div className="flex items-center gap-3">
-          <Button 
+        {/* Prev / page label / Next */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          <Button
             variant="outline"
             size="icon"
+            className="h-8 w-8"
             onClick={handlePrevious}
             disabled={currentPage === 0}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          
-          <span className="text-sm min-w-[100px] text-center">
+
+          <span className="text-xs sm:text-sm min-w-[80px] sm:min-w-[100px] text-center whitespace-nowrap">
             Page {currentPage + 1} of {totalPages}
           </span>
 
-          <Button 
+          <Button
             variant="outline"
             size="icon"
+            className="h-8 w-8"
             onClick={handleNext}
             disabled={currentPage >= totalPages - 1}
           >

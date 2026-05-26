@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Icon } from 'shared/components/common/Icon';
+import { Button } from 'shared/components/common/Button';
 import { Snackbar } from 'shared/components/common/Snackbar';
 import { apiRequest } from 'shared/utils/api';
 import { useLocale } from 'shared/context/LocaleContext';
@@ -160,10 +161,10 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="mb-7">
         <div className="flex flex-col gap-4">
-          <button onClick={onBack} className="inline-flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all self-start hover:-translate-x-0.5">
+          <Button variant="outline" onClick={onBack} className="flex items-center gap-2 self-start hover:-translate-x-0.5 transition-transform">
             <Icon name="arrow-left" size={18} />
             {t('backToRoutes') || 'Back to Routes'}
-          </button>
+          </Button>
           <div>
             <h1 className="flex items-center gap-3 text-3xl font-bold text-gray-900 dark:text-white mb-1.5">
               <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-600">

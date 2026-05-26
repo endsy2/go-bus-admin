@@ -229,10 +229,10 @@ const RouteDetailPage = ({ routeId, onBack }) => {
     return (
       <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
         <div className="mb-6">
-          <button onClick={onBack} className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all">
+          <Button variant="outline" onClick={onBack} className="flex items-center gap-2">
             <Icon name="arrow-left" size={20} />
             {t('backToRoutes') || 'Back to Routes'}
-          </button>
+          </Button>
         </div>
         <div className="flex flex-col items-center justify-center py-20 text-center">
           <Icon name="alert-circle" size={48} className="text-gray-400 mb-4" />
@@ -251,10 +251,10 @@ const RouteDetailPage = ({ routeId, onBack }) => {
   return (
     <div className="p-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="mb-6">
-        <button onClick={onBack} className="inline-flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition-all hover:-translate-x-0.5">
+        <Button variant="outline" onClick={onBack} className="flex items-center gap-2 hover:-translate-x-0.5 transition-transform">
           <Icon name="arrow-left" size={20} />
           {t('backToRoutes') || 'Back to Routes'}
-        </button>
+        </Button>
       </div>
 
       {error && (
@@ -442,12 +442,12 @@ const RouteDetailPage = ({ routeId, onBack }) => {
                             </svg>
                             Origin Map Preview
                           </span>
-                          <button onClick={() => openInMaps(originLocation.lat, originLocation.lng)} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 transition-all hover:-translate-y-0.5 shadow-sm hover:shadow-md">
+                          <Button onClick={() => openInMaps(originLocation.lat, originLocation.lng)} className="flex items-center gap-1.5 text-xs font-semibold hover:-translate-y-0.5 transition-transform shadow-sm hover:shadow-md">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
                             </svg>
                             Open in Google Maps
-                          </button>
+                          </Button>
                         </div>
                         <div className="relative w-full h-64 bg-gray-100 dark:bg-gray-800">
                           <iframe
@@ -506,12 +506,12 @@ const RouteDetailPage = ({ routeId, onBack }) => {
                             </svg>
                             Destination Map Preview
                           </span>
-                          <button onClick={() => openInMaps(destinationLocation.lat, destinationLocation.lng)} className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs font-semibold hover:bg-emerald-700 transition-all hover:-translate-y-0.5 shadow-sm hover:shadow-md">
+                          <Button onClick={() => openInMaps(destinationLocation.lat, destinationLocation.lng)} className="flex items-center gap-1.5 text-xs font-semibold bg-emerald-600 hover:bg-emerald-700 hover:-translate-y-0.5 transition-transform shadow-sm hover:shadow-md">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
                             </svg>
                             Open in Google Maps
-                          </button>
+                          </Button>
                         </div>
                         <div className="relative w-full h-64 bg-gray-100 dark:bg-gray-800">
                           <iframe

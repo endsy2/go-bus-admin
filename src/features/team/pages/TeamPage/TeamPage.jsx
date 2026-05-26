@@ -344,7 +344,7 @@ const TeamPage = () => {
     if (membersLoading) {
       return (
         <div className="space-y-6">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2">
             <div className="space-y-2">
               <Skeleton className="h-7 w-48" />
               <Skeleton className="h-4 w-64" />
@@ -396,17 +396,17 @@ const TeamPage = () => {
     }
 
     return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
           <div>
-            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+            <h2 className="text-lg sm:text-2xl font-bold text-slate-900 dark:text-slate-100">
               {t('teamMembers') || 'Team Members'}
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {t('manageTeamMembersDesc') || 'Manage members and their access levels'}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {teamMembers.length > 0 && (
               <Badge variant="secondary" className="gap-1.5">
                 <Users className="h-3.5 w-3.5" />
@@ -415,7 +415,7 @@ const TeamPage = () => {
             )}
             <Button
               onClick={() => setShowCreateMember(true)}
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto justify-center"
             >
               <Users className="h-4 w-4" />
               {t('createTeamMember') || 'Create Team Member'}
@@ -423,7 +423,8 @@ const TeamPage = () => {
           </div>
         </div>
 
-        <Card>
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow className="bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800">
@@ -506,6 +507,7 @@ const TeamPage = () => {
             </TableBody>
           </Table>
           
+          </div>
           {teamMembers.length > 0 && (
             <div className="p-4">
               <Pagination
@@ -688,13 +690,13 @@ const TeamPage = () => {
   }
 
   return (
-    <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
       {/* Header */}
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+      <div className="mb-4 sm:mb-6 lg:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold mb-1 sm:mb-2 bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
           {t('teamManagement') || 'Team Management'}
         </h1>
-        <p className="text-muted-foreground">
+        <p className="text-sm sm:text-base text-muted-foreground">
           {t('teamManagementDesc') || 'Manage members, roles, and access permissions'}
         </p>
       </div>
@@ -711,7 +713,7 @@ const TeamPage = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-2">
+        <TabsList className="grid w-full sm:max-w-md grid-cols-2">
           <TabsTrigger value="members" className="gap-2">
             <UserCheck className="h-4 w-4" />
             {t('teamMembers') || 'Team Members'}

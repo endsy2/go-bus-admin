@@ -3,9 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from 'shared/components/ui/button';
 import { Input } from 'shared/components/ui/input';
 import { Label } from 'shared/components/ui/label';
+import { useToast } from 'shared/components/ui/toast';
 import adminService from '../../services/adminService';
 
 const CreateRoleDialog = ({ open, onClose, onSuccess }) => {
+  const { addToast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -21,7 +23,7 @@ const CreateRoleDialog = ({ open, onClose, onSuccess }) => {
       onClose();
     } catch (error) {
       console.error('Failed to create role:', error);
-      alert('Failed to create role');
+      addToast({ message: error.response?.data?.message || 'Failed to create role', type: 'error' });
     } finally {
       setLoading(false);
     }

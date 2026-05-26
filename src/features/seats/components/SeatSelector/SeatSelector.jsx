@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
 import { Badge } from 'shared/components/ui/badge';
+import { useToast } from 'shared/components/ui/toast';
 import SeatMap from '../SeatMap/SeatMap';
 import seatService from '../../services/seatService';
 
 const SeatSelector = ({ busId, layout, onSelectionChange, maxSeats = null }) => {
+  const { addToast } = useToast();
   const [seats, setSeats] = useState([]);
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +42,7 @@ const SeatSelector = ({ busId, layout, onSelectionChange, maxSeats = null }) => 
       newSelection = selectedSeats.filter(s => s.id !== seat.id);
     } else {
       if (maxSeats && selectedSeats.length >= maxSeats) {
-        alert(`You can only select up to ${maxSeats} seat(s)`);
+        addToast({ message: `You can only select up to ${maxSeats} seat(s)`, type: 'warning' });
         return;
       }
       newSelection = [...selectedSeats, seat];
@@ -77,16 +79,16 @@ const SeatSelector = ({ busId, layout, onSelectionChange, maxSeats = null }) => 
         <div className="flex justify-between items-center">
           <div className="flex gap-4">
             <div>
-              <span className="text-sm text-gray-600">Available Seats:</span>
+              <span className="text-sm text-muted-foreground">Available Seats:</span>
               <Badge className="ml-2" variant="outline">{availableCount}</Badge>
             </div>
             <div>
-              <span className="text-sm text-gray-600">Selected:</span>
+              <span className="text-sm text-muted-foreground">Selected:</span>
               <Badge className="ml-2">{selectedSeats.length}</Badge>
             </div>
             {totalPrice > 0 && (
               <div>
-                <span className="text-sm text-gray-600">Total:</span>
+                <span className="text-sm text-muted-foreground">Total:</span>
                 <Badge className="ml-2" variant="secondary">${totalPrice.toFixed(2)}</Badge>
               </div>
             )}
@@ -100,7 +102,7 @@ const SeatSelector = ({ busId, layout, onSelectionChange, maxSeats = null }) => 
         
         {selectedSeats.length > 0 && (
           <div className="mt-3 pt-3 border-t">
-            <span className="text-sm font-semibold text-gray-700">Selected Seats: </span>
+            <span className="text-sm font-semibold text-foreground">Selected Seats: </span>
             <div className="flex flex-wrap gap-2 mt-2">
               {selectedSeats.map(seat => (
                 <Badge key={seat.id} variant="default">

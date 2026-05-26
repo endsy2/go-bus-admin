@@ -118,23 +118,23 @@ const DashboardPage = () => {
       const dataPoint = chartData.find(d => d.date === label);
       
       return (
-        <div className="bg-gray-900 dark:bg-gray-800 text-white text-xs rounded-lg px-3 py-2 shadow-lg border border-gray-700">
-          <div className="font-semibold mb-2">{label}</div>
+        <div className="bg-popover text-popover-foreground text-xs rounded-md px-3 py-2 shadow-md border border-border">
+          <div className="font-medium mb-2">{label}</div>
           {payload.map((entry, index) => {
             const isSeater = entry.name === 'Seater';
             const revenue = isSeater ? dataPoint?.seaterRevenue : dataPoint?.sleeperRevenue;
             const percentage = isSeater ? dataPoint?.seaterPercentage : dataPoint?.sleeperPercentage;
-            
+
             return (
               <div key={index} className="mb-1">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }}></div>
                   <span className="font-medium">{entry.name}</span>
                 </div>
-                <div className="ml-4 text-gray-300">
+                <div className="ml-4 text-muted-foreground">
                   <div>Count: {entry.value}</div>
                   <div>Revenue: ${(revenue || 0).toFixed(2)}</div>
-                  <div>Percentage: {(percentage || 0).toFixed(1)}%</div>
+                  <div>Share: {(percentage || 0).toFixed(1)}%</div>
                 </div>
               </div>
             );
@@ -147,12 +147,12 @@ const DashboardPage = () => {
 
   if (isLoading) {
     return (
-      <div className="flex-1 p-6 overflow-y-auto bg-gray-50 dark:bg-[#0F1419] min-h-screen">
-        <div className="mb-6">
-          <Skeleton className="h-8 w-64 mb-2" />
-          <Skeleton className="h-4 w-96" />
+      <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-background min-h-screen">
+        <div className="mb-4 sm:mb-6">
+          <Skeleton className="h-7 sm:h-8 w-48 sm:w-64 mb-2" />
+          <Skeleton className="h-4 w-64 sm:w-96" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
           {[1, 2, 3, 4].map(i => (
             <Skeleton key={i} className="h-32 rounded-xl" />
           ))}
@@ -162,14 +162,14 @@ const DashboardPage = () => {
   }
 
   return (
-    <div className="flex-1 p-6 overflow-y-auto bg-gray-50 dark:bg-[#0F1419] min-h-screen">
+    <div className="flex-1 p-4 sm:p-6 overflow-y-auto bg-background min-h-screen">
       {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
+      <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-1">
             Operational Overview
           </h1>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-xs sm:text-sm text-muted-foreground">
             Real-time performance and system health across the FTA network.
           </p>
         </div>
@@ -177,9 +177,9 @@ const DashboardPage = () => {
           {/* Date Range Selector */}
           <Popover open={dateRangeOpen} onOpenChange={setDateRangeOpen}>
             <PopoverTrigger asChild>
-              <Button 
-                variant="outline" 
-                className="bg-white dark:bg-card border-gray-200 dark:border-gray-700 min-w-[160px] justify-between"
+              <Button
+                variant="outline"
+                className="w-full sm:min-w-[160px] justify-between"
               >
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4" />
@@ -188,7 +188,7 @@ const DashboardPage = () => {
                 <ChevronDown className="w-4 h-4 ml-2 opacity-50" />
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-56 p-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg">
+            <PopoverContent className="w-56 p-2">
               <div className="space-y-1">
                 {dateRangeOptions.map((option) => (
                   <button
@@ -199,8 +199,8 @@ const DashboardPage = () => {
                     }}
                     className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded-md transition-colors ${
                       dateRange === option.value
-                        ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
+                        ? 'bg-primary/10 text-primary'
+                        : 'text-foreground hover:bg-muted'
                     }`}
                   >
                     <span>{option.label}</span>
@@ -216,78 +216,77 @@ const DashboardPage = () => {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
         {/* Active Bookings */}
-        <div className="bg-white dark:bg-card rounded-xl p-5 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Calendar className="w-5 h-5 text-blue-500" />
+        <div className="bg-card rounded-lg p-3 sm:p-5 border border-border">
+          <div className="flex items-start justify-between mb-2 sm:mb-3">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+              <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Active Bookings</div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="text-xs sm:text-sm text-muted-foreground mb-1">Active Bookings</div>
+          <div className="text-xl sm:text-2xl font-semibold text-foreground">
             {rawStats?.activeBookings?.toLocaleString() || '0'}
           </div>
           {rawStats?.confirmedBookings > 0 && (
-            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+            <div className="text-xs text-muted-foreground mt-1">
               {rawStats.confirmedBookings} confirmed
             </div>
           )}
         </div>
 
         {/* Total Revenue */}
-        <div className="bg-white dark:bg-card rounded-xl p-5 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-green-500" />
+        <div className="bg-card rounded-lg p-3 sm:p-5 border border-border">
+          <div className="flex items-start justify-between mb-2 sm:mb-3">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+              <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
             </div>
             {rawStats?.todayRevenue > 0 && (
-              <span className="text-xs font-medium text-green-500 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                +${parseFloat(rawStats.todayRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 })}
+              <span className="text-xs font-medium text-green-600 dark:text-green-400">
+                +${parseFloat(rawStats.todayRevenue).toLocaleString('en-US', { minimumFractionDigits: 2 })} today
               </span>
             )}
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Total Revenue</div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="text-xs sm:text-sm text-muted-foreground mb-1">Total Revenue</div>
+          <div className="text-xl sm:text-2xl font-semibold text-foreground">
             ${parseFloat(rawStats?.totalRevenue || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </div>
           {rawStats?.pendingPayments > 0 && (
-            <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+            <div className="text-xs text-muted-foreground mt-1">
               {rawStats.pendingPayments} pending payments
             </div>
           )}
         </div>
 
         {/* Available Fleet */}
-        <div className="bg-white dark:bg-card rounded-xl p-5 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Bus className="w-5 h-5 text-blue-500" />
+        <div className="bg-card rounded-lg p-3 sm:p-5 border border-border">
+          <div className="flex items-start justify-between mb-2 sm:mb-3">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+              <Bus className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-blue-400" />
             </div>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Available Fleet</div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="text-xs sm:text-sm text-muted-foreground mb-1">Available Fleet</div>
+          <div className="text-xl sm:text-2xl font-semibold text-foreground">
             {rawStats?.availableFleet || '0'}
           </div>
-          <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+          <div className="text-xs text-muted-foreground mt-1">
             Active buses
           </div>
         </div>
 
         {/* Pending Refunds */}
-        <div className="bg-white dark:bg-card rounded-xl p-5 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-start justify-between mb-3">
-            <div className="w-10 h-10 rounded-lg bg-red-500/10 flex items-center justify-center">
-              <AlertCircle className="w-5 h-5 text-red-500" />
+        <div className="bg-card rounded-lg p-3 sm:p-5 border border-border">
+          <div className="flex items-start justify-between mb-2 sm:mb-3">
+            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-md bg-red-50 dark:bg-red-900/20 flex items-center justify-center">
+              <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-600 dark:text-red-400" />
             </div>
           </div>
-          <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">Pending Refunds</div>
-          <div className="text-2xl font-bold text-gray-900 dark:text-white">
+          <div className="text-xs sm:text-sm text-muted-foreground mb-1">Pending Refunds</div>
+          <div className="text-xl sm:text-2xl font-semibold text-foreground">
             {rawStats?.pendingRefunds?.toLocaleString() || '0'}
           </div>
           {rawStats?.pendingRefundAmount > 0 && (
-            <div className="text-xs text-red-500 mt-1">
+            <div className="text-xs text-red-600 dark:text-red-400 mt-1">
               ${parseFloat(rawStats.pendingRefundAmount).toLocaleString('en-US', { minimumFractionDigits: 2 })} amount
             </div>
           )}
@@ -295,19 +294,19 @@ const DashboardPage = () => {
       </div>
 
       {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 mb-4 sm:mb-6">
         {/* Booking Trends - Takes 2 columns */}
-        <div className="lg:col-span-2 bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="flex items-center justify-between mb-6">
+        <div className="lg:col-span-2 bg-card rounded-lg p-4 sm:p-6 border border-border">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4 sm:mb-6">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Booking Trends</h3>
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {velocityData.length > 0 
+              <h3 className="text-sm sm:text-base font-semibold text-foreground">Booking Trends</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground">
+                {velocityData.length > 0
                   ? `Ticket sales velocity (${velocityData.length} days)`
                   : 'Ticket sales velocity'}
               </p>
             </div>
-            <div className="flex gap-4">
+            <div className="flex gap-3 sm:gap-4 flex-wrap">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
                 <span className="text-xs text-gray-600 dark:text-gray-400">Seater</span>
@@ -388,20 +387,17 @@ const DashboardPage = () => {
         </div>
 
         {/* Revenue Stream */}
-        <div className="bg-white dark:bg-card rounded-xl p-6 border border-gray-200 dark:border-gray-800">
-          <div className="mb-6">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Revenue Stream</h3>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Split by Payment Method</p>
+        <div className="bg-card rounded-lg p-4 sm:p-6 border border-border">
+          <div className="mb-4">
+            <h3 className="text-sm sm:text-base font-semibold text-foreground">Revenue Stream</h3>
+            <p className="text-xs sm:text-sm text-muted-foreground">Split by Payment Method</p>
           </div>
-          <div className="mb-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl p-6 text-white relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-            <div className="relative">
-              <div className="text-sm opacity-80 mb-1">WEEKLY TOTAL</div>
-              <div className="text-3xl font-bold">
-                ${revenueStream?.weeklyTotal 
-                  ? parseFloat(revenueStream.weeklyTotal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-                  : '0.00'}
-              </div>
+          <div className="mb-6 rounded-lg border border-border bg-muted/30 p-4">
+            <div className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Weekly Total</div>
+            <div className="text-2xl font-bold text-foreground">
+              ${revenueStream?.weeklyTotal
+                ? parseFloat(revenueStream.weeklyTotal).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                : '0.00'}
             </div>
           </div>
           <div className="space-y-3">

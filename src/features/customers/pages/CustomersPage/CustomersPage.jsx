@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Filter, Plus, X, Users, Mail, Phone, Calendar, Eye, Copy, AlertCircle, CheckCircle, XCircle, Power } from 'lucide-react';
+import { Plus, X, Users, Mail, Phone, Calendar, Eye, Copy, AlertCircle, CheckCircle, XCircle, Power } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Input } from 'shared/components/ui/input';
 import { Label } from 'shared/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'shared/components/ui/card';
-import { Badge } from 'shared/components/ui/badge';
+import { Badge } from 'shared/components/common/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from 'shared/components/ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
@@ -332,7 +332,7 @@ const CustomersPage = () => {
 
   if (!canView) {
     return (
-      <div className="flex-1 p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-background min-h-screen">
         <Card>
           <CardHeader>
             <CardTitle>{t('customerManagement')}</CardTitle>
@@ -352,28 +352,23 @@ const CustomersPage = () => {
 
   if (loading) {
     return (
-      <div className="flex-1 p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
-        <div className="flex justify-between items-center mb-8">
+      <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-background min-h-screen">
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6 lg:mb-8">
           <div>
-            <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">{t('customerManagement')}</h1>
-            <p className="text-muted-foreground">{t('customerManagementDesc')}</p>
+            <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-1">{t('customerManagement')}</h1>
+            <p className="text-sm sm:text-base text-muted-foreground">{t('customerManagementDesc')}</p>
           </div>
-          <Button disabled>
-            <Plus className="h-4 w-4" />
+          <Button disabled className="w-full sm:w-auto justify-center">
+            <Plus className="h-4 w-4 mr-2" />
             {t('addCustomer')}
           </Button>
         </div>
 
         <Card className="mb-8">
-          <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white rounded-t-lg">
-            <div className="flex items-center gap-3">
-              <div className="bg-white/20 p-2 rounded-lg">
-                <Filter className="h-5 w-5" />
-              </div>
-              <CardTitle className="text-white">Filter Customers</CardTitle>
-            </div>
+          <CardHeader>
+            <CardTitle className="text-base">Filter Customers</CardTitle>
           </CardHeader>
-          <CardContent className="pt-6 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800">
+          <CardContent className="pt-0">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
               {[1, 2, 3].map(i => (
                 <div key={i} className="space-y-2">
@@ -392,14 +387,14 @@ const CustomersPage = () => {
         <Card>
           <Table>
             <TableHeader>
-              <TableRow className="bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 hover:bg-gradient-to-r">
-                <TableHead className="font-bold text-xs uppercase">{t('customerId')}</TableHead>
-                <TableHead className="font-bold text-xs uppercase">{t('name')}</TableHead>
-                <TableHead className="font-bold text-xs uppercase">{t('email')}</TableHead>
-                <TableHead className="font-bold text-xs uppercase">{t('phone')}</TableHead>
-                <TableHead className="font-bold text-xs uppercase">{t('gender')}</TableHead>
-                <TableHead className="font-bold text-xs uppercase">{t('joinedDate')}</TableHead>
-                <TableHead className="font-bold text-xs uppercase">{t('actions')}</TableHead>
+              <TableRow>
+                <TableHead>{t('customerId')}</TableHead>
+                <TableHead>{t('name')}</TableHead>
+                <TableHead>{t('email')}</TableHead>
+                <TableHead>{t('phone')}</TableHead>
+                <TableHead>{t('gender')}</TableHead>
+                <TableHead>{t('joinedDate')}</TableHead>
+                <TableHead>{t('actions')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -456,17 +451,17 @@ const CustomersPage = () => {
 
   // Show customer list
   return (
-    <div className="flex-1 p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-background min-h-screen">
       {/* Header */}
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6 lg:mb-8">
         <div>
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent">
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-1">
             {t('customerManagement')}
           </h1>
-          <p className="text-muted-foreground">{t('customerManagementDesc')}</p>
+          <p className="text-sm sm:text-base text-muted-foreground">{t('customerManagementDesc')}</p>
         </div>
-        <Button onClick={handleCreateClick} disabled={!canCreate}>
-          <Plus className="h-4 w-4" />
+        <Button onClick={handleCreateClick} disabled={!canCreate} className="w-full sm:w-auto justify-center">
+          <Plus className="h-4 w-4 mr-2" />
           {t('addCustomer')}
         </Button>
       </div>
@@ -483,16 +478,11 @@ const CustomersPage = () => {
 
       {/* Filters Card */}
       <Card className="mb-8">
-        <CardHeader className="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 text-white rounded-t-lg">
-          <div className="flex items-center gap-3">
-            <div className="bg-white/20 p-2 rounded-lg">
-              <Filter className="h-5 w-5" />
-            </div>
-            <CardTitle className="text-white">Filter Customers</CardTitle>
-          </div>
+        <CardHeader>
+          <CardTitle className="text-base">Filter Customers</CardTitle>
         </CardHeader>
-        <CardContent className="pt-6 bg-gradient-to-br from-slate-50 to-white dark:from-slate-800 dark:to-slate-800">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+        <CardContent className="pt-0">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
             <div className="space-y-2">
               <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
                 <Users className="h-3.5 w-3.5 text-primary" />
@@ -574,19 +564,20 @@ const CustomersPage = () => {
       </Card>
 
       {/* Table Card */}
-      <Card>
+      <Card className="overflow-hidden">
+        <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow className="bg-gradient-to-r from-slate-100 via-slate-50 to-slate-100 dark:from-slate-800 dark:via-slate-700 dark:to-slate-800 hover:bg-gradient-to-r">
-              <TableHead className="font-bold text-xs uppercase">{t('customerId')}</TableHead>
-              <TableHead className="font-bold text-xs uppercase">{t('name')}</TableHead>
-              <TableHead className="font-bold text-xs uppercase">{t('email')}</TableHead>
-              <TableHead className="font-bold text-xs uppercase">{t('phone')}</TableHead>
-              <TableHead className="font-bold text-xs uppercase">{t('gender')}</TableHead>
-              <TableHead className="font-bold text-xs uppercase">Is Active</TableHead>
-              <TableHead className="font-bold text-xs uppercase">Is Deleted</TableHead>
-              <TableHead className="font-bold text-xs uppercase">{t('joinedDate')}</TableHead>
-              <TableHead className="font-bold text-xs uppercase">{t('actions')}</TableHead>
+            <TableRow>
+              <TableHead>{t('customerId')}</TableHead>
+              <TableHead>{t('name')}</TableHead>
+              <TableHead>{t('email')}</TableHead>
+              <TableHead>{t('phone')}</TableHead>
+              <TableHead>{t('gender')}</TableHead>
+              <TableHead>Is Active</TableHead>
+              <TableHead>Is Deleted</TableHead>
+              <TableHead>{t('joinedDate')}</TableHead>
+              <TableHead>{t('actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -620,11 +611,8 @@ const CustomersPage = () => {
                   </TableCell>
                   <TableCell>
                     <div className="flex items-center gap-3">
-                      <div className="relative">
-                        <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 via-blue-600 to-indigo-600 text-white flex items-center justify-center font-bold text-base shadow-lg ring-2 ring-blue-100 dark:ring-blue-900">
-                          {customer.fullName ? customer.fullName.charAt(0).toUpperCase() : '?'}
-                        </div>
-                        <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-background" />
+                      <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium text-muted-foreground flex-shrink-0">
+                        {customer.fullName ? customer.fullName.charAt(0).toUpperCase() : '?'}
                       </div>
                       <div>
                         <div className="font-bold text-sm">{customer.fullName}</div>
@@ -661,35 +649,18 @@ const CustomersPage = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white">
-                      <Users className="h-3 w-3 mr-1" />
-                      {customer.gender}
+                    <Badge variant="secondary">{customer.gender}</Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={customer.isActive ? 'success' : 'default'}>
+                      {customer.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {customer.isActive ? (
-                      <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Active
-                      </Badge>
-                    ) : (
-                      <Badge variant="secondary" className="bg-gradient-to-r from-gray-400 to-gray-500 text-white">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Inactive
-                      </Badge>
-                    )}
-                  </TableCell>
-                  <TableCell>
                     {customer.isDeleted ? (
-                      <Badge variant="destructive" className="bg-gradient-to-r from-red-500 to-red-600 text-white">
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Deleted
-                      </Badge>
+                      <Badge variant="danger">Deleted</Badge>
                     ) : (
-                      <Badge className="bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Active
-                      </Badge>
+                      <span className="text-xs text-muted-foreground">–</span>
                     )}
                   </TableCell>
                   <TableCell>
@@ -699,22 +670,23 @@ const CustomersPage = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
+                    <div className="flex gap-1">
                       <Button
+                        variant="ghost"
                         size="icon"
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+                        className="h-8 w-8 text-muted-foreground hover:text-foreground"
                         onClick={() => handleViewClick(customer)}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
                       {canDelete && (
                         <Button
+                          variant="ghost"
                           size="icon"
-                          variant={customer.isActive ? "destructive" : "default"}
-                          className={customer.isActive 
-                            ? "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700" 
-                            : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-                          }
+                          className={`h-8 w-8 ${customer.isActive
+                            ? 'text-destructive hover:text-destructive hover:bg-destructive/10'
+                            : 'text-muted-foreground hover:text-foreground'
+                          }`}
                           onClick={() => handleToggleStatusClick(customer)}
                           title={customer.isActive ? t('deactivateCustomer') : t('activateCustomer')}
                         >
@@ -729,6 +701,7 @@ const CustomersPage = () => {
           </TableBody>
         </Table>
         
+        </div>
         {customers.length > 0 && (
           <div className="p-4">
             <Pagination
@@ -761,13 +734,9 @@ const CustomersPage = () => {
             <Button variant="outline" onClick={cancelToggleStatus}>
               {t('cancel')}
             </Button>
-            <Button 
+            <Button
               variant={customerToToggle?.isActive ? "destructive" : "default"}
               onClick={confirmToggleStatus}
-              className={customerToToggle?.isActive 
-                ? "" 
-                : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
-              }
             >
               {customerToToggle?.isActive ? t('deactivate') : t('activate')}
             </Button>

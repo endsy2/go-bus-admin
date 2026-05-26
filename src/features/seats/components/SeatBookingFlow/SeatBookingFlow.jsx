@@ -4,16 +4,18 @@ import { Button } from 'shared/components/ui/button';
 import { Badge } from 'shared/components/ui/badge';
 import { Label } from 'shared/components/ui/label';
 import { Separator } from 'shared/components/ui/separator';
+import { useToast } from 'shared/components/ui/toast';
 import SeatSelector from '../SeatSelector/SeatSelector';
 
-const SeatBookingFlow = ({ 
-  busId, 
-  layout, 
-  onConfirm, 
+const SeatBookingFlow = ({
+  busId,
+  layout,
+  onConfirm,
   onCancel,
   maxSeats = 5,
-  showPricing = true 
+  showPricing = true
 }) => {
+  const { addToast } = useToast();
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [step, setStep] = useState(1); // 1: Select, 2: Confirm
 
@@ -23,7 +25,7 @@ const SeatBookingFlow = ({
 
   const handleContinue = () => {
     if (selectedSeats.length === 0) {
-      alert('Please select at least one seat');
+      addToast({ message: 'Please select at least one seat', type: 'warning' });
       return;
     }
     setStep(2);
@@ -45,7 +47,7 @@ const SeatBookingFlow = ({
           
           <div className="space-y-4">
             <div>
-              <Label className="text-sm font-semibold text-gray-600">Selected Seats</Label>
+              <Label className="text-sm font-semibold text-muted-foreground">Selected Seats</Label>
               <div className="flex flex-wrap gap-2 mt-2">
                 {selectedSeats.map(seat => (
                   <Badge key={seat.id} variant="default" className="text-base px-3 py-1">
@@ -76,7 +78,7 @@ const SeatBookingFlow = ({
                 <Separator />
                 <div className="flex justify-between items-center text-lg font-bold">
                   <span>Total Amount</span>
-                  <span className="text-blue-600">${totalPrice.toFixed(2)}</span>
+                  <span className="text-primary">${totalPrice.toFixed(2)}</span>
                 </div>
               </>
             )}
@@ -104,7 +106,7 @@ const SeatBookingFlow = ({
             Step 1 of 2
           </Badge>
         </div>
-        <p className="text-sm text-gray-600">
+        <p className="text-sm text-muted-foreground">
           Click on available seats to select them. You can select up to {maxSeats} seat(s).
         </p>
       </Card>

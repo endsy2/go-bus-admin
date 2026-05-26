@@ -4,6 +4,9 @@ import { useTransactions } from '../../hooks/useTransactions';
 import { Card, CardContent, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Badge } from 'shared/components/common/Badge';
 import { Button } from 'shared/components/common/Button';
+import { Input } from 'shared/components/common/Input';
+import { Label } from 'shared/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
@@ -35,13 +38,15 @@ const CopyButton = ({ text }) => {
     setTimeout(() => setCopied(false), 1500);
   }, [text]);
   return (
-    <button
+    <Button
+      variant="ghost"
+      size="icon"
       onClick={handleCopy}
       title={copied ? 'Copied!' : 'Copy'}
-      className="p-1 rounded text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors"
+      className="h-6 w-6 text-muted-foreground hover:text-foreground"
     >
       {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
-    </button>
+    </Button>
   );
 };
 
@@ -150,20 +155,21 @@ const WalletsPage = () => {
   };
 
   return (
-    <div className="flex-1 p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
-      <div className="flex justify-between items-center mb-8">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6 lg:mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-3">
-            <Wallet className="w-7 h-7 text-blue-500 dark:text-blue-400" />
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
+            <Wallet className="w-6 h-6 sm:w-7 sm:h-7 text-blue-500 dark:text-blue-400 flex-shrink-0" />
             {t('walletManagement') || 'Wallet Management'}
           </h1>
-          <p className="text-slate-600 dark:text-slate-400 text-base">
+          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
             {t('manageUserWalletsTransactions') || 'Manage user wallets and transactions'}
           </p>
         </div>
         <Button
+          variant="primary"
           onClick={() => setCreateDialogOpen(true)}
-          className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+          className="flex items-center justify-center gap-2 w-full sm:w-auto"
         >
           <Wallet className="w-4 h-4" />
           {t('createWallet') || 'Create Wallet'}
@@ -171,27 +177,19 @@ const WalletsPage = () => {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-2 mb-6">
-        <button
+      <div className="flex gap-2 mb-4 sm:mb-6">
+        <Button
+          variant={activeTab === 'wallets' ? 'primary' : 'secondary'}
           onClick={() => setActiveTab('wallets')}
-          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-            activeTab === 'wallets'
-              ? 'bg-blue-500 text-white'
-              : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'
-          }`}
         >
           {t('wallets') || 'Wallets'}
-        </button>
-        <button
+        </Button>
+        <Button
+          variant={activeTab === 'transactions' ? 'primary' : 'secondary'}
           onClick={() => setActiveTab('transactions')}
-          className={`px-6 py-3 rounded-lg font-semibold transition-all ${
-            activeTab === 'transactions'
-              ? 'bg-blue-500 text-white'
-              : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-700'
-          }`}
         >
           {t('transactions') || 'Transactions'}
-        </button>
+        </Button>
       </div>
 
       {/* Wallets Tab */}
@@ -199,16 +197,15 @@ const WalletsPage = () => {
         <>
           {/* Wallet Filters */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 mb-6">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center gap-2 mb-3 sm:mb-4">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Filter className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                 {t('filters') || 'Filters'}
               </h3>
               <Button
-                variant="secondary"
+                variant="outline"
                 size="sm"
                 onClick={() => setShowWalletFilters(!showWalletFilters)}
-                className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
               >
                 {showWalletFilters ? t('hide') || 'Hide' : t('show') || 'Show'}
               </Button>
@@ -216,73 +213,58 @@ const WalletsPage = () => {
 
             {showWalletFilters && (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      {t('name') || 'Name'}
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={walletFilters.name}
-                      onChange={handleWalletFilterChange}
-                      placeholder={t('searchByName') || 'Search by name...'}
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+                  <Input
+                    label={t('name') || 'Name'}
+                    name="name"
+                    value={walletFilters.name}
+                    onChange={handleWalletFilterChange}
+                    placeholder={t('searchByName') || 'Search by name...'}
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      {t('status') || 'Status'}
-                    </label>
-                    <select
-                      name="status"
-                      value={walletFilters.status}
-                      onChange={handleWalletFilterChange}
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <div className="flex flex-col gap-1.5">
+                    <Label>{t('status') || 'Status'}</Label>
+                    <Select
+                      value={walletFilters.status || '__all__'}
+                      onValueChange={(value) => setWalletFilters(prev => ({ ...prev, status: value === '__all__' ? '' : value }))}
                     >
-                      <option value="">{t('all') || 'All'}</option>
-                      <option value="ACTIVE">ACTIVE</option>
-                      <option value="INACTIVE">INACTIVE</option>
-                      <option value="SUSPENDED">SUSPENDED</option>
-                      <option value="CLOSED">CLOSED</option>
-                    </select>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('all') || 'All'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">{t('all') || 'All'}</SelectItem>
+                        <SelectItem value="ACTIVE">ACTIVE</SelectItem>
+                        <SelectItem value="INACTIVE">INACTIVE</SelectItem>
+                        <SelectItem value="SUSPENDED">SUSPENDED</SelectItem>
+                        <SelectItem value="CLOSED">CLOSED</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      {t('minBalance') || 'Min Balance'}
-                    </label>
-                    <input
-                      type="number"
-                      name="minBalance"
-                      value={walletFilters.minBalance}
-                      onChange={handleWalletFilterChange}
-                      placeholder="0.00"
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+                  <Input
+                    label={t('minBalance') || 'Min Balance'}
+                    name="minBalance"
+                    type="number"
+                    value={walletFilters.minBalance}
+                    onChange={handleWalletFilterChange}
+                    placeholder="0.00"
+                  />
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      {t('maxBalance') || 'Max Balance'}
-                    </label>
-                    <input
-                      type="number"
-                      name="maxBalance"
-                      value={walletFilters.maxBalance}
-                      onChange={handleWalletFilterChange}
-                      placeholder="10000.00"
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
+                  <Input
+                    label={t('maxBalance') || 'Max Balance'}
+                    name="maxBalance"
+                    type="number"
+                    value={walletFilters.maxBalance}
+                    onChange={handleWalletFilterChange}
+                    placeholder="10000.00"
+                  />
                 </div>
 
                 <div className="flex gap-3">
                   <Button
                     variant="primary"
                     onClick={applyWalletFilters}
-                    className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+                    className="flex items-center gap-2"
                   >
                     <Search className="w-4 h-4" />
                     {t('applyFilters') || 'Apply Filters'}
@@ -290,7 +272,7 @@ const WalletsPage = () => {
                   <Button
                     variant="secondary"
                     onClick={resetWalletFilters}
-                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    className="flex items-center gap-2"
                   >
                     <X className="w-4 h-4" />
                     {t('resetFilters') || 'Reset'}
@@ -436,9 +418,9 @@ const WalletsPage = () => {
                           </td>
                           <td className="px-4 py-4">
                             <div className="flex justify-center">
-                              <Button 
-                                variant="secondary" 
-                                className="w-9 h-9 p-0 flex items-center justify-center bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white transition-all duration-200"
+                              <Button
+                                variant="ghost"
+                                size="icon"
                                 onClick={() => handleViewDetails(wallet.id)}
                                 title="View Details"
                               >
@@ -455,53 +437,53 @@ const WalletsPage = () => {
 
               {/* Pagination */}
               {walletPagination.totalPages > 1 && (
-                <div className="mt-8 flex justify-center items-center gap-4">
+                <div className="mt-4 sm:mt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-4">
                   <Button
-                    variant="secondary"
-                    onClick={() => goToWalletPage(walletPagination.currentPage - 1)}
-                    disabled={walletPagination.currentPage === 0}
-                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => goToWalletPage(walletPagination.currentPage - 2)}
+                    disabled={walletPagination.currentPage === 1}
+                    className="flex items-center gap-1 sm:gap-2"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    {t('previous') || 'Previous'}
+                    <span className="hidden sm:inline">{t('previous') || 'Previous'}</span>
                   </Button>
-                  
-                  <div className="flex items-center gap-2">
+
+                  <div className="flex items-center gap-1 sm:gap-2">
                     {Array.from({ length: Math.min(walletPagination.totalPages, 5) }, (_, i) => {
                       let pageNum;
                       if (walletPagination.totalPages <= 5) {
-                        pageNum = i;
-                      } else if (walletPagination.currentPage < 3) {
-                        pageNum = i;
+                        pageNum = i + 1;
+                      } else if (walletPagination.currentPage <= 3) {
+                        pageNum = i + 1;
                       } else if (walletPagination.currentPage > walletPagination.totalPages - 3) {
-                        pageNum = walletPagination.totalPages - 5 + i;
+                        pageNum = walletPagination.totalPages - 4 + i;
                       } else {
                         pageNum = walletPagination.currentPage - 2 + i;
                       }
-                      
+
                       return (
-                        <button
+                        <Button
                           key={pageNum}
-                          onClick={() => goToWalletPage(pageNum)}
-                          className={`w-10 h-10 rounded-lg font-semibold transition-all ${
-                            pageNum === walletPagination.currentPage
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-                          }`}
+                          variant={pageNum === walletPagination.currentPage ? 'primary' : 'outline'}
+                          size="icon"
+                          className="w-8 h-8 sm:w-9 sm:h-9"
+                          onClick={() => goToWalletPage(pageNum - 1)}
                         >
-                          {pageNum + 1}
-                        </button>
+                          {pageNum}
+                        </Button>
                       );
                     })}
                   </div>
 
                   <Button
-                    variant="secondary"
-                    onClick={() => goToWalletPage(walletPagination.currentPage + 1)}
-                    disabled={walletPagination.currentPage >= walletPagination.totalPages - 1}
-                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => goToWalletPage(walletPagination.currentPage)}
+                    disabled={walletPagination.currentPage >= walletPagination.totalPages}
+                    className="flex items-center gap-1 sm:gap-2"
                   >
-                    {t('next') || 'Next'}
+                    <span className="hidden sm:inline">{t('next') || 'Next'}</span>
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>
@@ -516,16 +498,15 @@ const WalletsPage = () => {
         <>
           {/* Transaction Filters */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 mb-6">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center gap-2 mb-3 sm:mb-4">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                 <Filter className="w-5 h-5 text-blue-500 dark:text-blue-400" />
                 {t('filters') || 'Filters'}
               </h3>
               <Button
-                variant="secondary"
+                variant="outline"
                 size="sm"
                 onClick={() => setShowTxFilters(!showTxFilters)}
-                className="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
               >
                 {showTxFilters ? t('hide') || 'Hide' : t('show') || 'Show'}
               </Button>
@@ -534,42 +515,44 @@ const WalletsPage = () => {
             {showTxFilters && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      {t('type') || 'Type'}
-                    </label>
-                    <select
-                      name="type"
-                      value={txFilters.type}
-                      onChange={handleTxFilterChange}
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <div className="flex flex-col gap-1.5">
+                    <Label>{t('type') || 'Type'}</Label>
+                    <Select
+                      value={txFilters.type || '__all__'}
+                      onValueChange={(value) => setTxFilters(prev => ({ ...prev, type: value === '__all__' ? '' : value }))}
                     >
-                      <option value="">{t('all') || 'All'}</option>
-                      <option value="DEPOSIT">DEPOSIT</option>
-                      <option value="WITHDRAWAL">WITHDRAWAL</option>
-                      <option value="PAYMENT">PAYMENT</option>
-                      <option value="REFUND">REFUND</option>
-                      <option value="CREDIT">CREDIT</option>
-                      <option value="DEBIT">DEBIT</option>
-                    </select>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('all') || 'All'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">{t('all') || 'All'}</SelectItem>
+                        <SelectItem value="DEPOSIT">DEPOSIT</SelectItem>
+                        <SelectItem value="WITHDRAWAL">WITHDRAWAL</SelectItem>
+                        <SelectItem value="PAYMENT">PAYMENT</SelectItem>
+                        <SelectItem value="REFUND">REFUND</SelectItem>
+                        <SelectItem value="CREDIT">CREDIT</SelectItem>
+                        <SelectItem value="DEBIT">DEBIT</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-                      {t('status') || 'Status'}
-                    </label>
-                    <select
-                      name="status"
-                      value={txFilters.status}
-                      onChange={handleTxFilterChange}
-                      className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  <div className="flex flex-col gap-1.5">
+                    <Label>{t('status') || 'Status'}</Label>
+                    <Select
+                      value={txFilters.status || '__all__'}
+                      onValueChange={(value) => setTxFilters(prev => ({ ...prev, status: value === '__all__' ? '' : value }))}
                     >
-                      <option value="">{t('all') || 'All'}</option>
-                      <option value="PENDING">PENDING</option>
-                      <option value="COMPLETED">COMPLETED</option>
-                      <option value="FAILED">FAILED</option>
-                      <option value="CANCELLED">CANCELLED</option>
-                    </select>
+                      <SelectTrigger>
+                        <SelectValue placeholder={t('all') || 'All'} />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="__all__">{t('all') || 'All'}</SelectItem>
+                        <SelectItem value="PENDING">PENDING</SelectItem>
+                        <SelectItem value="COMPLETED">COMPLETED</SelectItem>
+                        <SelectItem value="FAILED">FAILED</SelectItem>
+                        <SelectItem value="CANCELLED">CANCELLED</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
@@ -577,7 +560,7 @@ const WalletsPage = () => {
                   <Button
                     variant="primary"
                     onClick={applyTxFilters}
-                    className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+                    className="flex items-center gap-2"
                   >
                     <Search className="w-4 h-4" />
                     {t('applyFilters') || 'Apply Filters'}
@@ -585,7 +568,7 @@ const WalletsPage = () => {
                   <Button
                     variant="secondary"
                     onClick={resetTxFilters}
-                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    className="flex items-center gap-2"
                   >
                     <X className="w-4 h-4" />
                     {t('resetFilters') || 'Reset'}
@@ -672,18 +655,19 @@ const WalletsPage = () => {
 
               {/* Pagination */}
               {txPagination.totalPages > 1 && (
-                <div className="mt-8 flex justify-center items-center gap-4">
+                <div className="mt-4 sm:mt-6 flex flex-wrap justify-center items-center gap-2 sm:gap-4">
                   <Button
-                    variant="secondary"
+                    variant="outline"
+                    size="sm"
                     onClick={() => goToTxPage(txPagination.currentPage - 1)}
                     disabled={txPagination.currentPage === 0}
-                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    className="flex items-center gap-1 sm:gap-2"
                   >
                     <ChevronLeft className="w-4 h-4" />
-                    {t('previous') || 'Previous'}
+                    <span className="hidden sm:inline">{t('previous') || 'Previous'}</span>
                   </Button>
-                  
-                  <div className="flex items-center gap-2">
+
+                  <div className="flex items-center gap-1 sm:gap-2">
                     {Array.from({ length: Math.min(txPagination.totalPages, 5) }, (_, i) => {
                       let pageNum;
                       if (txPagination.totalPages <= 5) {
@@ -695,30 +679,29 @@ const WalletsPage = () => {
                       } else {
                         pageNum = txPagination.currentPage - 2 + i;
                       }
-                      
+
                       return (
-                        <button
+                        <Button
                           key={pageNum}
+                          variant={pageNum === txPagination.currentPage ? 'primary' : 'outline'}
+                          size="icon"
+                          className="w-8 h-8 sm:w-9 sm:h-9"
                           onClick={() => goToTxPage(pageNum)}
-                          className={`w-10 h-10 rounded-lg font-semibold transition-all ${
-                            pageNum === txPagination.currentPage
-                              ? 'bg-blue-500 text-white'
-                              : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
-                          }`}
                         >
                           {pageNum + 1}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
 
                   <Button
-                    variant="secondary"
+                    variant="outline"
+                    size="sm"
                     onClick={() => goToTxPage(txPagination.currentPage + 1)}
                     disabled={txPagination.currentPage >= txPagination.totalPages - 1}
-                    className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    className="flex items-center gap-1 sm:gap-2"
                   >
-                    {t('next') || 'Next'}
+                    <span className="hidden sm:inline">{t('next') || 'Next'}</span>
                     <ChevronRight className="w-4 h-4" />
                   </Button>
                 </div>

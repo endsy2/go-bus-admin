@@ -33,10 +33,6 @@ export const NavItem = ({ icon, label, active, onClick }) => {
         {label}
       </span>
 
-      {/* Hover effect */}
-      {!active && (
-        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-100/50 dark:via-gray-700/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-      )}
     </button>
   );
 };

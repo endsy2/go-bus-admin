@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Plus, Search, X, Eye, Trash2, AlertCircle, MapPin, Clock, Activity, Bus } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent } from 'shared/components/ui/card';
-import { Badge } from 'shared/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { useToast } from 'shared/components/ui/toast';
@@ -249,19 +248,18 @@ const RoutesPage = () => {
   }
 
   return (
-    <div className="flex-1 p-6 md:p-8 overflow-y-auto bg-gradient-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-900 min-h-screen">
+    <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-background min-h-screen">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6">
         <div>
-          <h1 className="text-4xl font-bold mb-2 bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-300 bg-clip-text text-transparent flex items-center gap-3">
-            <Clock className="h-8 w-8 text-blue-600 dark:text-blue-400" />
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-1">
             {t('routesManagement') || 'Routes Management'}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {t('routesManagementDesc') || 'Manage bus routes, distances, and schedules'}
           </p>
         </div>
-        <Button onClick={handleCreateRoute} className="gap-2">
+        <Button onClick={handleCreateRoute} className="gap-2 w-full sm:w-auto justify-center">
           <Plus className="h-4 w-4" />
           {t('addNewRoute') || 'Add New Route'}
         </Button>
@@ -278,67 +276,51 @@ const RoutesPage = () => {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-8">
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-3 rounded-xl text-white">
-                <MapPin className="h-6 w-6" />
-              </div>
-              <div>
-                {loading ? <Skeleton className="h-8 w-16 mb-1" /> : <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{pagination.totalElements}</div>}
-                <div className="text-sm text-muted-foreground">{t('totalRoutes') || 'Total Routes'}</div>
-              </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+        <div className="bg-card rounded-lg p-4 border border-border">
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-9 h-9 rounded-md bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+              <MapPin className="h-4 w-4 text-blue-600 dark:text-blue-400" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="text-xs text-muted-foreground mb-1">{t('totalRoutes') || 'Total Routes'}</div>
+          {loading ? <Skeleton className="h-6 w-12" /> : <div className="text-xl font-semibold text-foreground">{pagination.totalElements}</div>}
+        </div>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-emerald-500 to-green-600 p-3 rounded-xl text-white">
-                <Bus className="h-6 w-6" />
-              </div>
-              <div>
-                {loading ? <Skeleton className="h-8 w-16 mb-1" /> : <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{totalBuses}</div>}
-                <div className="text-sm text-muted-foreground">{t('totalBusesAssigned') || 'Buses Assigned'}</div>
-              </div>
+        <div className="bg-card rounded-lg p-4 border border-border">
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-9 h-9 rounded-md bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+              <Bus className="h-4 w-4 text-green-600 dark:text-green-400" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="text-xs text-muted-foreground mb-1">{t('totalBusesAssigned') || 'Buses Assigned'}</div>
+          {loading ? <Skeleton className="h-6 w-12" /> : <div className="text-xl font-semibold text-foreground">{totalBuses}</div>}
+        </div>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-amber-500 to-orange-600 p-3 rounded-xl text-white">
-                <Clock className="h-6 w-6" />
-              </div>
-              <div>
-                {loading ? <Skeleton className="h-8 w-16 mb-1" /> : <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">{formatDuration(avgDuration)}</div>}
-                <div className="text-sm text-muted-foreground">{t('avgDuration') || 'Avg Duration'}</div>
-              </div>
+        <div className="bg-card rounded-lg p-4 border border-border">
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-9 h-9 rounded-md bg-amber-50 dark:bg-amber-900/20 flex items-center justify-center">
+              <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="text-xs text-muted-foreground mb-1">{t('avgDuration') || 'Avg Duration'}</div>
+          {loading ? <Skeleton className="h-6 w-12" /> : <div className="text-xl font-semibold text-foreground">{formatDuration(avgDuration)}</div>}
+        </div>
 
-        <Card className="hover:shadow-lg transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex items-center gap-4">
-              <div className="bg-gradient-to-br from-purple-500 to-pink-600 p-3 rounded-xl text-white">
-                <Activity className="h-6 w-6" />
-              </div>
-              <div>
-                {loading ? <Skeleton className="h-8 w-16 mb-1" /> : (
-                  <div className="text-3xl font-bold text-slate-900 dark:text-slate-100">
-                    {Math.round(totalDistance).toLocaleString()}
-                    <span className="text-lg text-muted-foreground ml-1">km</span>
-                  </div>
-                )}
-                <div className="text-sm text-muted-foreground">{t('totalDistance') || 'Total Distance'}</div>
-              </div>
+        <div className="bg-card rounded-lg p-4 border border-border">
+          <div className="flex items-start justify-between mb-3">
+            <div className="w-9 h-9 rounded-md bg-purple-50 dark:bg-purple-900/20 flex items-center justify-center">
+              <Activity className="h-4 w-4 text-purple-600 dark:text-purple-400" />
             </div>
-          </CardContent>
-        </Card>
+          </div>
+          <div className="text-xs text-muted-foreground mb-1">{t('totalDistance') || 'Total Distance'}</div>
+          {loading ? <Skeleton className="h-6 w-12" /> : (
+            <div className="text-xl font-semibold text-foreground">
+              {Math.round(totalDistance).toLocaleString()}
+              <span className="text-sm text-muted-foreground ml-1">km</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content Card */}
@@ -398,18 +380,18 @@ const RoutesPage = () => {
 
           {/* Routes List */}
           {loading ? (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {[...Array(5)].map((_, i) => (
-                <Skeleton key={i} className="h-24 w-full" />
+                <Skeleton key={i} className="h-14 w-full" />
               ))}
             </div>
           ) : routes.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-20">
-              <div className="bg-muted p-6 rounded-full mb-4">
-                <MapPin className="h-12 w-12 text-muted-foreground" />
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="bg-muted w-12 h-12 rounded-full flex items-center justify-center mb-4">
+                <MapPin className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h3 className="text-xl font-semibold mb-2">{t('noRoutesFound') || 'No routes found'}</h3>
-              <p className="text-muted-foreground text-center max-w-md mb-4">
+              <h3 className="text-base font-semibold text-foreground mb-1">{t('noRoutesFound') || 'No routes found'}</h3>
+              <p className="text-sm text-muted-foreground mb-4 px-4">
                 {search
                   ? t('tryAdjustingFilters') || "Try adjusting your search to find what you're looking for"
                   : t('startByAddingRoute') || 'Start by adding your first route'}
@@ -422,82 +404,40 @@ const RoutesPage = () => {
               )}
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="divide-y divide-border">
               {routes.map(route => (
-                <Card key={route.id} className="hover:shadow-md transition-shadow">
-                  <CardContent className="p-6">
-                    <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-                      {/* Route Path */}
-                      <div className="flex-1 flex items-center gap-3">
-                        <div className="flex items-center gap-2">
-                          <div className="flex flex-col items-center">
-                            <div className="w-3 h-3 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600" />
-                            <div className="text-xs text-muted-foreground mt-1">{t('origin') || 'Origin'}</div>
-                          </div>
-                          <div>
-                            <div className="font-bold text-sm">{route.origin}</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-1 px-3">
-                          <div className="h-px w-8 bg-gradient-to-r from-blue-500 to-indigo-600" />
-                          <MapPin className="h-4 w-4 text-blue-600" />
-                          <div className="h-px w-8 bg-gradient-to-r from-blue-500 to-indigo-600" />
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <div className="flex flex-col items-center">
-                            <div className="w-3 h-3 rounded-full bg-gradient-to-br from-emerald-500 to-green-600" />
-                            <div className="text-xs text-muted-foreground mt-1">{t('destination') || 'Destination'}</div>
-                          </div>
-                          <div>
-                            <div className="font-bold text-sm">{route.destination}</div>
-                          </div>
-                        </div>
-                        
-                        <Badge variant="secondary" className="ml-2">ID: R-{route.id}</Badge>
-                      </div>
-
-                      {/* Stats */}
-                      <div className="flex flex-wrap gap-4 lg:gap-6">
-                        <div className="flex items-center gap-2 text-sm">
-                          <Activity className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{route.distanceKm?.toFixed(0)} km</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Clock className="h-4 w-4 text-muted-foreground" />
-                          <span className="font-medium">{formatDuration(route.durationMinutes)}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Bus className="h-4 w-4 text-muted-foreground" />
-                          <Badge className={route.busCount > 0 ? 'bg-gradient-to-r from-emerald-500 to-green-500 text-white' : ''}>
-                            {route.busCount ?? 0} {route.busCount === 1 ? 'bus' : 'buses'}
-                          </Badge>
-                        </div>
-                      </div>
-
-                      {/* Actions */}
-                      <div className="flex gap-2">
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          onClick={() => handleViewRoute(route.id)}
-                          title={t('viewDetails') || 'View Details'}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="destructive"
-                          onClick={() => handleDeleteRoute(route)}
-                          title={t('delete') || 'Delete'}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
+                <div key={route.id} className="flex flex-col sm:flex-row sm:items-center gap-3 py-3 hover:bg-muted/30 -mx-2 px-2 rounded transition-colors">
+                  {/* Route info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-foreground text-sm">
+                      {route.origin} → {route.destination}
                     </div>
-                  </CardContent>
-                </Card>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      R-{route.id} · {route.distanceKm?.toFixed(0)} km · {formatDuration(route.durationMinutes)} · {route.busCount ?? 0} {route.busCount === 1 ? 'bus' : 'buses'}
+                    </div>
+                  </div>
+                  {/* Actions */}
+                  <div className="flex gap-1 flex-shrink-0">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                      onClick={() => handleViewRoute(route.id)}
+                      title={t('viewDetails') || 'View Details'}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => handleDeleteRoute(route)}
+                      title={t('delete') || 'Delete'}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               ))}
             </div>
           )}

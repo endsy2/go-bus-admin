@@ -4,9 +4,11 @@ import { Button } from 'shared/components/ui/button';
 import { Input } from 'shared/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
 import { Badge } from 'shared/components/ui/badge';
+import { useToast } from 'shared/components/ui/toast';
 import adminService from '../../services/adminService';
 
 const UserManagementTab = () => {
+  const { addToast } = useToast();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -39,13 +41,15 @@ const UserManagementTab = () => {
   };
 
   const handleResetPassword = async (id) => {
-    const newPassword = prompt('Enter new password:');
+    // eslint-disable-next-line no-alert
+    const newPassword = window.prompt('Enter new password:');
     if (newPassword) {
       try {
         await adminService.users.resetPassword(id, { password: newPassword });
-        alert('Password reset successfully');
+        addToast({ message: 'Password reset successfully', type: 'success' });
       } catch (error) {
         console.error('Failed to reset password:', error);
+        addToast({ message: error.response?.data?.message || 'Failed to reset password', type: 'error' });
       }
     }
   };
