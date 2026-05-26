@@ -4,6 +4,8 @@ import { Button } from 'shared/components/common/Button';
 import { Snackbar } from 'shared/components/common/Snackbar';
 import EditCustomerDialog from '../../components/EditCustomerDialog/EditCustomerDialog';
 import userService from 'features/team/services/userService';
+import walletService from 'features/wallets/services/walletService';
+import { Wallet } from 'lucide-react';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 
@@ -14,6 +16,7 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [creatingWallet, setCreatingWallet] = useState(false);
   const [snackbar, setSnackbar] = useState({ isOpen: false, message: '', type: 'success' });
 
   useEffect(() => {
@@ -66,6 +69,19 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
 
   const cancelEdit = () => {
     setShowEditDialog(false);
+  };
+
+  const handleCreateWallet = async () => {
+    setCreatingWallet(true);
+    try {
+      await walletService.createWallet(customer.id);
+      setCustomer(prev => ({ ...prev, isWalletExist: true }));
+      setSnackbar({ isOpen: true, message: t('walletCreatedSuccess') || 'Wallet created successfully', type: 'success' });
+    } catch (err) {
+      setSnackbar({ isOpen: true, message: err.response?.data?.message || 'Failed to create wallet', type: 'error' });
+    } finally {
+      setCreatingWallet(false);
+    }
   };
 
   if (loading) {
@@ -132,7 +148,13 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
               </span>
             </div>
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
+            {!customer.isWalletExist && (
+              <Button variant="outline" onClick={handleCreateWallet} disabled={creatingWallet} className="flex items-center gap-2">
+                <Wallet size={18} />
+                {creatingWallet ? (t('creating') || 'Creating...') : (t('createWallet') || 'Create Wallet')}
+              </Button>
+            )}
             <Button variant="primary" onClick={handleEditClick}>
               <Icon name="edit" size={18} />
               {t('editProfile')}

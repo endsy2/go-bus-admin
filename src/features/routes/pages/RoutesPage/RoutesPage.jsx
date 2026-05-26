@@ -396,13 +396,13 @@ const RoutesPage = () => {
                       <Eye className="h-4 w-4" />
                     </Button>
                     <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      size="sm"
+                      variant="destructive"
                       onClick={() => handleDeleteRoute(route)}
                       title={t('delete') || 'Delete'}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="w-3 h-3 sm:mr-1" />
+                      <span className="hidden sm:inline">{t('delete') || 'Delete'}</span>
                     </Button>
                   </div>
                 </div>

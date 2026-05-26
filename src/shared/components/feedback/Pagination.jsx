@@ -11,7 +11,9 @@ export const Pagination = ({
   onPageChange,
   onPageSizeChange
 }) => {
-  const pageSizeOptions = [15, 30, 50];
+  const pageSizeOptions = [15, 30, 50].filter((size, i, arr) =>
+    i === 0 || totalElements > arr[i - 1]
+  );
 
   const handlePrevious = () => {
     if (currentPage > 0) {
@@ -25,7 +27,7 @@ export const Pagination = ({
     }
   };
 
-  const startItem = currentPage * pageSize + 1;
+  const startItem = totalElements === 0 ? 0 : currentPage * pageSize + 1;
   const endItem = Math.min((currentPage + 1) * pageSize, totalElements);
 
   return (
@@ -59,12 +61,12 @@ export const Pagination = ({
             size="icon"
             className="h-8 w-8"
             onClick={handlePrevious}
-            disabled={currentPage === 0}
+            disabled={currentPage <= 0}
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
 
-          <span className="text-xs sm:text-sm min-w-[80px] sm:min-w-[100px] text-center whitespace-nowrap">
+          <span className="text-sm min-w-[100px] text-center">
             Page {currentPage + 1} of {totalPages}
           </span>
 
