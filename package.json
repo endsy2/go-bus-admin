@@ -55,8 +55,21 @@
     ]
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "autoprefixer": "^10.4.27",
     "postcss": "^8.5.8",
     "tailwindcss": "^3.4.19"
+  },
+  "jest": {
+    "moduleNameMapper": {
+      "^react-router-dom$": "<rootDir>/node_modules/react-router-dom/dist/index.js",
+      "^react-router/dom$": "<rootDir>/node_modules/react-router/dist/development/dom-export.js",
+      "^react-router$": "<rootDir>/node_modules/react-router/dist/development/index.js",
+      "^axios$": "<rootDir>/node_modules/axios/dist/node/axios.cjs",
+      "^@stomp/stompjs$": "<rootDir>/node_modules/@stomp/stompjs/bundles/stomp.umd.js"
+    },
+    "transformIgnorePatterns": [
+      "/node_modules/(?!(recharts|d3-scale|d3-array|d3-color|d3-format|d3-interpolate|d3-path|d3-shape|d3-time|d3-time-format|internmap|robust-predicates)/)"
+    ]
   }
 }

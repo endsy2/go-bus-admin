@@ -29,3 +29,6 @@ CLAUDE.md
 
 # Keep .env.production for Railway deployment
 # !.env.production
+test-results
+e2e
+claude

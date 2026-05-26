@@ -29,9 +29,11 @@ export const ConfirmDialog = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
-          <DialogDescription className="space-y-2">
-            <p>{message}</p>
-            <p className="text-sm italic text-muted-foreground">{t('actionCannotBeUndone')}</p>
+          <DialogDescription asChild>
+            <div className="space-y-2">
+              <p>{message}</p>
+              <p className="text-sm italic text-muted-foreground">{t('actionCannotBeUndone')}</p>
+            </div>
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

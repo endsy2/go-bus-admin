@@ -14,3 +14,4 @@ coverage
 *.md
 .DS_Store
 .claude
+./test
