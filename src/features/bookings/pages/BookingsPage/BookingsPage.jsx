@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useBookings } from '../../hooks/useBookings';
 import { useMultiScheduleWebSocket } from '../../hooks/useMultiScheduleWebSocket';
 import { Badge } from 'shared/components/common/Badge';
@@ -33,50 +33,53 @@ const BookingsPage = () => {
   const [selectedBookingId, setSelectedBookingId] = useState(null);
   const [markPaidDialogOpen, setMarkPaidDialogOpen] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState(null);
-  const [wsConnected, setWsConnected] = useState(false);
 
-  // Get unique schedule IDs from current bookings
-  const scheduleIds = [...new Set(bookings.map(b => b.scheduleId).filter(Boolean))];
+  // ── WebSocket setup ────────────────────────────────────────────────────────
 
-  // Handle seat updates from WebSocket
-  const handleSeatUpdate = useCallback((data) => {
-    console.log('Seat update received:', data);
-    
-    // Show toast notification based on event type
-    if (data.type === 'SEAT_BOOKED') {
-      addToast({
-        message: `Seat ${data.seatNumber} has been booked on schedule #${data.scheduleId}`,
-        type: 'info'
-      });
-    } else if (data.type === 'SEAT_RELEASED') {
-      addToast({
-        message: `Seat ${data.seatNumber} is now available on schedule #${data.scheduleId}`,
-        type: 'info'
-      });
-    }
-
-    // Refetch bookings to get updated data
-    refetch();
-  }, [addToast, refetch]);
-
-  // Subscribe to WebSocket for all schedules
-  const { isConnected, subscribedSchedules } = useMultiScheduleWebSocket(
-    scheduleIds,
-    handleSeatUpdate,
-    scheduleIds.length > 0 // Only enable if there are schedules
+  /**
+   * Memoise the schedule-ID array so its reference only changes when the
+   * bookings data actually changes. Without this, a new array is created on
+   * every render, causing useMultiScheduleWebSocket to see a constant "change"
+   * in its deps and re-subscribe on every render.
+   */
+  const scheduleIds = useMemo(
+    () => [...new Set(bookings.map((b) => b.scheduleId).filter(Boolean))],
+    [bookings]
   );
 
-  // Update connection status
-  useEffect(() => {
-    setWsConnected(isConnected);
-  }, [isConnected]);
+  /**
+   * Callback stored in a ref inside the hook — safe to use useCallback with
+   * stable deps. The hook will always call the latest version of this function.
+   */
+  const handleSeatUpdate = useCallback(
+    (data) => {
+      if (data.type === 'SEAT_BOOKED') {
+        addToast({
+          message: `Seat ${data.seatNumber} has been booked on schedule #${data.scheduleId}`,
+          type: 'info',
+        });
+      } else if (data.type === 'SEAT_RELEASED') {
+        addToast({
+          message: `Seat ${data.seatNumber} is now available on schedule #${data.scheduleId}`,
+          type: 'info',
+        });
+      }
+      // Refresh the table so booking statuses reflect the latest server state
+      refetch();
+    },
+    [addToast, refetch]
+  );
 
-  // Log subscribed schedules for debugging
-  useEffect(() => {
-    if (subscribedSchedules.length > 0) {
-      console.log('Subscribed to schedules:', subscribedSchedules);
-    }
-  }, [subscribedSchedules]);
+  /**
+   * isConnected is reactive state (driven by the service's event emitter),
+   * so the Live/Offline indicator updates automatically without a polling loop
+   * or a separate useEffect to sync it into local state.
+   */
+  const { isConnected: wsConnected } = useMultiScheduleWebSocket(
+    scheduleIds,
+    handleSeatUpdate,
+    scheduleIds.length > 0
+  );
 
   const handleViewDetails = (bookingId) => {
     setSelectedBookingId(bookingId);

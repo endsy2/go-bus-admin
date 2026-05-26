@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -34,7 +34,6 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
   const [loadingSchedules, setLoadingSchedules] = useState(false);
   const [loadingRoutes, setLoadingRoutes] = useState(false);
   const [loadingBus, setLoadingBus] = useState(false);
-  const [wsConnected, setWsConnected] = useState(false);
   
   const [formData, setFormData] = useState({
     scheduleId: '',
@@ -49,30 +48,19 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
   });
   const [errors, setErrors] = useState({});
 
-  // Get current user ID from localStorage
-  const getCurrentUserId = () => {
+  /**
+   * The user ID does not change during a session — memoising it avoids a
+   * localStorage read and JSON.parse on every single render of this dialog.
+   * Computed once when the component mounts.
+   */
+  const currentUserId = useMemo(() => {
     try {
-      const userStr = localStorage.getItem('user');
-      console.log('👤 Getting current user ID from localStorage');
-      console.log('  - User string found:', !!userStr);
-      
-      if (userStr) {
-        const user = JSON.parse(userStr);
-        console.log('  - User object:', user);
-        console.log('  - User ID:', user.id);
-        console.log('  - User ID type:', typeof user.id);
-        return user.id;
-      } else {
-        console.warn('  - No user found in localStorage');
-      }
-    } catch (error) {
-      console.error('❌ Error getting user ID:', error);
+      const user = JSON.parse(localStorage.getItem('user') || 'null');
+      return user?.id ?? null;
+    } catch {
+      return null;
     }
-    return null;
-  };
-
-  const currentUserId = getCurrentUserId();
-  console.log('👤 Current User ID set to:', currentUserId, '(type:', typeof currentUserId + ')');
+  }, []);
 
   // Handle seat updates from WebSocket
   const handleSeatUpdate = useCallback((data) => {
@@ -160,20 +148,21 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
     }
   }, [addToast, currentUserId]);
 
-  // Subscribe to WebSocket for current schedule
-  const { isConnected, sendMessage } = useSeatWebSocket(
+  /**
+   * Subscribe to real-time seat updates only when:
+   *   - the dialog is open
+   *   - the user is on the seat-selection step
+   *   - a schedule has been chosen
+   *
+   * isConnected is reactive state (driven by the service's event emitter) so
+   * the Live/Offline indicator updates automatically — no polling useEffect needed.
+   */
+  const wsEnabled = Boolean(open && step === 2 && formData.scheduleId);
+  const { isConnected: wsConnected, sendMessage } = useSeatWebSocket(
     formData.scheduleId ? parseInt(formData.scheduleId) : null,
     handleSeatUpdate,
-    open && step === 2 && formData.scheduleId // Only enable on step 2 with schedule selected
+    wsEnabled
   );
-
-  // Update connection status
-  useEffect(() => {
-    setWsConnected(isConnected);
-    if (isConnected && step === 2) {
-      console.log('✅ WebSocket connected for schedule:', formData.scheduleId);
-    }
-  }, [isConnected, step, formData.scheduleId]);
 
   // Fetch schedules with optional filters
   const fetchSchedules = useCallback(async () => {
@@ -434,7 +423,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
     console.log('  - Pending User ID Type:', typeof scheduleSeat.pendingUserId);
     console.log('  - Current User ID:', currentUserId);
     console.log('  - Current User ID Type:', typeof currentUserId);
-    console.log('  - WebSocket Connected:', isConnected);
+    console.log('  - WebSocket Connected:', wsConnected);
     console.log('  - Send Message Available:', !!sendMessage);
     
     // Check if seat is in local selection
@@ -464,7 +453,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
     
     console.log('═══════════════════════════════════════════════════');
 
-    if (!isConnected || !sendMessage) {
+    if (!wsConnected || !sendMessage) {
       console.error('❌ WebSocket not connected or sendMessage not available');
       addToast({ message: 'WebSocket not connected. Please refresh the page.', type: 'error' });
       return;

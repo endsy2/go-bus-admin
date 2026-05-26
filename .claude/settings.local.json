@@ -5,7 +5,9 @@
       "Bash(Select-Object FullName)",
       "Bash(Sort-Object FullName)",
       "Bash(Get-ChildItem *)",
-      "Bash(npx eslint *)"
+      "Bash(npx eslint *)",
+      "Bash(node -e \"const pkg = require\\('./package.json'\\); console.log\\('@stomp/stompjs:', pkg.dependencies['@stomp/stompjs']\\); console.log\\('sockjs-client:', pkg.dependencies['sockjs-client']\\);\")",
+      "Bash(npx react-scripts *)"
     ]
   }
 }

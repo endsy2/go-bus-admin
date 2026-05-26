@@ -1,116 +1,89 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import websocketService from 'shared/services/websocketService';
 
 /**
- * Custom hook for managing WebSocket connections for seat availability updates
- * @param {number|null} scheduleId - The schedule ID to subscribe to
- * @param {function} onSeatUpdate - Callback function when seat update is received
- * @param {boolean} enabled - Whether the WebSocket connection should be active
+ * Subscribe to real-time seat availability updates for a single schedule.
+ *
+ * Design decisions
+ * ────────────────
+ * 1. The onSeatUpdate callback is kept in a ref so its identity can change
+ *    every render without restarting the subscription. This breaks the
+ *    old callback → useCallback → useEffect dependency chain that was
+ *    causing re-subscriptions on every parent render.
+ *
+ * 2. isConnected is actual React state (not a snapshot value), updated via
+ *    the service's event emitter. This makes the status indicator reactive
+ *    without polling or extra useEffects.
+ *
+ * 3. There is a single useEffect keyed only on [scheduleId, enabled].
+ *    It creates one subscription and tears it down cleanly on unmount or
+ *    when those values change. No second "disconnect" effect.
+ *
+ * @param {number|null} scheduleId   - The schedule to subscribe to (null = inactive)
+ * @param {Function}    onSeatUpdate - Callback invoked with each incoming seat event
+ * @param {boolean}     enabled      - Set to false to suspend the subscription
  */
 export const useSeatWebSocket = (scheduleId, onSeatUpdate, enabled = true) => {
-  const subscriptionRef = useRef(null);
-  const isConnectedRef = useRef(false);
+  // ── Reactive connection state ──────────────────────────────────────────────
+  const [isConnected, setIsConnected] = useState(() => websocketService.isConnected());
 
-  const handleSeatUpdate = useCallback((data) => {
-    console.log('Seat update received:', data);
-    
-    // Validate the event data
-    if (!data || !data.type) {
-      console.warn('Invalid seat update data:', data);
-      return;
-    }
-
-    // Call the callback with the seat update
-    if (onSeatUpdate) {
-      onSeatUpdate(data);
-    }
-  }, [onSeatUpdate]);
-
-  const connectAndSubscribe = useCallback(async () => {
-    if (!scheduleId || !enabled) {
-      return;
-    }
-    try {
-      // Connect to WebSocket if not already connected
-      if (!websocketService.isConnected()) {
-        console.log('Connecting to WebSocket...');
-        await websocketService.connect();
-        isConnectedRef.current = true;
-      }
-
-      // Subscribe to the schedule's seat updates
-      const topic = `/topic/schedule/${scheduleId}/seats`;
-      console.log(`Subscribing to topic: ${topic}`);
-      
-      subscriptionRef.current = websocketService.subscribe(topic, handleSeatUpdate);
-    } catch (error) {
-      console.error('Failed to connect or subscribe to WebSocket:', error);
-      isConnectedRef.current = false;
-    }
-  }, [scheduleId, enabled, handleSeatUpdate]);
-
-  const unsubscribe = useCallback(() => {
-    if (subscriptionRef.current && scheduleId) {
-      const topic = `/topic/schedule/${scheduleId}/seats`;
-      websocketService.unsubscribe(topic);
-      subscriptionRef.current = null;
-      console.log(`Unsubscribed from topic: ${topic}`);
-    }
-  }, [scheduleId]);
-
-  // Connect and subscribe when component mounts or scheduleId changes
   useEffect(() => {
-    connectAndSubscribe();
-
-    // Cleanup on unmount or when scheduleId changes
-    return () => {
-      unsubscribe();
-    };
-  }, [connectAndSubscribe, unsubscribe]);
-
-  // Disconnect when component unmounts completely
-  useEffect(() => {
-    return () => {
-      // Only disconnect if this is the last component using the WebSocket
-      // In a real app, you might want to implement reference counting
-      if (isConnectedRef.current) {
-        // Don't disconnect immediately as other components might be using it
-        // websocketService.disconnect();
-      }
-    };
+    const unsubs = [
+      websocketService.on('connect', () => setIsConnected(true)),
+      websocketService.on('disconnect', () => setIsConnected(false)),
+    ];
+    return () => unsubs.forEach((fn) => fn());
   }, []);
 
+  // ── Stable callback ref ────────────────────────────────────────────────────
+  // Updating this ref never triggers a re-subscription — the Effect below
+  // does not depend on the callback at all.
+  const callbackRef = useRef(onSeatUpdate);
+  useEffect(() => {
+    callbackRef.current = onSeatUpdate;
+  });
+
+  // ── Subscription lifecycle ─────────────────────────────────────────────────
+  useEffect(() => {
+    if (!enabled || !scheduleId) return; // Nothing to subscribe to
+
+    const topic = `/topic/schedule/${scheduleId}/seats`;
+
+    const handler = (data) => {
+      if (!data?.type) {
+        console.warn('[useSeatWebSocket] Unexpected message format:', data);
+        return;
+      }
+      callbackRef.current?.(data);
+    };
+
+    websocketService.subscribe(topic, handler);
+
+    // Cleanup: unsubscribe when scheduleId changes, enabled becomes false,
+    // or the component unmounts. The service's singleton connection stays alive.
+    return () => {
+      websocketService.unsubscribe(topic);
+    };
+    // callbackRef is intentionally excluded from deps — it never needs to
+    // trigger a re-subscription (that's the whole point of using a ref).
+  }, [scheduleId, enabled]);
+
+  // ── Outbound message sender ────────────────────────────────────────────────
   const sendMessage = useCallback((destination, body) => {
-    console.log('═══════════════════════════════════════════════════');
-    console.log('📨 SEND MESSAGE CALLED');
-    console.log('═══════════════════════════════════════════════════');
-    console.log('📍 Destination:', destination);
-    console.log('📦 Body:', JSON.stringify(body, null, 2));
-    console.log('🔌 WebSocket Connected:', websocketService.isConnected());
-    
     if (!websocketService.isConnected()) {
-      console.error('❌ Cannot send message: WebSocket not connected');
+      console.error('[useSeatWebSocket] Cannot send — WebSocket not connected');
       return false;
     }
-
     try {
       websocketService.send(destination, body);
-      console.log('✅ Message sent successfully');
-      console.log('═══════════════════════════════════════════════════');
       return true;
-    } catch (error) {
-      console.error('❌ Failed to send message:', error);
-      console.log('═══════════════════════════════════════════════════');
+    } catch (err) {
+      console.error('[useSeatWebSocket] Send failed:', err);
       return false;
     }
   }, []);
 
-  return {
-    isConnected: websocketService.isConnected(),
-    reconnect: connectAndSubscribe,
-    disconnect: unsubscribe,
-    sendMessage
-  };
+  return { isConnected, sendMessage };
 };
 
 export default useSeatWebSocket;
