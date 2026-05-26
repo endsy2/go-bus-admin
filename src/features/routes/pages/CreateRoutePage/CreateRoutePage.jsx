@@ -2,11 +2,9 @@ import React, { useState } from 'react';
 import { Icon } from 'shared/components/common/Icon';
 import { Button } from 'shared/components/common/Button';
 import { Snackbar } from 'shared/components/common/Snackbar';
-import { apiRequest } from 'shared/utils/api';
+import { routeService } from 'features/routes';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
-
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
 const CreateRoutePage = ({ onBack, onSuccess }) => {
   const { locale } = useLocale();
@@ -127,20 +125,15 @@ const CreateRoutePage = ({ onBack, onSuccess }) => {
         ...(destinationLocationValue && { destinationLocation: destinationLocationValue }),
       };
 
-      const response = await apiRequest(`${BASE_URL}/api/routes`, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      });
-
-      if (response.ok) {
-        setSnackbar({ isOpen: true, message: t('routeCreated') || 'Route created successfully!', type: 'success' });
-        setTimeout(() => onSuccess?.(), 1200);
-      } else {
-        const result = await response.json();
-        setSnackbar({ isOpen: true, message: result.message || 'Failed to create route', type: 'error' });
-      }
+      await routeService.createRoute(payload);
+      setSnackbar({ isOpen: true, message: t('routeCreated') || 'Route created successfully!', type: 'success' });
+      setTimeout(() => onSuccess?.(), 1200);
     } catch (err) {
-      setSnackbar({ isOpen: true, message: 'Network error. Please check your connection.', type: 'error' });
+      setSnackbar({
+        isOpen: true,
+        message: err.response?.data?.message || 'Network error. Please check your connection.',
+        type: 'error',
+      });
     } finally {
       setSubmitting(false);
     }

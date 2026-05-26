@@ -9,11 +9,9 @@ import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
 import { Pagination } from 'shared/components/feedback/Pagination';
 import RouteDetailPage from '../RouteDetailPage/RouteDetailPage';
 import CreateRoutePage from '../CreateRoutePage/CreateRoutePage';
-import { apiRequest } from 'shared/utils/api';
+import { routeService } from 'features/routes';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
-
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
 const RoutesPage = () => {
   const { locale } = useLocale();
@@ -45,36 +43,22 @@ const RoutesPage = () => {
   const fetchRoutes = async () => {
     setLoading(true);
     try {
-      // Use paginated endpoint
-      const response = await apiRequest(
-        `${BASE_URL}/api/routes/paginate?pageNo=${pagination.currentPage + 1}&pageSize=${pagination.pageSize}`, 
-        { method: 'GET' }
+      const result = await routeService.getRoutesPaginated(
+        pagination.currentPage + 1,
+        pagination.pageSize
       );
-      const result = await response.json();
-      
-      if (response.ok) {
-        const data = result.data || result;
-        const routesArray = data.content || data;
-        
-        setRoutes(Array.isArray(routesArray) ? routesArray : []);
-        
-        // Update pagination from API response
-        setPagination(prev => ({
-          ...prev,
-          totalPages: data.totalPages || 1,
-          totalElements: data.totalElements || 0
-        }));
-        
-        setError('');
-        
-        // Also fetch all routes for the search dropdown
-        fetchAllRoutesForDropdown();
-      } else {
-        setError((result.data || result).message || 'Failed to fetch routes');
-      }
+      const data = result.data || result;
+      const routesArray = data.content || data;
+      setRoutes(Array.isArray(routesArray) ? routesArray : []);
+      setPagination(prev => ({
+        ...prev,
+        totalPages: data.totalPages || 1,
+        totalElements: data.totalElements || 0,
+      }));
+      setError('');
+      fetchAllRoutesForDropdown();
     } catch (err) {
-      setError('Network error. Please check your connection.');
-      console.error('Error fetching routes:', err);
+      setError(err.response?.data?.message || 'Network error. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -82,29 +66,24 @@ const RoutesPage = () => {
 
   const fetchAllRoutesForDropdown = async () => {
     try {
-      const response = await apiRequest(`${BASE_URL}/api/routes`, { method: 'GET' });
-      const result = await response.json();
-      if (response.ok) {
-        const data = result.data || result;
-        const routesArray = Array.isArray(data) ? data : [];
-        setAllRoutes(routesArray);
-      }
-    } catch (err) {
-      console.error('Error fetching all routes for dropdown:', err);
+      const result = await routeService.getRoutes();
+      const data = result.data || result;
+      setAllRoutes(Array.isArray(data) ? data : []);
+    } catch {
+      // Dropdown data is non-critical
     }
   };
 
   const handleSearch = async (origin = null, destination = null) => {
     let searchOrigin = origin;
     let searchDestination = destination;
-    
+
     if (!origin && !destination) {
       if (!search.trim()) {
         setPagination(prev => ({ ...prev, currentPage: 0 }));
         fetchRoutes();
         return;
       }
-      
       const searchTerms = search.trim().split(/\s+/);
       if (searchTerms.length >= 2) {
         searchOrigin = searchTerms[0];
@@ -117,36 +96,21 @@ const RoutesPage = () => {
 
     setSearching(true);
     setPagination(prev => ({ ...prev, currentPage: 0 }));
-    
-    try {
-      const searchParams = new URLSearchParams();
-      searchParams.append('origin', searchOrigin);
-      searchParams.append('destination', searchDestination);
 
-      const response = await apiRequest(`${BASE_URL}/api/routes/search?${searchParams.toString()}`, { method: 'GET' });
-      const result = await response.json();
-      
-      if (response.ok) {
-        const data = result.data || result;
-        const routesArray = Array.isArray(data) ? data : [];
-        
-        setRoutes(routesArray);
-        
-        // Update pagination for search results (client-side pagination)
-        setPagination(prev => ({
-          ...prev,
-          currentPage: 0,
-          totalPages: Math.ceil(routesArray.length / prev.pageSize),
-          totalElements: routesArray.length
-        }));
-        
-        setError('');
-      } else {
-        setError((result.data || result).message || 'Search failed');
-      }
+    try {
+      const result = await routeService.searchRoutes(searchOrigin, searchDestination);
+      const data = result.data || result;
+      const routesArray = Array.isArray(data) ? data : [];
+      setRoutes(routesArray);
+      setPagination(prev => ({
+        ...prev,
+        currentPage: 0,
+        totalPages: Math.ceil(routesArray.length / prev.pageSize),
+        totalElements: routesArray.length,
+      }));
+      setError('');
     } catch (err) {
-      setError('Network error. Please check your connection.');
-      console.error('Error searching routes:', err);
+      setError(err.response?.data?.message || 'Network error. Please check your connection.');
     } finally {
       setSearching(false);
     }
@@ -198,18 +162,14 @@ const RoutesPage = () => {
   const handleConfirmDelete = async () => {
     if (!routeToDelete) return;
     try {
-      const response = await apiRequest(`${BASE_URL}/api/routes/${routeToDelete.id}`, { method: 'DELETE' });
-      if (response.ok) {
-        setRoutes(prev => prev.filter(r => r.id !== routeToDelete.id));
-        addToast({
-          message: `Route ${routeToDelete.origin} → ${routeToDelete.destination} deleted successfully`,
-          type: 'success'
-        });
-      } else {
-        addToast({ message: 'Failed to delete route', type: 'error' });
-      }
+      await routeService.deleteRoute(routeToDelete.id);
+      setRoutes(prev => prev.filter(r => r.id !== routeToDelete.id));
+      addToast({
+        message: `Route ${routeToDelete.origin} → ${routeToDelete.destination} deleted successfully`,
+        type: 'success',
+      });
     } catch (err) {
-      addToast({ message: 'Network error', type: 'error' });
+      addToast({ message: err.response?.data?.message || 'Failed to delete route', type: 'error' });
     } finally {
       setShowDeleteDialog(false);
       setRouteToDelete(null);

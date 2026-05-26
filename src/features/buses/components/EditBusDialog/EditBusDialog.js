@@ -11,12 +11,11 @@ import { Input } from 'shared/components/ui/input';
 import { Label } from 'shared/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { Loader2 } from 'lucide-react';
-import { apiRequest } from 'shared/utils/api';
+import busService from '../../services/busService';
+import routeService from 'features/routes/services/routeService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import { cn } from 'lib/utils';
-
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
 const BUS_TYPES = ['SLEEPER', 'SEATER'];
 const STATUS_OPTIONS = ['Active', 'Standby', 'Maintenance', 'Inactive', 'InService'];
@@ -42,12 +41,10 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
 
   const fetchRoutes = useCallback(async () => {
     try {
-      const res = await apiRequest(`${BASE_URL}/api/routes`, { method: 'GET' });
-      const result = await res.json();
-      console.log('Fetched routes:', result);
-      if (res.ok) setRoutes(result.data || result || []);
-    } catch (err) {
-      console.error('Failed to fetch routes:', err);
+      const result = await routeService.getRoutes();
+      setRoutes(result.data || result || []);
+    } catch {
+      // Non-critical — dropdown will show empty
     }
   }, []);
 
@@ -103,20 +100,10 @@ const EditBusDialog = ({ isOpen, bus, onSave, onCancel }) => {
         busStatus: form.busStatus,
       };
 
-      const res = await apiRequest(`${BASE_URL}/api/buses/${bus.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await res.json();
-      if (res.ok) {
-        onSave && onSave(result.data || result);
-      } else {
-        setErrors({ submit: result.message || 'Failed to update bus' });
-      }
+      const result = await busService.updateBus(bus.id, payload);
+      onSave && onSave(result.data || result);
     } catch (err) {
-      setErrors({ submit: 'Network error. Please try again.' });
+      setErrors({ submit: err.response?.data?.message || 'Failed to update bus. Please try again.' });
     } finally {
       setSubmitting(false);
     }

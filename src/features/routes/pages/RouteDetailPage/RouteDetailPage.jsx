@@ -4,11 +4,9 @@ import { Icon } from 'shared/components/common/Icon';
 import { Input } from 'shared/components/common/Input';
 import { Snackbar } from 'shared/components/common/Snackbar';
 import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
-import { apiRequest } from 'shared/utils/api';
+import { routeService } from 'features/routes';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
-
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
 const RouteDetailPage = ({ routeId, onBack }) => {
   const { locale } = useLocale();
@@ -54,30 +52,24 @@ const RouteDetailPage = ({ routeId, onBack }) => {
   const fetchRouteDetails = async () => {
     try {
       setLoading(true);
-      const response = await apiRequest(`${BASE_URL}/api/routes/${routeId}`, { method: 'GET' });
-      if (response.ok) {
-        const result = await response.json();
-        const routeData = result.data || result;
-        setRoute(routeData);
-        const originLoc = parseLocation(routeData.originLocation);
-        const destLoc = parseLocation(routeData.destinationLocation);
-        setFormData({
-          origin: routeData.origin || '',
-          destination: routeData.destination || '',
-          distanceKm: routeData.distanceKm?.toString() || '',
-          durationMinutes: routeData.durationMinutes?.toString() || '',
-          originLat: originLoc?.lat?.toString() || '',
-          originLng: originLoc?.lng?.toString() || '',
-          destLat: destLoc?.lat?.toString() || '',
-          destLng: destLoc?.lng?.toString() || '',
-        });
-        setError('');
-      } else {
-        const result = await response.json();
-        setError(result.message || 'Failed to fetch route details');
-      }
+      const result = await routeService.getRouteById(routeId);
+      const routeData = result.data || result;
+      setRoute(routeData);
+      const originLoc = parseLocation(routeData.originLocation);
+      const destLoc = parseLocation(routeData.destinationLocation);
+      setFormData({
+        origin: routeData.origin || '',
+        destination: routeData.destination || '',
+        distanceKm: routeData.distanceKm?.toString() || '',
+        durationMinutes: routeData.durationMinutes?.toString() || '',
+        originLat: originLoc?.lat?.toString() || '',
+        originLng: originLoc?.lng?.toString() || '',
+        destLat: destLoc?.lat?.toString() || '',
+        destLng: destLoc?.lng?.toString() || '',
+      });
+      setError('');
     } catch (err) {
-      setError('Network error. Please check your connection.');
+      setError(err.response?.data?.message || 'Network error. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -131,23 +123,12 @@ const RouteDetailPage = ({ routeId, onBack }) => {
         ...(destinationLocationValue && { destinationLocation: destinationLocationValue }),
       };
 
-      const response = await apiRequest(`${BASE_URL}/api/routes/${routeId}`, {
-        method: 'PUT',
-        body: JSON.stringify(updateData),
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        const updatedRoute = result.data || result;
-        setRoute(updatedRoute);
-        setIsEditing(false);
-        setSnackbar({ isOpen: true, message: t('routeUpdated') || 'Route updated successfully!', type: 'success' });
-      } else {
-        const result = await response.json();
-        setError(result.message || 'Failed to update route');
-      }
+      const result = await routeService.updateRoute(routeId, updateData);
+      setRoute(result.data || result);
+      setIsEditing(false);
+      setSnackbar({ isOpen: true, message: t('routeUpdated') || 'Route updated successfully!', type: 'success' });
     } catch (err) {
-      setError('Network error. Failed to update route.');
+      setError(err.response?.data?.message || 'Network error. Failed to update route.');
     } finally {
       setSaving(false);
     }
@@ -155,16 +136,11 @@ const RouteDetailPage = ({ routeId, onBack }) => {
 
   const handleDelete = async () => {
     try {
-      const response = await apiRequest(`${BASE_URL}/api/routes/${routeId}`, { method: 'DELETE' });
-      if (response.ok) {
-        setSnackbar({ isOpen: true, message: t('routeDeleted') || 'Route deleted successfully!', type: 'success' });
-        setTimeout(() => onBack(), 1000);
-      } else {
-        const result = await response.json();
-        setError(result.message || 'Failed to delete route');
-      }
+      await routeService.deleteRoute(routeId);
+      setSnackbar({ isOpen: true, message: t('routeDeleted') || 'Route deleted successfully!', type: 'success' });
+      setTimeout(() => onBack(), 1000);
     } catch (err) {
-      setError('Network error. Failed to delete route.');
+      setError(err.response?.data?.message || 'Network error. Failed to delete route.');
     } finally {
       setShowDeleteDialog(false);
     }

@@ -6,7 +6,8 @@ import { Label } from 'shared/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { Badge } from 'shared/components/ui/badge';
-import { apiRequest } from 'shared/utils/api';
+import userService from '../../services/userService';
+import adminService from 'features/admin/services/adminService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 
@@ -39,17 +40,11 @@ const CreateTeamMemberPage = ({ onCancel, onSuccess }) => {
   const fetchRoles = async () => {
     try {
       setRolesLoading(true);
-      const response = await apiRequest(
-        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/roles`,
-        { method: 'GET' }
-      );
-      const result = await response.json();
-      if (response.ok) {
-        const rolesData = result.data || result;
-        setRoles(Array.isArray(rolesData) ? rolesData : []);
-      }
-    } catch (err) {
-      console.error('Error fetching roles:', err);
+      const result = await adminService.roles.getAll();
+      const rolesData = result.data || result;
+      setRoles(Array.isArray(rolesData) ? rolesData : []);
+    } catch {
+      // Non-critical — role selector will be empty
     } finally {
       setRolesLoading(false);
     }
@@ -119,39 +114,23 @@ const CreateTeamMemberPage = ({ onCancel, onSuccess }) => {
         phone: createData.phone,
         password: createData.password,
         gender: createData.gender,
-        isEmployee: true
+        isEmployee: true,
       };
 
-      const response = await apiRequest(
-        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users`,
-        { method: 'POST', body: JSON.stringify(payload) }
-      );
+      const result = await userService.createUser(payload);
+      const userId = (result.data || result)?.id;
 
-      if (response.ok) {
-        const result = await response.json();
-        const userData = result.data || result;
-        const userId = userData.id;
-
-        if (userId && selectedRole) {
-          try {
-            await apiRequest(
-              `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/users/${userId}/roles`,
-              { method: 'PUT', body: JSON.stringify({ roles: [selectedRole] }) }
-            );
-          } catch (roleErr) {
-            console.error('Error assigning role:', roleErr);
-          }
+      if (userId && selectedRole) {
+        try {
+          await adminService.users.assignRoles(userId, { roles: [selectedRole] });
+        } catch {
+          // Role assignment is best-effort; user was created successfully
         }
-
-        if (onSuccess) onSuccess();
-      } else {
-        const result = await response.json();
-        const errorData = result.data || result;
-        setApiError(errorData.message || t('failedToCreateTeamMember') || 'Failed to create team member');
       }
+
+      if (onSuccess) onSuccess();
     } catch (err) {
-      setApiError(t('networkError') || 'Network error. Failed to create team member.');
-      console.error('Error creating team member:', err);
+      setApiError(err.response?.data?.message || t('failedToCreateTeamMember') || 'Failed to create team member.');
     } finally {
       setLoading(false);
     }

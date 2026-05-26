@@ -5,7 +5,7 @@ import { Input } from 'shared/components/ui/input';
 import { Label } from 'shared/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
-import { apiRequest } from 'shared/utils/api';
+import userService from 'features/team/services/userService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 
@@ -87,8 +87,6 @@ const CreateCustomerPage = ({ onCancel, onSuccess, isEmployee = false }) => {
 
     try {
       const { confirmPassword, ...createData } = formData;
-      
-      // Ensure isEmployee is included in the payload
       const payload = {
         userName: createData.userName,
         fullName: createData.fullName,
@@ -96,27 +94,12 @@ const CreateCustomerPage = ({ onCancel, onSuccess, isEmployee = false }) => {
         phone: createData.phone,
         password: createData.password,
         gender: createData.gender,
-        isEmployee: isEmployee
+        isEmployee,
       };
-
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users`, {
-        method: 'POST',
-        body: JSON.stringify(payload)
-      });
-
-      if (response.ok) {
-        // Call success callback if provided
-        if (onSuccess) {
-          onSuccess();
-        }
-      } else {
-        const result = await response.json();
-        const errorData = result.data || result;
-        setApiError(errorData.message || t('failedToCreateCustomer') || 'Failed to create customer');
-      }
+      await userService.createUser(payload);
+      if (onSuccess) onSuccess();
     } catch (err) {
-      setApiError(t('networkError') || 'Network error. Failed to create customer.');
-      console.error('Error creating customer:', err);
+      setApiError(err.response?.data?.message || t('failedToCreateCustomer') || 'Failed to create customer');
     } finally {
       setLoading(false);
     }

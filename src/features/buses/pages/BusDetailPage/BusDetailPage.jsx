@@ -35,47 +35,25 @@ const BusDetailPage = ({ busId, onBack }) => {
     try {
       setLoading(true);
       setError('');
-      
-      // Fetch bus details
+
       const busResponse = await busService.getBusById(busId);
       const busData = busResponse.data || busResponse;
-      console.log('Bus data:', busData); // Debug log
       setBus(busData);
 
-      // Fetch layout details if layoutId exists
-      if (busData.layout.id) {
-        console.log('Fetching layout for ID:', busData.layout.id); // Debug log
-        try {
-          const layoutResponse = await layoutService.getLayoutById( busData.layout.id);
-          const layoutData = layoutResponse.data || layoutResponse;
-          console.log('Layout data:', layoutData); // Debug log
-          setLayout(layoutData);
-        } catch (layoutErr) {
-          console.error('Error fetching layout:', layoutErr);
-          // Don't fail the whole page if layout fetch fails
-        }
-      } else {
-        console.log('No layoutId found in bus data'); // Debug log
-      }
+      // Fetch layout and route in parallel (non-blocking)
+      const [layoutResult, routeResult] = await Promise.allSettled([
+        busData.layout?.id ? layoutService.getLayoutById(busData.layout.id) : Promise.resolve(null),
+        busData.route?.id ? routeService.getRouteById(busData.route.id) : Promise.resolve(null),
+      ]);
 
-      // Fetch route details if routeId exists
-      if (busData.route.id) {
-        console.log('Fetching route for ID:', busData.route.id); // Debug log
-        try {
-          const routeResponse = await routeService.getRouteById( busData.route.id);
-          const routeData = routeResponse.data || routeResponse;
-          console.log('Route data:', routeData); // Debug log
-          setRoute(routeData);
-        } catch (routeErr) {
-          console.error('Error fetching route:', routeErr);
-          // Don't fail the whole page if route fetch fails
-        }
-      } else {
-        console.log('No routeId found in bus data'); // Debug log
+      if (layoutResult.status === 'fulfilled' && layoutResult.value) {
+        setLayout(layoutResult.value.data || layoutResult.value);
+      }
+      if (routeResult.status === 'fulfilled' && routeResult.value) {
+        setRoute(routeResult.value.data || routeResult.value);
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to fetch bus details');
-      console.error('Error fetching bus details:', err);
     } finally {
       setLoading(false);
     }
@@ -107,7 +85,6 @@ const BusDetailPage = ({ busId, onBack }) => {
         type: 'error'
       });
       setShowDeleteDialog(false);
-      console.error('Error deleting bus:', err);
     }
   };
 

@@ -66,7 +66,6 @@ const ProfilePage = () => {
         setProfileImageUrl(imageUrl);
       }
     } catch (error) {
-      console.log('No profile image found or failed to load');
     }
   };
 

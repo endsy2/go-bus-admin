@@ -78,6 +78,11 @@ const adminService = {
       const response = await axiosInstance.delete(`/admin/roles/${id}`);
       return response.data;
     },
+
+    updatePermissions: async (id, data) => {
+      const response = await axiosInstance.put(`/admin/roles/${id}/permissions`, data);
+      return response.data;
+    },
   },
 
   permissions: {

@@ -13,7 +13,8 @@ import AssignRoleDialog from '../../components/AssignRoleDialog/AssignRoleDialog
 import CreateTeamMemberPage from '../CreateTeamMemberPage/CreateTeamMemberPage';
 import { Pagination } from 'shared/components/feedback/Pagination';
 import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
-import { apiRequest } from 'shared/utils/api';
+import adminService from 'features/admin/services/adminService';
+import userService from '../../services/userService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 
@@ -94,30 +95,18 @@ const TeamPage = () => {
   const fetchTeamMembers = async (page = 1, size = 15) => {
     try {
       setMembersLoading(true);
-      const response = await apiRequest(
-        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/specification?pageStart=${page}&pageSize=${size}&isEmployee=true`,
-        { method: 'GET' }
-      );
-      const result = await response.json();
-      if (response.ok) {
-        const users = result.data?.content || result.content || result.data || result;
-        setTeamMembers(Array.isArray(users) ? users : []);
-        
-        const pageData = result.data || result;
-        setMembersPagination({
-          currentPage: page,
-          pageSize: pageData.size || size,
-          totalPages: pageData.totalPages || 1,
-          totalElements: pageData.totalElements || 0
-        });
-        
-        setError('');
-      } else {
-        const errorData = result.data || result;
-        setError(errorData.message || 'Failed to fetch team members');
-      }
+      const result = await userService.getBySpecification({ pageStart: page, pageSize: size, isEmployee: true });
+      const pageData = result.data || {};
+      setTeamMembers(pageData.content || []);
+      setMembersPagination({
+        currentPage: page,
+        pageSize: pageData.size || size,
+        totalPages: pageData.totalPages || 1,
+        totalElements: pageData.totalElements || 0,
+      });
+      setError('');
     } catch (err) {
-      setError('Network error. Please check your connection.');
+      setError(err.response?.data?.message || 'Network error. Please check your connection.');
     } finally {
       setMembersLoading(false);
     }
@@ -126,21 +115,12 @@ const TeamPage = () => {
   const fetchRoles = async () => {
     try {
       setRolesLoading(true);
-      const response = await apiRequest(
-        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/roles`,
-        { method: 'GET' }
-      );
-      const result = await response.json();
-      if (response.ok) {
-        const rolesData = result.data || result;
-        setRoles(Array.isArray(rolesData) ? rolesData : []);
-        setError('');
-      } else {
-        const errorData = result.data || result;
-        setError(errorData.message || 'Failed to fetch roles');
-      }
+      const result = await adminService.roles.getAll();
+      const rolesData = result.data || result;
+      setRoles(Array.isArray(rolesData) ? rolesData : []);
+      setError('');
     } catch (err) {
-      setError('Network error. Please check your connection.');
+      setError(err.response?.data?.message || 'Failed to fetch roles');
     } finally {
       setRolesLoading(false);
     }
@@ -148,17 +128,11 @@ const TeamPage = () => {
 
   const fetchAllPermissions = async () => {
     try {
-      const response = await apiRequest(
-        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/permissions`,
-        { method: 'GET' }
-      );
-      const result = await response.json();
-      if (response.ok) {
-        const data = result.data || result;
-        setAllPermissions(Array.isArray(data) ? data : []);
-      }
+      const result = await adminService.permissions.getAll();
+      const data = result.data || result;
+      setAllPermissions(Array.isArray(data) ? data : []);
     } catch (err) {
-      console.error('Error fetching permissions:', err);
+      // Permissions are supplementary — silently ignore fetch failures
     }
   };
 
@@ -179,21 +153,12 @@ const TeamPage = () => {
   const handleSaveRoles = async (roles) => {
     if (!selectedUser) return;
     try {
-      const response = await apiRequest(
-        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/users/${selectedUser.id}/roles`,
-        { method: 'PUT', body: JSON.stringify({ roles }) }
-      );
-      if (response.ok) {
-        setShowAssignRoleDialog(false);
-        addToast({ message: 'Roles updated successfully!', type: 'success' });
-        fetchTeamMembers(membersPagination.currentPage, membersPagination.pageSize);
-      } else {
-        const result = await response.json();
-        const errorData = result.data || result;
-        addToast({ message: errorData.message || 'Failed to update roles', type: 'error' });
-      }
+      await adminService.users.assignRoles(selectedUser.id, { roles });
+      setShowAssignRoleDialog(false);
+      addToast({ message: 'Roles updated successfully!', type: 'success' });
+      fetchTeamMembers(membersPagination.currentPage, membersPagination.pageSize);
     } catch (err) {
-      addToast({ message: 'Network error. Failed to update roles.', type: 'error' });
+      addToast({ message: err.response?.data?.message || 'Failed to update roles', type: 'error' });
     }
   };
 
@@ -227,34 +192,17 @@ const TeamPage = () => {
 
   const confirmDeleteUser = async () => {
     if (!selectedUser) return;
-    
     setDeletingUser(true);
     try {
-      const response = await apiRequest(
-        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/users/${selectedUser.id}`,
-        { method: 'DELETE' }
-      );
-      
-      if (response.ok) {
-        setShowDeleteDialog(false);
-        addToast({ 
-          message: `${selectedUser.fullName || selectedUser.userName} has been deleted successfully!`, 
-          type: 'success' 
-        });
-        fetchTeamMembers(membersPagination.currentPage, membersPagination.pageSize);
-      } else {
-        const result = await response.json();
-        const errorData = result.data || result;
-        addToast({ 
-          message: errorData.message || 'Failed to delete team member', 
-          type: 'error' 
-        });
-      }
-    } catch (err) {
-      addToast({ 
-        message: 'Network error. Failed to delete team member.', 
-        type: 'error' 
+      await adminService.users.delete(selectedUser.id);
+      setShowDeleteDialog(false);
+      addToast({
+        message: `${selectedUser.fullName || selectedUser.userName} has been deleted successfully!`,
+        type: 'success',
       });
+      fetchTeamMembers(membersPagination.currentPage, membersPagination.pageSize);
+    } catch (err) {
+      addToast({ message: err.response?.data?.message || 'Failed to delete team member', type: 'error' });
     } finally {
       setDeletingUser(false);
       setSelectedUser(null);
@@ -288,22 +236,14 @@ const TeamPage = () => {
     setSavingRole(role.id);
     try {
       const permissionIds = Array.from(rolePermissions[role.id] || []);
-      const response = await apiRequest(
-        `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/roles/${role.id}/permissions`,
-        { method: 'PUT', body: JSON.stringify({ permissionIds }) }
-      );
-      if (response.ok) {
-        addToast({
-          message: `Permissions for ${role.name.replace('ROLE_', '')} updated!`,
-          type: 'success',
-        });
-        fetchRoles();
-      } else {
-        const result = await response.json();
-        addToast({ message: result.message || 'Failed to update permissions', type: 'error' });
-      }
+      await adminService.roles.updatePermissions(role.id, { permissionIds });
+      addToast({
+        message: `Permissions for ${role.name.replace('ROLE_', '')} updated!`,
+        type: 'success',
+      });
+      fetchRoles();
     } catch (err) {
-      addToast({ message: 'Network error. Failed to update permissions.', type: 'error' });
+      addToast({ message: err.response?.data?.message || 'Failed to update permissions', type: 'error' });
     } finally {
       setSavingRole(null);
     }

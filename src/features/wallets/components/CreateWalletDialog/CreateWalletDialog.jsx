@@ -13,6 +13,7 @@ import { Skeleton } from 'shared/components/ui/skeleton';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import walletService from '../../services/walletService';
+import userService from 'features/team/services/userService';
 import { Wallet, User, CheckCircle, AlertCircle } from 'lucide-react';
 
 const CreateWalletDialog = ({ open, onClose, onSuccess }) => {
@@ -40,53 +41,28 @@ const CreateWalletDialog = ({ open, onClose, onSuccess }) => {
     try {
       setUsersLoading(true);
       setUsersError(null);
-      
-      const response = await walletService.getWallets({ status: 'ACTIVE' }, 0, 100);
-      
-      // Extract users from response - handle different response structures
-      let userData = [];
-      if (response?.data?.content) {
-        userData = response.data.content;
-      } else if (response?.content) {
-        userData = response.content;
-      } else if (response?.data) {
-        userData = Array.isArray(response.data) ? response.data : [];
-      } else if (Array.isArray(response)) {
-        userData = response;
-      }
-      
-      // Get unique users who don't have wallets yet
-      const usersWithWallets = new Set(userData.map(w => w.userId).filter(Boolean));
-      
-      // Fetch all users
-      const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
-      const usersResponse = await fetch(
-        `${BASE_URL}/api/users/specification?pageStart=1&pageSize=100&isEmployee=false`,
-        {
-          headers: {
-            'Authorization': `Bearer ${JSON.parse(localStorage.getItem('user') || '{}')?.token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-      
-      if (!usersResponse.ok) throw new Error('Failed to fetch users');
-      
-      const usersData = await usersResponse.json();
-      const allUsers = usersData?.data?.content ?? usersData?.content ?? usersData?.data ?? usersData ?? [];
-      
-      // Filter out users who already have wallets
-      const availableUsers = Array.isArray(allUsers) 
-        ? allUsers.filter(user => !usersWithWallets.has(user.id))
-        : [];
-      
+
+      // Fetch active wallets and all customers in parallel
+      const [walletsResult, usersResult] = await Promise.all([
+        walletService.getWallets({ status: 'ACTIVE' }, 0, 100),
+        userService.getBySpecification({ pageStart: 1, pageSize: 100, isEmployee: false }),
+      ]);
+
+      // Collect IDs of users who already have wallets
+      const walletContent = walletsResult?.data?.content ?? walletsResult?.content ?? [];
+      const usersWithWallets = new Set(walletContent.map(w => w.userId).filter(Boolean));
+
+      // All customers from the specification endpoint
+      const allUsers = usersResult?.data?.content ?? [];
+
+      // Only show customers who don't already have a wallet
+      const availableUsers = allUsers.filter(user => !usersWithWallets.has(user.id));
       setUsers(availableUsers);
-      
+
       if (availableUsers.length === 0) {
         setUsersError('All users already have wallets');
       }
     } catch (err) {
-      console.error('Error fetching users:', err);
       setUsersError(err.response?.data?.message || err.message || 'Failed to load users');
     } finally {
       setUsersLoading(false);

@@ -175,7 +175,7 @@ const WebSocketTester = () => {
 
         {/* Connection Info */}
         <div className="text-xs text-slate-500 dark:text-slate-400 space-y-1">
-          <div>WebSocket URL: ws://localhost:8080/bus-service/ws/bus</div>
+          <div>WebSocket URL: {process.env.REACT_APP_WS_URL || 'ws://localhost:8080/bus-service/ws/bus'}</div>
           <div>Subscribed Topics: {subscribedSchedules.length}</div>
           <div>
             Topics: {subscribedSchedules.map(id => `/topic/schedule/${id}/seats`).join(', ') || 'None'}

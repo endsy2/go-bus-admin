@@ -11,7 +11,7 @@ import { Avatar, AvatarFallback } from 'shared/components/ui/avatar';
 import { Checkbox } from 'shared/components/ui/checkbox';
 import { Label } from 'shared/components/ui/label';
 import { Shield, Loader2 } from 'lucide-react';
-import { apiRequest } from 'shared/utils/api';
+import adminService from 'features/admin/services/adminService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import { cn } from 'lib/utils';
@@ -36,23 +36,12 @@ const AssignRoleDialog = ({ isOpen, user, onSave, onCancel }) => {
   const fetchRoles = async () => {
     try {
       setLoading(true);
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/roles`, {
-        method: 'GET'
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        const rolesData = result.data || result;
-        setAvailableRoles(Array.isArray(rolesData) ? rolesData : []);
-        setError('');
-      } else {
-        const errorData = result.data || result;
-        setError(errorData.message || 'Failed to fetch roles');
-      }
+      const result = await adminService.roles.getAll();
+      const rolesData = result.data || result;
+      setAvailableRoles(Array.isArray(rolesData) ? rolesData : []);
+      setError('');
     } catch (err) {
       setError('Failed to load roles');
-      console.error('Error fetching roles:', err);
     } finally {
       setLoading(false);
     }

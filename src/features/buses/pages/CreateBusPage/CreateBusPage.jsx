@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Check } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent } from 'shared/components/ui/card';
-import { apiRequest } from 'shared/utils/api';
+import busService from '../../services/busService';
+import routeService from 'features/routes/services/routeService';
+import layoutService from 'features/layouts/services/layoutService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
-
-const BASE_URL = process.env.REACT_APP_BASE_URL || 'http://localhost:8080';
 
 const BUS_TYPES = ['SLEEPER', 'SEATER'];
 const STATUS_OPTIONS = ['Active', 'Standby', 'Maintenance', 'Inactive', 'InService'];
@@ -42,21 +42,19 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
 
   const fetchRoutes = async () => {
     try {
-      const res = await apiRequest(`${BASE_URL}/api/routes`, { method: 'GET' });
-      const result = await res.json();
-      if (res.ok) setRoutes(result.data || result || []);
-    } catch (err) {
-      console.error('Failed to fetch routes:', err);
+      const result = await routeService.getRoutes();
+      setRoutes(result.data || result || []);
+    } catch {
+      // Non-critical — form will show empty dropdown
     }
   };
 
   const fetchLayouts = async () => {
     try {
-      const res = await apiRequest(`${BASE_URL}/api/layouts`, { method: 'GET' });
-      const result = await res.json();
-      if (res.ok) setLayouts(result.data || result || []);
-    } catch (err) {
-      console.error('Failed to fetch layouts:', err);
+      const result = await layoutService.getAllLayouts();
+      setLayouts(result.data || result || []);
+    } catch {
+      // Non-critical — form will show empty dropdown
     }
   };
 
@@ -119,20 +117,10 @@ const CreateBusPage = ({ onBack, onSuccess }) => {
         busStatus: form.busStatus || null,
       };
 
-      const res = await apiRequest(`${BASE_URL}/api/buses`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-
-      const result = await res.json();
-      if (res.ok) {
-        onSuccess && onSuccess(result.data || result);
-      } else {
-        setErrors({ submit: result.message || 'Failed to create bus' });
-      }
+      const result = await busService.createBus(payload);
+      onSuccess && onSuccess(result.data || result);
     } catch (err) {
-      setErrors({ submit: 'Network error. Please try again.' });
+      setErrors({ submit: err.response?.data?.message || 'Failed to create bus. Please try again.' });
     } finally {
       setSubmitting(false);
     }

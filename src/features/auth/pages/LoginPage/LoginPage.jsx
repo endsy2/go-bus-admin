@@ -60,40 +60,27 @@ const LoginPage = ({ onLoginSuccess }) => {
       // Step 1: Login to get token
       const responseData = await authService.login(formData);
       const data = responseData.data || responseData;
-      
-      // Step 2: Fetch user profile with the token
-      const token = data.token || data.accessToken;
-      
-      console.log('Login response data:', data);
-      console.log('Extracted token:', token);
-      
-      // Store token temporarily for profile fetch
+
+      // Store token so the profile request can attach it via the interceptor
       localStorage.setItem('user', JSON.stringify(data));
-      
+
       try {
         const profileResult = await userService.getProfile();
         const profileData = profileResult.data || profileResult;
-        
-        console.log('Profile response data:', profileData);
-        
-        // Combine login data (token) with profile data
         const userProfile = {
           ...data,
           ...profileData,
           fullName: profileData.fullName || profileData.name || data.fullName || 'User',
-          userName: profileData.userName || profileData.username || data.userName || formData.email.split('@')[0]
+          userName: profileData.userName || profileData.username || data.userName || formData.email.split('@')[0],
         };
-        
-        console.log('Saving user profile to localStorage:', userProfile);
         localStorage.setItem('user', JSON.stringify(userProfile));
         onLoginSuccess(userProfile);
-      } catch (profileError) {
-        // If profile API fails, proceed with login data
-        console.warn('Profile fetch failed:', profileError);
+      } catch {
+        // Profile fetch is best-effort; fall back to auth data
         const userProfile = {
           ...data,
           fullName: data.fullName || data.name || 'User',
-          userName: data.userName || data.username || formData.email.split('@')[0]
+          userName: data.userName || data.username || formData.email.split('@')[0],
         };
         localStorage.setItem('user', JSON.stringify(userProfile));
         onLoginSuccess(userProfile);

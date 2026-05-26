@@ -13,18 +13,19 @@ import EditCustomerDialog from '../../components/EditCustomerDialog/EditCustomer
 import { Pagination } from 'shared/components/feedback/Pagination';
 import CustomerDetailPage from '../CustomerDetailPage/CustomerDetailPage';
 import CreateCustomerPage from '../CreateCustomerPage/CreateCustomerPage';
-import { apiRequest } from 'shared/utils/api';
+import userService from 'features/team/services/userService';
+import adminService from 'features/admin/services/adminService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import { canViewCustomers, canEditCustomers, canDeleteCustomers, canCreateCustomers } from 'shared/utils/permissions';
+import useAuth from 'shared/hooks/useAuth';
 
 const CustomersPage = () => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const { addToast } = useToast();
-  
-  const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-  
+  const currentUser = useAuth();
+
   const canView = canViewCustomers(currentUser);
   const canEdit = canEditCustomers(currentUser);
   const canDelete = canDeleteCustomers(currentUser);
@@ -80,77 +81,33 @@ const CustomersPage = () => {
     try {
       setLoading(true);
 
-      // Use the new specification endpoint for customers
-      let url = `${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/specification`;
-      
-      const queryParams = new URLSearchParams();
-      
-      // Add pagination parameters - pageStart starts at 1
-      queryParams.append('pageStart', page);
-      queryParams.append('pageSize', size);
-      queryParams.append('isEmployee', 'false');
-      
-      // If filters are provided, add them as query parameters with proper type handling
+      const params = { pageStart: page, pageSize: size, isEmployee: false };
+
       if (filterParams) {
-        Object.keys(filterParams).forEach(key => {
-          const value = filterParams[key];
+        Object.entries(filterParams).forEach(([key, value]) => {
           if (value && value.toString().trim() !== '' && value !== 'all') {
-            // Handle different data types
             if (key === 'userId') {
-              // userId should be a number
               const numValue = parseInt(value, 10);
-              if (!isNaN(numValue)) {
-                queryParams.append(key, numValue.toString());
-                console.log('Added userId filter:', numValue);
-              }
-            } else if (key === 'isActive' || key === 'isDeleted') {
-              // Boolean fields
-              queryParams.append(key, value);
-              console.log(`Added ${key} filter:`, value);
+              if (!isNaN(numValue)) params[key] = numValue;
             } else {
-              // Other fields are strings
-              queryParams.append(key, value.toString().trim());
-              console.log(`Added ${key} filter:`, value.toString().trim());
+              params[key] = value.toString().trim();
             }
           }
         });
       }
-      
-      const queryString = queryParams.toString();
-      console.log('Final query string:', queryString);
-      if (queryString) {
-        url = `${url}?${queryString}`;
-      }
-      console.log('Fetching customers from:', url);
 
-      const response = await apiRequest(url, {
-        method: 'GET'
+      const result = await userService.getBySpecification(params);
+      const pageData = result.data || {};
+      setCustomers(pageData.content || []);
+      setPagination({
+        currentPage: page,
+        pageSize: pageData.size || size,
+        totalPages: pageData.totalPages || 1,
+        totalElements: pageData.totalElements || 0,
       });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        // Handle paginated response structure
-        const users = result.data?.content || result.content || result.data || result;
-        setCustomers(Array.isArray(users) ? users : []);
-        
-        // Update pagination info
-        const pageData = result.data || result;
-        setPagination({
-          currentPage: page,
-          pageSize: pageData.size || size,
-          totalPages: pageData.totalPages || 1,
-          totalElements: pageData.totalElements || 0
-        });
-        
-        setError('');
-      } else {
-        const errorData = result.data || result;
-        setError(errorData.message || 'Failed to fetch customers');
-      }
+      setError('');
     } catch (err) {
-      setError('Network error. Please check your connection.');
-      console.error('Error fetching customers:', err);
+      setError(err.response?.data?.message || 'Network error. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -192,8 +149,7 @@ const CustomersPage = () => {
   const handleCopyToClipboard = (text, label) => {
     navigator.clipboard.writeText(text).then(() => {
       addToast({ message: `${label} ${t('copiedToClipboard')}`, type: 'success' });
-    }).catch(err => {
-      console.error('Failed to copy:', err);
+    }).catch(() => {
       addToast({ message: t('failedToCopy'), type: 'error' });
     });
   };
@@ -230,35 +186,18 @@ const CustomersPage = () => {
 
   const handleSaveEdit = async (updateData) => {
     if (!customerToEdit) return;
-
     try {
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/${customerToEdit.id}`, {
-        method: 'PUT',
-        body: JSON.stringify(updateData)
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        const updatedCustomer = result.data || result;
-        
-        // Update customer in list
-        setCustomers(customers.map(c => 
-          c.id === customerToEdit.id ? { ...c, ...updatedCustomer } : c
-        ));
-        
-        setShowEditDialog(false);
-        setCustomerToEdit(null);
-        setError('');
-        
-        addToast({ message: 'Customer updated successfully!', type: 'success' });
-      } else {
-        const result = await response.json();
-        const errorData = result.data || result;
-        setError(errorData.message || 'Failed to update customer');
-      }
+      const result = await userService.updateUser(customerToEdit.id, updateData);
+      const updatedCustomer = result.data || result;
+      setCustomers(customers.map(c =>
+        c.id === customerToEdit.id ? { ...c, ...updatedCustomer } : c
+      ));
+      setShowEditDialog(false);
+      setCustomerToEdit(null);
+      setError('');
+      addToast({ message: 'Customer updated successfully!', type: 'success' });
     } catch (err) {
-      setError('Network error. Failed to update customer.');
-      console.error('Error updating customer:', err);
+      setError(err.response?.data?.message || 'Failed to update customer');
     }
   };
 
@@ -288,39 +227,21 @@ const CustomersPage = () => {
 
   const confirmToggleStatus = async () => {
     if (!customerToToggle) return;
-
     try {
       const newStatus = !customerToToggle.isActive;
-      
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/admin/users/${customerToToggle.id}/status`, {
-        method: 'PATCH',
-        body: JSON.stringify({ active: newStatus })
+      const result = await adminService.users.setStatus(customerToToggle.id, { active: newStatus });
+      const updatedCustomer = result.data || result;
+      setCustomers(customers.map(c =>
+        c.id === customerToToggle.id ? { ...c, isActive: updatedCustomer.active } : c
+      ));
+      setShowStatusDialog(false);
+      setCustomerToToggle(null);
+      addToast({
+        message: `Customer ${newStatus ? 'activated' : 'deactivated'} successfully`,
+        type: 'success',
       });
-
-      if (response.ok) {
-        const result = await response.json();
-        const updatedCustomer = result.data || result;
-        
-        // Update customer in list
-        setCustomers(customers.map(c => 
-          c.id === customerToToggle.id ? { ...c, isActive: updatedCustomer.active } : c
-        ));
-        
-        setShowStatusDialog(false);
-        setCustomerToToggle(null);
-        addToast({ 
-          message: `Customer ${newStatus ? 'activated' : 'deactivated'} successfully`, 
-          type: 'success' 
-        });
-      } else {
-        const result = await response.json();
-        const errorData = result.data || result;
-        setError(errorData.message || 'Failed to update customer status');
-        setShowStatusDialog(false);
-      }
     } catch (err) {
-      setError('Network error. Failed to update customer status.');
-      console.error('Error updating customer status:', err);
+      setError(err.response?.data?.message || 'Failed to update customer status');
       setShowStatusDialog(false);
     }
   };

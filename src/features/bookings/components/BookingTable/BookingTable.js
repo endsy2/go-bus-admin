@@ -17,9 +17,6 @@ const BookingTable = ({ bookings, loading }) => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   
-  console.log('BookingTable - bookings:', bookings);
-  console.log('BookingTable - loading:', loading);
-  console.log('BookingTable - bookings length:', bookings?.length);
   
   if (loading) {
     return (

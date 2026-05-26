@@ -3,7 +3,7 @@ import { Icon } from 'shared/components/common/Icon';
 import { Button } from 'shared/components/common/Button';
 import { Snackbar } from 'shared/components/common/Snackbar';
 import EditCustomerDialog from '../../components/EditCustomerDialog/EditCustomerDialog';
-import { apiRequest } from 'shared/utils/api';
+import userService from 'features/team/services/userService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 
@@ -25,23 +25,11 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
   const fetchCustomerDetail = async () => {
     try {
       setLoading(true);
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/${customerId}`, {
-        method: 'GET'
-      });
-
-      const result = await response.json();
-
-      if (response.ok) {
-        const customerData = result.data || result;
-        setCustomer(customerData);
-        setError('');
-      } else {
-        const errorData = result.data || result;
-        setError(errorData.message || 'Failed to fetch customer details');
-      }
+      const result = await userService.getUserById(customerId);
+      setCustomer(result.data || result);
+      setError('');
     } catch (err) {
-      setError('Network error. Please check your connection.');
-      console.error('Error fetching customer details:', err);
+      setError(err.response?.data?.message || 'Network error. Please check your connection.');
     } finally {
       setLoading(false);
     }
@@ -65,34 +53,14 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
 
   const handleSaveEdit = async (updateData) => {
     if (!customer) return;
-
     try {
-      const response = await apiRequest(`${process.env.REACT_APP_BASE_URL || 'http://localhost:8080'}/api/users/${customer.id}`, {
-        method: 'PUT',
-        body: JSON.stringify(updateData)
-      });
-
-      if (response.ok) {
-        const result = await response.json();
-        const updatedCustomer = result.data || result;
-        
-        setCustomer(updatedCustomer);
-        setShowEditDialog(false);
-        setError('');
-        
-        setSnackbar({
-          isOpen: true,
-          message: t('customerUpdatedSuccess'),
-          type: 'success'
-        });
-      } else {
-        const result = await response.json();
-        const errorData = result.data || result;
-        setError(errorData.message || t('error'));
-      }
+      const result = await userService.updateUser(customer.id, updateData);
+      setCustomer(result.data || result);
+      setShowEditDialog(false);
+      setError('');
+      setSnackbar({ isOpen: true, message: t('customerUpdatedSuccess'), type: 'success' });
     } catch (err) {
-      setError(t('error'));
-      console.error('Error updating customer:', err);
+      setError(err.response?.data?.message || t('error'));
     }
   };
 

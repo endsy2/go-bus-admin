@@ -7,6 +7,13 @@ const userService = {
     return response.data;
   },
 
+  // Flexible user search via the specification endpoint
+  // params: { pageStart, pageSize, isEmployee, email, phone, username, isActive, isDeleted, ... }
+  getBySpecification: async (params = {}) => {
+    const response = await axiosInstance.get('/users/specification', { params });
+    return response.data;
+  },
+
   // Update user profile
   updateProfile: async (profileData) => {
     const response = await axiosInstance.put('/users/profile', profileData);

@@ -215,11 +215,6 @@ export const translations = {
     noRolesFound: 'No Roles Found',
     permissions: 'Permissions',
     more: 'More',
-    assignRoles: 'Assign Roles',
-    rolesUpdatedSuccess: 'Roles Updated Successfully!',
-    createNewTeamMember: 'Create New Team Member',
-    addNewTeamMemberToSystem: 'Add A New Team Member To The System',
-    createTeamMember: 'Create Team Member',
     teamMemberCreated: 'Team Member Created Successfully',
     teamMemberDeleted: 'Team Member Deleted Successfully',
     deleteTeamMember: 'Delete Team Member',
@@ -238,9 +233,7 @@ export const translations = {
     noWalletsMatchFilters: 'No wallets match your current filters',
     noTransactionsFound: 'No transactions found',
     noTransactionsMatchFilters: 'No transactions match your current filters',
-    type: 'Type',
-    user: 'User',
-    
+
     // Promos
     promoManagement: 'Promo Code Management',
     managePromoCodes: 'Manage promotional codes and discounts',
@@ -466,7 +459,6 @@ export const translations = {
     backToSchedules: 'Back To Schedules',
     departureDateTime: 'Departure Date & Time',
     arrivalDateTime: 'Arrival Date & Time',
-    pricePerSeat: 'Price Per Seat',
     availableSeats: 'Available Seats',
     busAssignment: 'Bus Assignment',
     selectBus: 'Select Bus',
@@ -765,8 +757,6 @@ export const translations = {
     noWalletsMatchFilters: 'គ្មានកាបូបត្រូវនឹងតម្រងរបស់អ្នក',
     noTransactionsFound: 'រកមិនឃើញប្រតិបត្តិការ',
     noTransactionsMatchFilters: 'គ្មានប្រតិបត្តិការត្រូវនឹងតម្រងរបស់អ្នក',
-    type: 'ប្រភេទ',
-    user: 'អ្នកប្រើ',
     
     // Promos
     promoManagement: 'ការគ្រប់គ្រងកូដបញ្ចុះតម្លៃ',
@@ -795,8 +785,6 @@ export const translations = {
     discountValueRequired: 'តម្លៃបញ្ចុះត្រូវតែធំជាង 0',
     validFromRequired: 'តម្រូវឱ្យមានកាលបរិច្ឆេទចាប់ផ្តើម',
     validUntilRequired: 'តម្រូវឱ្យមានកាលបរិច្ឆេទបញ្ចប់',
-    assignRoles: 'ចាត់តាំងតួនាទី',
-    rolesUpdatedSuccess: 'ធ្វើបច្ចុប្បន្នភាពតួនាទីបានជោគជ័យ!',
     loadingTeamMembers: 'កំពុងផ្ទុកសមាជិកក្រុម...',
     loadingRoles: 'កំពុងផ្ទុកតួនាទី...',
         
@@ -995,7 +983,6 @@ export const translations = {
     backToSchedules: 'ត្រឡប់ទៅកាលវិភាគ',
     departureDateTime: 'កាលបរិច្ឆេទនិងពេលវេលាចេញដំណើរ',
     arrivalDateTime: 'កាលបរិច្ឆេទនិងពេលវេលាមកដល់',
-    pricePerSeat: 'តម្លៃក្នុងមួយកៅអី',
     availableSeats: 'កៅអីអាចប្រើបាន',
     busAssignment: 'ការចាត់តាំងឡានក្រុង',
     selectBus: 'ជ្រើសរើសឡានក្រុង',
