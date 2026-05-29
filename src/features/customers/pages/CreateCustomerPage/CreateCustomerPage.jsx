@@ -5,7 +5,7 @@ import { Input } from 'shared/components/ui/input';
 import { Label } from 'shared/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
-import userService from 'features/team/services/userService';
+import customerService from '../../services/customerService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 
@@ -96,7 +96,7 @@ const CreateCustomerPage = ({ onCancel, onSuccess, isEmployee = false }) => {
         gender: createData.gender,
         isEmployee,
       };
-      await userService.createUser(payload);
+      await customerService.createCustomer(payload);
       if (onSuccess) onSuccess();
     } catch (err) {
       setApiError(err.response?.data?.message || t('failedToCreateCustomer') || 'Failed to create customer');

@@ -8,8 +8,54 @@ const customerService = {
     return response.data;
   },
 
+  // Legacy "specification" shape used by CustomersPage. Translates to the real
+  // AdminUserController.getUsers params before hitting GET /admin/users.
+  getBySpecification: async (params = {}) => {
+    const {
+      pageStart,
+      pageSize,
+      isActive,
+      email,
+      phone,
+      username,
+      // dropped — not supported by /admin/users:
+      isEmployee, isDeleted, userId,
+      ...rest
+    } = params;
+
+    const translated = { ...rest };
+    if (pageStart != null) translated.page = Math.max(0, Number(pageStart) - 1);
+    if (pageSize != null) translated.size = pageSize;
+    if (isActive !== undefined && isActive !== null && isActive !== '') {
+      translated.active = isActive === true || isActive === 'true';
+    }
+
+    // Backend has one `search` field; pick the first non-empty filter value.
+    const searchTerm = [username, email, phone]
+      .map(v => (v == null ? '' : String(v).trim()))
+      .find(v => v !== '');
+    if (searchTerm) translated.search = searchTerm;
+
+    const response = await axiosInstance.get('/admin/users', { params: translated });
+    return response.data;
+  },
+
   getCustomerById: async (customerId) => {
     const response = await axiosInstance.get(`/admin/users/${customerId}`);
+    return response.data;
+  },
+
+  // Lifetime booking stats for a customer. Lives on the booking-service admin
+  // controller (/api/admin/bookings/**), not the user endpoint above.
+  // Returns the envelope { status, message, data: { totalBookings, totalSpent, activeTickets } }.
+  getCustomerBookingStats: async (customerId) => {
+    const response = await axiosInstance.get(`/admin/bookings/user-detail-stats/${customerId}`);
+    return response.data;
+  },
+
+  // AdminUserController has no POST endpoint; admin customer creation reuses /users.
+  createCustomer: async (customerData) => {
+    const response = await axiosInstance.post('/users', customerData);
     return response.data;
   },
 

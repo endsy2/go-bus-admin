@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'shared/components/common/Button';
+import { Label } from 'shared/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
+import { DatePicker } from 'shared/components/ui/date-picker';
 import { Filter, X } from 'lucide-react';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
@@ -8,98 +11,113 @@ const RefundFilters = ({ onFilterChange, onReset }) => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
 
+  const [showFilters, setShowFilters] = useState(false);
   const [status, setStatus] = useState('');
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
 
-  const handleApplyFilters = () => {
-    const filters = {};
-    if (status) filters.status = status;
-    if (fromDate) filters.fromDate = new Date(fromDate).toISOString();
-    if (toDate) filters.toDate = new Date(toDate).toISOString();
-    
-    onFilterChange(filters);
-  };
+  // Real-time search: filters apply automatically (debounced 400ms after the
+  // last change) so the list updates as you pick — no "Apply" button needed.
+  // We always send every field (incl. empty ones) so clearing one actually
+  // removes it from the applied filters.
+  const skipFirstSync = useRef(true);
+  useEffect(() => {
+    if (skipFirstSync.current) {
+      skipFirstSync.current = false;
+      return;
+    }
+    const handle = setTimeout(() => {
+      onFilterChange({
+        status,
+        fromDate: fromDate ? new Date(fromDate).toISOString() : '',
+        toDate: toDate ? new Date(toDate).toISOString() : '',
+      });
+    }, 400);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, fromDate, toDate]);
 
   const handleReset = () => {
     setStatus('');
     setFromDate('');
     setToDate('');
+    // Skip the debounced effect's duplicate run; onReset fetches the unfiltered list now.
+    skipFirstSync.current = true;
     onReset();
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 mb-6">
-      <div className="flex items-center gap-2 mb-4">
-        <Filter className="w-5 h-5 text-blue-500" />
-        <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+    <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 mb-6">
+      <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center gap-2 mb-3 sm:mb-4">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <Filter className="w-5 h-5 text-blue-500 dark:text-blue-400" />
           {t('filters') || 'Filters'}
         </h3>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => setShowFilters(!showFilters)}
+        >
+          {showFilters ? t('hide') || 'Hide' : t('show') || 'Show'}
+        </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Status Filter */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            {t('status') || 'Status'}
-          </label>
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="">{t('all') || 'All'}</option>
-            <option value="PENDING">PENDING</option>
-            <option value="APPROVED">APPROVED</option>
-            <option value="REJECTED">REJECTED</option>
-            <option value="COMPLETED">COMPLETED</option>
-          </select>
-        </div>
+      {showFilters && (
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {/* Status */}
+            <div className="space-y-2">
+              <Label>{t('status') || 'Status'}</Label>
+              <Select
+                value={status || '__all__'}
+                onValueChange={(value) => setStatus(value === '__all__' ? '' : value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={t('all') || 'All'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__all__">{t('all') || 'All'}</SelectItem>
+                  <SelectItem value="PENDING">PENDING</SelectItem>
+                  <SelectItem value="APPROVED">APPROVED</SelectItem>
+                  <SelectItem value="REJECTED">REJECTED</SelectItem>
+                  <SelectItem value="COMPLETED">COMPLETED</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-        {/* From Date */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            {t('fromDate') || 'From Date'}
-          </label>
-          <input
-            type="date"
-            value={fromDate}
-            onChange={(e) => setFromDate(e.target.value)}
-            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
+            {/* From Date */}
+            <div className="space-y-2">
+              <Label>{t('fromDate') || 'From Date'}</Label>
+              <DatePicker
+                value={fromDate}
+                onChange={(value) => setFromDate(value)}
+                placeholder={t('fromDate') || 'From Date'}
+              />
+            </div>
 
-        {/* To Date */}
-        <div>
-          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
-            {t('toDate') || 'To Date'}
-          </label>
-          <input
-            type="date"
-            value={toDate}
-            onChange={(e) => setToDate(e.target.value)}
-            className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
-        </div>
+            {/* To Date */}
+            <div className="space-y-2">
+              <Label>{t('toDate') || 'To Date'}</Label>
+              <DatePicker
+                value={toDate}
+                onChange={(value) => setToDate(value)}
+                placeholder={t('toDate') || 'To Date'}
+              />
+            </div>
+          </div>
 
-        {/* Action Buttons */}
-        <div className="flex items-end gap-2">
-          <Button
-            variant="primary"
-            onClick={handleApplyFilters}
-            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
-          >
-            {t('apply') || 'Apply'}
-          </Button>
-          <Button
-            variant="secondary"
-            onClick={handleReset}
-            className="px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700"
-          >
-            <X className="w-4 h-4" />
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              variant="secondary"
+              onClick={handleReset}
+              className="flex items-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              {t('resetFilters') || 'Reset'}
+            </Button>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };

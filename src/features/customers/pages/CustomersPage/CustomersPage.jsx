@@ -13,7 +13,7 @@ import EditCustomerDialog from '../../components/EditCustomerDialog/EditCustomer
 import { Pagination } from 'shared/components/feedback/Pagination';
 import CustomerDetailPage from '../CustomerDetailPage/CustomerDetailPage';
 import CreateCustomerPage from '../CreateCustomerPage/CreateCustomerPage';
-import userService from 'features/team/services/userService';
+import customerService from '../../services/customerService';
 import adminService from 'features/admin/services/adminService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
@@ -100,7 +100,7 @@ const CustomersPage = () => {
         });
       }
 
-      const result = await userService.getBySpecification(params);
+      const result = await customerService.getBySpecification(params);
       const pageData = result.data || {};
       setCustomers(pageData.content || []);
       setPagination({
@@ -192,7 +192,7 @@ const CustomersPage = () => {
   const handleSaveEdit = async (updateData) => {
     if (!customerToEdit) return;
     try {
-      const result = await userService.updateUser(customerToEdit.id, updateData);
+      const result = await customerService.updateCustomer(customerToEdit.id, updateData);
       const updatedCustomer = result.data || result;
       setCustomers(customers.map(c =>
         c.id === customerToEdit.id ? { ...c, ...updatedCustomer } : c
@@ -233,11 +233,11 @@ const CustomersPage = () => {
   const confirmToggleStatus = async () => {
     if (!customerToToggle) return;
     try {
-      const newStatus = !customerToToggle.isActive;
+      const newStatus = !customerToToggle.active;
       const result = await adminService.users.setStatus(customerToToggle.id, { active: newStatus });
       const updatedCustomer = result.data || result;
       setCustomers(customers.map(c =>
-        c.id === customerToToggle.id ? { ...c, isActive: updatedCustomer.active } : c
+        c.id === customerToToggle.id ? { ...c, active: updatedCustomer.active } : c
       ));
       setShowStatusDialog(false);
       setCustomerToToggle(null);
@@ -578,8 +578,8 @@ const CustomersPage = () => {
                     <Badge variant="secondary">{customer.gender}</Badge>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={customer.isActive ? 'success' : 'default'}>
-                      {customer.isActive ? 'Active' : 'Inactive'}
+                    <Badge variant={customer.active ? 'success' : 'default'}>
+                      {customer.active ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -609,12 +609,12 @@ const CustomersPage = () => {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className={`h-8 w-8 ${customer.isActive
+                          className={`h-8 w-8 ${customer.active
                             ? 'text-destructive hover:text-destructive hover:bg-destructive/10'
                             : 'text-muted-foreground hover:text-foreground'
                           }`}
                           onClick={() => handleToggleStatusClick(customer)}
-                          title={customer.isActive ? t('deactivateCustomer') : t('activateCustomer')}
+                          title={customer.active ? t('deactivateCustomer') : t('activateCustomer')}
                         >
                           <Power className="h-4 w-4" />
                         </Button>
@@ -645,10 +645,10 @@ const CustomersPage = () => {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {customerToToggle?.isActive ? t('deactivateCustomer') : t('activateCustomer')}
+              {customerToToggle?.active ? t('deactivateCustomer') : t('activateCustomer')}
             </DialogTitle>
             <DialogDescription>
-              {customerToToggle?.isActive 
+              {customerToToggle?.active
                 ? t('confirmDeactivateCustomer').replace('{name}', customerToToggle?.fullName || 'this customer')
                 : t('confirmActivateCustomer').replace('{name}', customerToToggle?.fullName || 'this customer')
               }
@@ -659,10 +659,10 @@ const CustomersPage = () => {
               {t('cancel')}
             </Button>
             <Button
-              variant={customerToToggle?.isActive ? "destructive" : "default"}
+              variant={customerToToggle?.active ? "destructive" : "default"}
               onClick={confirmToggleStatus}
             >
-              {customerToToggle?.isActive ? t('deactivate') : t('activate')}
+              {customerToToggle?.active ? t('deactivate') : t('activate')}
             </Button>
           </DialogFooter>
         </DialogContent>

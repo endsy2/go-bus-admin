@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { useWallets } from '../../hooks/useWallets';
 import { useTransactions } from '../../hooks/useTransactions';
 import { Card, CardContent } from 'shared/components/ui/card';
@@ -7,6 +7,7 @@ import { Button } from 'shared/components/common/Button';
 import { Input } from 'shared/components/common/Input';
 import { Label } from 'shared/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
+import { DatePicker } from 'shared/components/ui/date-picker';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { Pagination } from 'shared/components/feedback/Pagination';
 import { useLocale } from 'shared/context/LocaleContext';
@@ -20,13 +21,24 @@ import {
   TrendingUp,
   Filter,
   X,
-  Search,
   ArrowUpRight,
   ArrowDownLeft,
   Eye,
   Copy,
   Check
 } from 'lucide-react';
+
+// Trim string filter values (non-strings pass through). Empty values are kept
+// on purpose so they overwrite — and thereby clear — any previously-applied
+// value when merged in the hook; the service layer drops empties before
+// building the query string.
+const trimFilters = (filters) => {
+  const out = {};
+  Object.keys(filters).forEach(key => {
+    out[key] = typeof filters[key] === 'string' ? filters[key].trim() : filters[key];
+  });
+  return out;
+};
 
 const CopyButton = ({ text }) => {
   const [copied, setCopied] = useState(false);
@@ -69,6 +81,11 @@ const WalletsPage = () => {
   const [txFilters, setTxFilters] = useState({
     type: '',
     status: '',
+    referenceId: '',
+    fromDate: '',
+    toDate: '',
+    minAmount: '',
+    maxAmount: '',
   });
 
   const {
@@ -81,6 +98,33 @@ const WalletsPage = () => {
     updateFilters: updateTxFilters, goToPage: goToTxPage, changePageSize: changeTxPageSize,
   } = useTransactions();
 
+  // Real-time search: all wallet filters apply automatically (debounced 400ms
+  // after the last change) so the list updates as you type / pick — no
+  // "Apply Filters" button needed. We send every field (incl. empty ones) so
+  // clearing a field actually removes it from the applied filters.
+  const skipFirstWalletSync = useRef(true);
+  useEffect(() => {
+    if (skipFirstWalletSync.current) {
+      skipFirstWalletSync.current = false;
+      return;
+    }
+    const handle = setTimeout(() => updateWalletFilters(trimFilters(walletFilters)), 400);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [walletFilters]);
+
+  // Real-time transaction filters apply automatically (debounced) too.
+  const skipFirstTxSync = useRef(true);
+  useEffect(() => {
+    if (skipFirstTxSync.current) {
+      skipFirstTxSync.current = false;
+      return;
+    }
+    const handle = setTimeout(() => updateTxFilters(trimFilters(txFilters)), 400);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [txFilters]);
+
   const handleWalletFilterChange = (e) => {
     const { name, value } = e.target;
     setWalletFilters(prev => ({ ...prev, [name]: value }));
@@ -91,35 +135,20 @@ const WalletsPage = () => {
     setTxFilters(prev => ({ ...prev, [name]: value }));
   };
 
-  const applyWalletFilters = () => {
-    const cleanFilters = {};
-    Object.keys(walletFilters).forEach(key => {
-      if (walletFilters[key]) cleanFilters[key] = walletFilters[key];
-    });
-    if (Object.keys(cleanFilters).length === 0) return;
-    updateWalletFilters(cleanFilters);
-  };
-
   const resetWalletFilters = () => {
-    if (!Object.values(walletFilters).some(v => v !== '')) return;
     const empty = { name: '', status: '', minBalance: '', maxBalance: '' };
     setWalletFilters(empty);
+    // Skip the debounced effect's duplicate run and fetch the unfiltered list now.
+    skipFirstWalletSync.current = true;
     updateWalletFilters(empty);
   };
 
-  const applyTxFilters = () => {
-    const cleanFilters = {};
-    Object.keys(txFilters).forEach(key => {
-      if (txFilters[key]) cleanFilters[key] = txFilters[key];
-    });
-    if (Object.keys(cleanFilters).length === 0) return;
-    updateTxFilters(cleanFilters);
-  };
-
   const resetTxFilters = () => {
-    if (!Object.values(txFilters).some(v => v !== '')) return;
-    setTxFilters({ type: '', status: '' });
-    updateTxFilters({});
+    const empty = { type: '', status: '', referenceId: '', fromDate: '', toDate: '', minAmount: '', maxAmount: '' };
+    setTxFilters(empty);
+    // Skip the debounced effect's duplicate run and fetch the unfiltered list now.
+    skipFirstTxSync.current = true;
+    updateTxFilters(empty);
   };
 
   const handleViewDetails = (walletId) => {
@@ -227,7 +256,7 @@ const WalletsPage = () => {
                     placeholder={t('searchByName') || 'Search by name...'}
                   />
 
-                  <div className="flex flex-col gap-1.5">
+                  <div className="space-y-2">
                     <Label>{t('status') || 'Status'}</Label>
                     <Select
                       value={walletFilters.status || '__all__'}
@@ -266,14 +295,6 @@ const WalletsPage = () => {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button
-                    variant="primary"
-                    onClick={applyWalletFilters}
-                    className="flex items-center gap-2"
-                  >
-                    <Search className="w-4 h-4" />
-                    {t('applyFilters') || 'Apply Filters'}
-                  </Button>
                   <Button
                     variant="secondary"
                     onClick={resetWalletFilters}
@@ -477,8 +498,8 @@ const WalletsPage = () => {
 
             {showTxFilters && (
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex flex-col gap-1.5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                  <div className="space-y-2">
                     <Label>{t('type') || 'Type'}</Label>
                     <Select
                       value={txFilters.type || '__all__'}
@@ -499,7 +520,7 @@ const WalletsPage = () => {
                     </Select>
                   </div>
 
-                  <div className="flex flex-col gap-1.5">
+                  <div className="space-y-2">
                     <Label>{t('status') || 'Status'}</Label>
                     <Select
                       value={txFilters.status || '__all__'}
@@ -517,17 +538,53 @@ const WalletsPage = () => {
                       </SelectContent>
                     </Select>
                   </div>
+
+                  <Input
+                    label={t('referenceId') || 'Reference ID'}
+                    name="referenceId"
+                    value={txFilters.referenceId}
+                    onChange={handleTxFilterChange}
+                    placeholder={t('searchByReference') || 'Search by reference...'}
+                  />
+
+                  <div className="space-y-2">
+                    <Label>{t('fromDate') || 'From Date'}</Label>
+                    <DatePicker
+                      value={txFilters.fromDate}
+                      onChange={(value) => setTxFilters(prev => ({ ...prev, fromDate: value }))}
+                      placeholder={t('fromDate') || 'From Date'}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>{t('toDate') || 'To Date'}</Label>
+                    <DatePicker
+                      value={txFilters.toDate}
+                      onChange={(value) => setTxFilters(prev => ({ ...prev, toDate: value }))}
+                      placeholder={t('toDate') || 'To Date'}
+                    />
+                  </div>
+
+                  <Input
+                    label={t('minAmount') || 'Min Amount'}
+                    name="minAmount"
+                    type="number"
+                    value={txFilters.minAmount}
+                    onChange={handleTxFilterChange}
+                    placeholder="0.00"
+                  />
+
+                  <Input
+                    label={t('maxAmount') || 'Max Amount'}
+                    name="maxAmount"
+                    type="number"
+                    value={txFilters.maxAmount}
+                    onChange={handleTxFilterChange}
+                    placeholder="10000.00"
+                  />
                 </div>
 
                 <div className="flex gap-3">
-                  <Button
-                    variant="primary"
-                    onClick={applyTxFilters}
-                    className="flex items-center gap-2"
-                  >
-                    <Search className="w-4 h-4" />
-                    {t('applyFilters') || 'Apply Filters'}
-                  </Button>
                   <Button
                     variant="secondary"
                     onClick={resetTxFilters}

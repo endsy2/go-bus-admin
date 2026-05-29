@@ -44,6 +44,10 @@ const walletService = {
     if (filters.type) params.append('type', filters.type);
     if (filters.status) params.append('status', filters.status);
     if (filters.referenceId) params.append('referenceId', filters.referenceId);
+    if (filters.fromDate) params.append('fromDate', filters.fromDate);   // ISO yyyy-MM-dd
+    if (filters.toDate) params.append('toDate', filters.toDate);         // ISO yyyy-MM-dd
+    if (filters.minAmount) params.append('minAmount', filters.minAmount);
+    if (filters.maxAmount) params.append('maxAmount', filters.maxAmount);
     params.append('page', page);
     params.append('size', size);
 

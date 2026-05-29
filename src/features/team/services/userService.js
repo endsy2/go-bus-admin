@@ -7,7 +7,9 @@ const userService = {
     return response.data;
   },
 
-  // Flexible user search via the specification endpoint
+  // Flexible user search via the specification endpoint.
+  // Lives on UserController at GET /api/users/specification (NOT /admin/users — that
+  // controller has no /specification route, so the path matched /{id} and 500'd).
   // params: { pageStart, pageSize, isEmployee, email, phone, username, isActive, isDeleted, ... }
   getBySpecification: async (params = {}) => {
     const response = await axiosInstance.get('/users/specification', { params });

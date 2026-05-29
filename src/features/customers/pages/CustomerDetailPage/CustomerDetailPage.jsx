@@ -3,7 +3,7 @@ import { Icon } from 'shared/components/common/Icon';
 import { Button } from 'shared/components/common/Button';
 import { Snackbar } from 'shared/components/common/Snackbar';
 import EditCustomerDialog from '../../components/EditCustomerDialog/EditCustomerDialog';
-import userService from 'features/team/services/userService';
+import customerService from '../../services/customerService';
 import walletService from 'features/wallets/services/walletService';
 import { Wallet } from 'lucide-react';
 import { useLocale } from 'shared/context/LocaleContext';
@@ -13,6 +13,7 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
   const [customer, setCustomer] = useState(null);
+  const [bookingStats, setBookingStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showEditDialog, setShowEditDialog] = useState(false);
@@ -25,11 +26,21 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
     }
   }, [customerId]);
 
+  // Fetches user profile and lifetime booking stats from two separate endpoints
+  // in parallel. The profile is required (failure shows the page error); the
+  // stats are optional — if that call fails the page still renders with zeros.
   const fetchCustomerDetail = async () => {
     try {
       setLoading(true);
-      const result = await userService.getUserById(customerId);
-      setCustomer(result.data || result);
+      const [userResult, statsResult] = await Promise.all([
+        customerService.getCustomerById(customerId),
+        customerService.getCustomerBookingStats(customerId).catch((err) => {
+          console.warn('[CustomerDetailPage] booking stats unavailable:', err.response?.status);
+          return null;
+        }),
+      ]);
+      setCustomer(userResult.data || userResult);
+      setBookingStats(statsResult?.data ?? statsResult ?? null);
       setError('');
     } catch (err) {
       setError(err.response?.data?.message || 'Network error. Please check your connection.');
@@ -41,13 +52,18 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
       day: 'numeric',
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const formatCurrency = (amount) => {
+    if (amount == null) return '$0.00';
+    return `$${Number(amount).toFixed(2)}`;
   };
 
   const handleEditClick = () => {
@@ -57,7 +73,7 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
   const handleSaveEdit = async (updateData) => {
     if (!customer) return;
     try {
-      const result = await userService.updateUser(customer.id, updateData);
+      const result = await customerService.updateCustomer(customer.id, updateData);
       setCustomer(result.data || result);
       setShowEditDialog(false);
       setError('');
@@ -75,7 +91,8 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
     setCreatingWallet(true);
     try {
       await walletService.createWallet(customer.id);
-      setCustomer(prev => ({ ...prev, isWalletExist: true }));
+      // Optimistically mark wallet as existing using the field the backend actually sends
+      setCustomer(prev => ({ ...prev, walletStatus: 'ACTIVE' }));
       setSnackbar({ isOpen: true, message: t('walletCreatedSuccess') || 'Wallet created successfully', type: 'success' });
     } catch (err) {
       setSnackbar({ isOpen: true, message: err.response?.data?.message || 'Failed to create wallet', type: 'error' });
@@ -149,7 +166,7 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
             </div>
           </div>
           <div className="flex gap-3 flex-wrap">
-            {!customer.isWalletExist && (
+            {!customer.walletStatus && (
               <Button variant="outline" onClick={handleCreateWallet} disabled={creatingWallet} className="flex items-center gap-2">
                 <Wallet size={18} />
                 {creatingWallet ? (t('creating') || 'Creating...') : (t('createWallet') || 'Create Wallet')}
@@ -254,15 +271,21 @@ const CustomerDetailPage = ({ customerId, onBack }) => {
             </div>
             <div className="p-6">
               <div className="text-center py-4 border-b border-slate-200 dark:border-slate-700">
-                <div className="text-3xl font-bold text-blue-500 mb-1">0</div>
+                <div className="text-3xl font-bold text-blue-500 mb-1">
+                  {bookingStats?.totalBookings ?? 0}
+                </div>
                 <div className="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wider">{t('totalBookings')}</div>
               </div>
               <div className="text-center py-4 border-b border-slate-200 dark:border-slate-700">
-                <div className="text-3xl font-bold text-blue-500 mb-1">$0.00</div>
+                <div className="text-3xl font-bold text-blue-500 mb-1">
+                  {formatCurrency(bookingStats?.totalSpent)}
+                </div>
                 <div className="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wider">{t('totalSpent')}</div>
               </div>
               <div className="text-center py-4">
-                <div className="text-3xl font-bold text-blue-500 mb-1">0</div>
+                <div className="text-3xl font-bold text-blue-500 mb-1">
+                  {bookingStats?.activeTickets ?? 0}
+                </div>
                 <div className="text-xs text-slate-600 dark:text-slate-400 uppercase tracking-wider">{t('activeTickets')}</div>
               </div>
             </div>
