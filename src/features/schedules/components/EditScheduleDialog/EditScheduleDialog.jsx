@@ -6,6 +6,7 @@ import { Input } from 'shared/components/common/Input';
 import { DateTimePicker } from 'shared/components/ui/datetime-picker';
 import { useToast } from 'shared/components/ui/toast';
 import scheduleService from '../../services/scheduleService';
+import { findConflictingSchedule } from '../../utils/scheduleConflict';
 
 const normalizeTime = (value) => {
   if (!value) return '';
@@ -88,9 +89,31 @@ const EditScheduleDialog = ({ open, schedule, onClose, onSuccess }) => {
       addToast({ message: 'Please provide departure date/time, arrival date/time, and a valid price.', type: 'error' });
       return;
     }
+    if (new Date(payload.arrivalDateTime).getTime() <= new Date(payload.departureDateTime).getTime()) {
+      addToast({ message: 'Arrival time must be after departure time.', type: 'error' });
+      return;
+    }
 
     try {
       setLoading(true);
+
+      // Fast guard: a bus can't run two overlapping trips. Exclude this schedule
+      // from the check. The backend enforces this too.
+      const existingRes = await scheduleService.getSchedulesByBus(payload.busId);
+      const conflict = findConflictingSchedule(
+        existingRes?.data || [],
+        payload.departureDateTime,
+        payload.arrivalDateTime,
+        schedule.id,
+      );
+      if (conflict) {
+        addToast({
+          message: `This bus already has a schedule from ${new Date(conflict.departureDateTime).toLocaleString()} to ${new Date(conflict.arrivalDateTime).toLocaleString()}. Pick a different time or bus.`,
+          type: 'error',
+        });
+        return;
+      }
+
       await scheduleService.updateSchedule(schedule.id, payload);
       onSuccess();
       onClose();

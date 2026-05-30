@@ -6,9 +6,13 @@ import { Input } from 'shared/components/common/Input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { DateTimePicker } from 'shared/components/ui/datetime-picker';
 import { useToast } from 'shared/components/ui/toast';
-import { Calendar, Bus, Clock, DollarSign, Loader2 } from 'lucide-react';
+import { Calendar, Bus, Clock, DollarSign, Loader2, CheckCircle2, XCircle, AlertTriangle } from 'lucide-react';
 import scheduleService from '../../services/scheduleService';
 import busService from '../../../buses/services/busService';
+import { findConflictingSchedule } from '../../utils/scheduleConflict';
+
+const fmt = (value) =>
+  value ? new Date(value).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : '';
 
 const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
   const { addToast } = useToast();
@@ -22,8 +26,15 @@ const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
   const [loading, setLoading] = useState(false);
   const [loadingData, setLoadingData] = useState(true);
 
+  // Existing schedules of the currently-selected bus — shown so the admin can
+  // see which times are taken and pick a free slot before submitting.
+  const [busSchedules, setBusSchedules] = useState([]);
+  const [loadingSchedules, setLoadingSchedules] = useState(false);
+
   useEffect(() => {
     if (open) {
+      // Start every open with a clean form so stale selections don't linger.
+      setFormData({ busId: '', departureDateTime: '', arrivalDateTime: '', price: '' });
       fetchBuses();
     }
   }, [open]);
@@ -36,15 +47,69 @@ const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
       setBuses(Array.isArray(busesData) ? busesData : []);
     } catch (error) {
       console.error('Failed to fetch buses:', error);
+      addToast({ message: 'Failed to load buses. Please try again.', type: 'error' });
     } finally {
       setLoadingData(false);
     }
   };
 
+  // Load the selected bus's schedules whenever the bus changes.
+  useEffect(() => {
+    if (!open || !formData.busId) {
+      setBusSchedules([]);
+      return;
+    }
+    let cancelled = false;
+    setLoadingSchedules(true);
+    scheduleService
+      .getSchedulesByBus(parseInt(formData.busId))
+      .then((res) => { if (!cancelled) setBusSchedules(res?.data || []); })
+      .catch(() => { if (!cancelled) setBusSchedules([]); })
+      .finally(() => { if (!cancelled) setLoadingSchedules(false); });
+    return () => { cancelled = true; };
+  }, [open, formData.busId]);
+
+  // ── Live availability state (derived) ──────────────────────────────────────
+  const hasTimes = Boolean(formData.departureDateTime && formData.arrivalDateTime);
+  const departureInPast =
+    Boolean(formData.departureDateTime) &&
+    new Date(formData.departureDateTime).getTime() < Date.now();
+  const invalidRange =
+    hasTimes &&
+    new Date(formData.arrivalDateTime).getTime() <= new Date(formData.departureDateTime).getTime();
+  const conflict =
+    hasTimes && !invalidRange
+      ? findConflictingSchedule(busSchedules, formData.departureDateTime, formData.arrivalDateTime)
+      : null;
+  const blockSubmit = departureInPast || invalidRange || Boolean(conflict) || loadingSchedules;
+
+  // Only show schedules departing today or later — past trips aren't relevant
+  // when picking a new slot.
+  const startOfToday = new Date();
+  startOfToday.setHours(0, 0, 0, 0);
+  const sortedSchedules = [...busSchedules]
+    .filter((s) => new Date(s.departureDateTime).getTime() >= startOfToday.getTime())
+    .sort((a, b) => new Date(a.departureDateTime) - new Date(b.departureDateTime));
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.busId || !formData.departureDateTime || !formData.arrivalDateTime || !formData.price) {
       addToast({ message: 'Please fill in all required fields.', type: 'error' });
+      return;
+    }
+    if (departureInPast) {
+      addToast({ message: 'Departure time cannot be in the past.', type: 'error' });
+      return;
+    }
+    if (invalidRange) {
+      addToast({ message: 'Arrival time must be after departure time.', type: 'error' });
+      return;
+    }
+    if (conflict) {
+      addToast({
+        message: `This bus already has a schedule from ${fmt(conflict.departureDateTime)} to ${fmt(conflict.arrivalDateTime)}. Pick a different time or bus.`,
+        type: 'error',
+      });
       return;
     }
     try {
@@ -59,6 +124,8 @@ const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
       onClose();
       setFormData({ busId: '', departureDateTime: '', arrivalDateTime: '', price: '' });
     } catch (error) {
+      // Backend is the source of truth — surface its conflict message if our
+      // local data was stale.
       addToast({ message: error.response?.data?.message || 'Failed to create schedule', type: 'error' });
     } finally {
       setLoading(false);
@@ -133,6 +200,49 @@ const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
               </p>
             </div>
 
+            {/* Existing schedules for the selected bus — so the admin can pick a free slot */}
+            {formData.busId && (
+              <div className="rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 p-3">
+                <div className="flex items-center gap-2 mb-2 text-sm font-medium text-slate-700 dark:text-slate-300">
+                  <Clock className="w-4 h-4 text-blue-400" />
+                  Booked times for this bus
+                </div>
+                {loadingSchedules ? (
+                  <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" /> Loading…
+                  </p>
+                ) : sortedSchedules.length === 0 ? (
+                  <p className="text-xs text-emerald-600 dark:text-emerald-400">
+                    No schedules yet — this bus is completely free.
+                  </p>
+                ) : (
+                  <ul className="space-y-1 max-h-32 overflow-y-auto">
+                    {sortedSchedules.map((s) => {
+                      const isConflict = conflict && conflict.id === s.id;
+                      return (
+                        <li
+                          key={s.id}
+                          className={`text-xs flex items-center gap-2 rounded px-2 py-1 ${
+                            isConflict
+                              ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300'
+                              : 'text-slate-600 dark:text-slate-400'
+                          }`}
+                        >
+                          <span
+                            className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                              isConflict ? 'bg-red-500' : 'bg-slate-400'
+                            }`}
+                          />
+                          <span>{fmt(s.departureDateTime)} → {fmt(s.arrivalDateTime)}</span>
+                          {isConflict && <span className="ml-auto font-semibold">Overlaps</span>}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
+            )}
+
             {/* Departure DateTime */}
             <div className="space-y-2">
               <Label className="flex items-center gap-2">
@@ -158,6 +268,33 @@ const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
                 placeholder="Select arrival date and time"
               />
             </div>
+
+            {/* Live availability status for the chosen bus + time */}
+            {formData.busId && formData.departureDateTime && (
+              departureInPast ? (
+                <div className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  Departure time is in the past. Choose a future time.
+                </div>
+              ) : invalidRange ? (
+                <div className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                  Arrival must be after departure.
+                </div>
+              ) : hasTimes && conflict ? (
+                <div className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+                  <XCircle className="w-4 h-4 flex-shrink-0" />
+                  <span>
+                    Conflicts with {fmt(conflict.departureDateTime)} → {fmt(conflict.arrivalDateTime)}. Pick another time or bus.
+                  </span>
+                </div>
+              ) : hasTimes ? (
+                <div className="flex items-center gap-2 text-sm rounded-lg px-3 py-2 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                  <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                  This bus is free for the selected time.
+                </div>
+              ) : null
+            )}
 
             {/* Price */}
             <Input
@@ -189,7 +326,7 @@ const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
             </Button>
             <Button
               type="submit"
-              disabled={loading || loadingData}
+              disabled={loading || loadingData || blockSubmit}
               className="flex items-center gap-2"
             >
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}

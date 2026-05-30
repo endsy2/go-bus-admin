@@ -15,6 +15,12 @@ const scheduleService = {
     return response.data;
   },
 
+  // Get all schedules for a specific bus (used to pre-check time conflicts)
+  getSchedulesByBus: async (busId) => {
+    const response = await axiosInstance.get(`/schedules/bus/${busId}`);
+    return response.data;
+  },
+
   // Create new schedule
   createSchedule: async (scheduleData) => {
     const response = await axiosInstance.post('/schedules', scheduleData);
