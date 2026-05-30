@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from 'shared/components/common/Button';
+import { DatePicker } from 'shared/components/ui/date-picker';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import { Filter, X, ChevronUp, ChevronDown } from 'lucide-react';
@@ -48,6 +49,11 @@ const BookingFilters = ({ onFilterChange, onReset }) => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    setFilters((prev) => ({ ...prev, [name]: value }));
+  };
+
+  // DatePicker calls onChange(string) directly, not an event object
+  const handleDateChange = (name, value) => {
     setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -176,24 +182,18 @@ const BookingFilters = ({ onFilterChange, onReset }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className={labelClass}>{t('from') || 'From'}</label>
-                <input
-                  type="date"
-                  name="departureFrom"
+                <DatePicker
                   value={filters.departureFrom}
-                  onChange={handleChange}
-                  max={filters.departureTo || undefined}
-                  className={inputClass}
+                  onChange={(val) => handleDateChange('departureFrom', val)}
+                  placeholder="Select departure from"
                 />
               </div>
               <div>
                 <label className={labelClass}>{t('to') || 'To'}</label>
-                <input
-                  type="date"
-                  name="departureTo"
+                <DatePicker
                   value={filters.departureTo}
-                  onChange={handleChange}
-                  min={filters.departureFrom || undefined}
-                  className={inputClass}
+                  onChange={(val) => handleDateChange('departureTo', val)}
+                  placeholder="Select departure to"
                 />
               </div>
             </div>
@@ -207,24 +207,18 @@ const BookingFilters = ({ onFilterChange, onReset }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
               <div>
                 <label className={labelClass}>{t('from') || 'From'}</label>
-                <input
-                  type="date"
-                  name="createdFrom"
+                <DatePicker
                   value={filters.createdFrom}
-                  onChange={handleChange}
-                  max={filters.createdTo || undefined}
-                  className={inputClass}
+                  onChange={(val) => handleDateChange('createdFrom', val)}
+                  placeholder="Select booked from"
                 />
               </div>
               <div>
                 <label className={labelClass}>{t('to') || 'To'}</label>
-                <input
-                  type="date"
-                  name="createdTo"
+                <DatePicker
                   value={filters.createdTo}
-                  onChange={handleChange}
-                  min={filters.createdFrom || undefined}
-                  className={inputClass}
+                  onChange={(val) => handleDateChange('createdTo', val)}
+                  placeholder="Select booked to"
                 />
               </div>
             </div>
