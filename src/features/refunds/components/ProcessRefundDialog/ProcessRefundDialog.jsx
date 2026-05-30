@@ -54,7 +54,7 @@ const ProcessRefundDialog = ({ open, onClose, refund, onProcess }) => {
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Amount:</span>
-              <span className="font-bold text-green-500">${refund.refundAmount?.toFixed(2)}</span>
+              <span className="font-bold text-green-500">${(refund.amount ?? refund.refundAmount)?.toFixed(2) ?? '0.00'}</span>
             </div>
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Reason:</span>

@@ -203,7 +203,7 @@ const RefundsPage = () => {
                       </td>
                       <td className="px-4 py-4 text-right">
                         <span className="font-bold text-lg text-green-400">
-                          ${refund.refundAmount?.toFixed(2)}
+                          ${(refund.amount ?? refund.refundAmount)?.toFixed(2) ?? '0.00'}
                         </span>
                       </td>
                       <td className="px-4 py-4">
@@ -262,7 +262,7 @@ const RefundsPage = () => {
                       <span className="font-bold text-slate-900 dark:text-white text-sm">#{refund.id}</span>
                       <span className="text-xs text-slate-500 dark:text-slate-400">Booking #{refund.bookingId}</span>
                     </div>
-                    <span className="font-bold text-base text-green-400">${refund.refundAmount?.toFixed(2)}</span>
+                    <span className="font-bold text-base text-green-400">${(refund.amount ?? refund.refundAmount)?.toFixed(2) ?? '0.00'}</span>
                   </div>
                   <Badge variant={getStatusColor(refund.status)} className="text-xs">
                     {formatStatus(refund.status)}

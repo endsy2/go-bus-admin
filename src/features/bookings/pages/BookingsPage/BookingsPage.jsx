@@ -55,6 +55,22 @@ const REFUND_STATUS_COLOR = {
   COMPLETED: 'info',
 };
 
+// Maps backend status enums → translation keys (see shared/locales/translations.js)
+const STATUS_I18N_KEY = {
+  CONFIRMED: 'confirmed',
+  PENDING: 'pending',
+  CANCELLED: 'cancelled',
+  FAILED: 'failed',
+  REFUND_REQUESTED: 'refundRequested',
+  REFUNDED: 'refunded',
+  SUCCESS: 'success',
+  EXPIRED: 'expired',
+  TIMEOUT: 'timeout',
+  APPROVED: 'approved',
+  REJECTED: 'rejected',
+  COMPLETED: 'completed',
+};
+
 const PAYMENT_METHOD_LABEL = { WALLET: 'Wallet', BAKONG: 'Bakong QR', CASH: 'Cash', ADMIN: 'Force-paid' };
 const PAYMENT_METHOD_COLOR = { WALLET: 'info', BAKONG: 'success', CASH: 'default', ADMIN: 'warning' };
 
@@ -68,6 +84,12 @@ const fmtDate = (dt) =>
 const BookingsPage = () => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
+  // Localizes a backend status enum; falls back to title-cased English if unmapped
+  const tStatus = (value) => {
+    if (!value) return '';
+    const key = STATUS_I18N_KEY[value];
+    return key ? t(key) : formatStatus(value);
+  };
   const { addToast } = useToast();
   const {
     bookings,
@@ -173,7 +195,7 @@ const BookingsPage = () => {
         <table className="w-full">
           <thead className="bg-muted/50 border-b border-border">
             <tr>
-              {['#', 'Customer', 'Trip', 'Booked On', 'Status', 'Payment', 'Amount', 'Actions'].map((col) => (
+              {['#', 'Customer', 'Trip', 'Booked On', 'Status', 'Refund', 'Payment', 'Amount', 'Actions'].map((col) => (
                 <th key={col} className="px-4 py-3">
                   <Skeleton className="h-4 w-16" />
                 </th>
@@ -183,7 +205,7 @@ const BookingsPage = () => {
           <tbody className="divide-y divide-border">
             {[1, 2, 3, 4, 5].map((i) => (
               <tr key={i}>
-                {[1, 2, 3, 4, 5, 6, 7, 8].map((j) => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((j) => (
                   <td key={j} className="px-4 py-4">
                     <Skeleton className="h-5 w-full" />
                   </td>
@@ -234,6 +256,9 @@ const BookingsPage = () => {
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 {t('status') || 'Status'}
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                {t('refund') || 'Refund'}
               </th>
               <th className="px-4 py-3 text-left text-xs font-medium text-muted-foreground uppercase tracking-wider">
                 {t('payment') || 'Payment'}
@@ -300,25 +325,29 @@ const BookingsPage = () => {
                   </span>
                 </td>
 
-                {/* Booking status + optional refund indicator */}
+                {/* Booking status */}
                 <td className="px-4 py-3">
-                  <div className="flex flex-col gap-1 items-start">
-                    <Badge variant={BOOKING_STATUS_COLOR[booking.bookingStatus] || 'default'}>
-                      {formatStatus(booking.bookingStatus)}
+                  <Badge variant={BOOKING_STATUS_COLOR[booking.bookingStatus] || 'default'}>
+                    {tStatus(booking.bookingStatus)}
+                  </Badge>
+                </td>
+
+                {/* Refund status */}
+                <td className="px-4 py-3">
+                  {booking.refundStatus ? (
+                    <Badge variant={REFUND_STATUS_COLOR[booking.refundStatus] || 'default'}>
+                      {tStatus(booking.refundStatus)}
                     </Badge>
-                    {booking.refundStatus && (
-                      <Badge variant={REFUND_STATUS_COLOR[booking.refundStatus] || 'default'}>
-                        Refund: {formatStatus(booking.refundStatus)}
-                      </Badge>
-                    )}
-                  </div>
+                  ) : (
+                    <span className="text-sm text-muted-foreground/50">—</span>
+                  )}
                 </td>
 
                 {/* Payment status + method */}
                 <td className="px-4 py-3">
                   <div className="flex flex-col gap-1 items-start">
                     <Badge variant={PAYMENT_STATUS_COLOR[booking.paymentStatus] || 'default'}>
-                      {formatStatus(booking.paymentStatus)}
+                      {tStatus(booking.paymentStatus)}
                     </Badge>
                     {booking.paymentMethod && (
                       <Badge variant={PAYMENT_METHOD_COLOR[booking.paymentMethod] || 'default'}>
@@ -395,10 +424,10 @@ const BookingsPage = () => {
             </div>
             <div className="flex flex-wrap gap-1.5">
               <Badge variant={BOOKING_STATUS_COLOR[booking.bookingStatus] || 'default'}>
-                {formatStatus(booking.bookingStatus)}
+                {tStatus(booking.bookingStatus)}
               </Badge>
               <Badge variant={PAYMENT_STATUS_COLOR[booking.paymentStatus] || 'default'}>
-                {formatStatus(booking.paymentStatus)}
+                {tStatus(booking.paymentStatus)}
               </Badge>
               {booking.paymentMethod && (
                 <Badge variant={PAYMENT_METHOD_COLOR[booking.paymentMethod] || 'default'}>
@@ -407,7 +436,7 @@ const BookingsPage = () => {
               )}
               {booking.refundStatus && (
                 <Badge variant={REFUND_STATUS_COLOR[booking.refundStatus] || 'default'}>
-                  Refund: {formatStatus(booking.refundStatus)}
+                  {t('refund') || 'Refund'}: {tStatus(booking.refundStatus)}
                 </Badge>
               )}
             </div>
