@@ -634,7 +634,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                           });
                         }
                       }}
-                      placeholder="Select from date"
+                      placeholder="Select From Date"
                     />
                     {errors.fromDate && <p className="text-sm text-red-400 mt-1">{errors.fromDate}</p>}
                   </div>
@@ -652,7 +652,7 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
                           });
                         }
                       }}
-                      placeholder="Select to date"
+                      placeholder="Select To Date"
                     />
                     {errors.toDate && <p className="text-sm text-red-400 mt-1">{errors.toDate}</p>}
                   </div>

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatStatus } from 'shared/utils/formatters';
 import { useRefunds } from '../../hooks/useRefunds';
 import { Badge } from 'shared/components/common/Badge';
 import { Button } from 'shared/components/common/Button';
@@ -212,7 +213,7 @@ const RefundsPage = () => {
                       </td>
                       <td className="px-4 py-4">
                         <Badge variant={getStatusColor(refund.status)}>
-                          {refund.status}
+                          {formatStatus(refund.status)}
                         </Badge>
                       </td>
                       <td className="px-4 py-4">
@@ -264,7 +265,7 @@ const RefundsPage = () => {
                     <span className="font-bold text-base text-green-400">${refund.refundAmount?.toFixed(2)}</span>
                   </div>
                   <Badge variant={getStatusColor(refund.status)} className="text-xs">
-                    {refund.status}
+                    {formatStatus(refund.status)}
                   </Badge>
                 </div>
 

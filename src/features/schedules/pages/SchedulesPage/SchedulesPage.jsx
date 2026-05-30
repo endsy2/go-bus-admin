@@ -239,7 +239,7 @@ const SchedulesPage = () => {
             <DatePicker
               value={filters.fromDate}
               onChange={(value) => updateFilter('fromDate', value)}
-              placeholder="Select from date"
+              placeholder="Select From Date"
               className="h-[42px] rounded-xl"
             />
           </div>
@@ -250,7 +250,7 @@ const SchedulesPage = () => {
             <DatePicker
               value={filters.toDate}
               onChange={(value) => updateFilter('toDate', value)}
-              placeholder="Select to date"
+              placeholder="Select To Date"
               className="h-[42px] rounded-xl"
             />
           </div>
@@ -265,7 +265,7 @@ const SchedulesPage = () => {
               min="0"
               value={filters.maxPrice}
               onChange={(e) => updateFilter('maxPrice', e.target.value)}
-              placeholder="Any price"
+              placeholder="Any Price"
             />
           </div>
 

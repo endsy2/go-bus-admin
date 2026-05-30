@@ -177,7 +177,7 @@ const FinancialReportsTab = () => {
               <DatePicker
                 value={revenueFilters.startDate}
                 onChange={(value) => setRevenueFilters({ ...revenueFilters, startDate: value })}
-                placeholder="Select start date"
+                placeholder="Select Start Date"
               />
             </div>
             <div>
@@ -187,7 +187,7 @@ const FinancialReportsTab = () => {
               <DatePicker
                 value={revenueFilters.endDate}
                 onChange={(value) => setRevenueFilters({ ...revenueFilters, endDate: value })}
-                placeholder="Select end date"
+                placeholder="Select End Date"
               />
             </div>
             <div>
@@ -244,7 +244,7 @@ const FinancialReportsTab = () => {
               <DatePicker
                 value={paymentFilters.startDate}
                 onChange={(value) => setPaymentFilters({ ...paymentFilters, startDate: value })}
-                placeholder="Select start date"
+                placeholder="Select Start Date"
               />
             </div>
             <div>
@@ -254,7 +254,7 @@ const FinancialReportsTab = () => {
               <DatePicker
                 value={paymentFilters.endDate}
                 onChange={(value) => setPaymentFilters({ ...paymentFilters, endDate: value })}
-                placeholder="Select end date"
+                placeholder="Select End Date"
               />
             </div>
             <div className="flex items-end">
@@ -293,7 +293,7 @@ const FinancialReportsTab = () => {
               <DatePicker
                 value={refundFilters.startDate}
                 onChange={(value) => setRefundFilters({ ...refundFilters, startDate: value })}
-                placeholder="Select start date"
+                placeholder="Select Start Date"
               />
             </div>
             <div>
@@ -303,7 +303,7 @@ const FinancialReportsTab = () => {
               <DatePicker
                 value={refundFilters.endDate}
                 onChange={(value) => setRefundFilters({ ...refundFilters, endDate: value })}
-                placeholder="Select end date"
+                placeholder="Select End Date"
               />
             </div>
             <div>
@@ -360,7 +360,7 @@ const FinancialReportsTab = () => {
               <DatePicker
                 value={promoFilters.startDate}
                 onChange={(value) => setPromoFilters({ ...promoFilters, startDate: value })}
-                placeholder="Select start date"
+                placeholder="Select Start Date"
               />
             </div>
             <div>
@@ -370,7 +370,7 @@ const FinancialReportsTab = () => {
               <DatePicker
                 value={promoFilters.endDate}
                 onChange={(value) => setPromoFilters({ ...promoFilters, endDate: value })}
-                placeholder="Select end date"
+                placeholder="Select End Date"
               />
             </div>
             <div className="flex items-end">

@@ -5,7 +5,7 @@ import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import { AlertCircle, Loader2, Eye, EyeOff, Mail, Lock, Bus } from 'lucide-react';
 import authService from '../../services/authService';
-import userService from 'features/team/services/userService';
+import userService from 'features/team/services/teamService';
 
 const LoginPage = ({ onLoginSuccess }) => {
   const { locale } = useLocale();

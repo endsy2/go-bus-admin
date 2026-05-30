@@ -191,7 +191,7 @@ const BusReportsTab = () => {
               <DatePicker
                 value={utilizationFilters.startDate}
                 onChange={(value) => setUtilizationFilters({ ...utilizationFilters, startDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div>
@@ -201,7 +201,7 @@ const BusReportsTab = () => {
               <DatePicker
                 value={utilizationFilters.endDate}
                 onChange={(value) => setUtilizationFilters({ ...utilizationFilters, endDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div className="flex items-end">
@@ -240,7 +240,7 @@ const BusReportsTab = () => {
               <DatePicker
                 value={performanceFilters.startDate}
                 onChange={(value) => setPerformanceFilters({ ...performanceFilters, startDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div>
@@ -250,7 +250,7 @@ const BusReportsTab = () => {
               <DatePicker
                 value={performanceFilters.endDate}
                 onChange={(value) => setPerformanceFilters({ ...performanceFilters, endDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div className="flex items-end">
@@ -387,7 +387,7 @@ const BusReportsTab = () => {
               <DatePicker
                 value={capacityFilters.startDate}
                 onChange={(value) => setCapacityFilters({ ...capacityFilters, startDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div>
@@ -397,7 +397,7 @@ const BusReportsTab = () => {
               <DatePicker
                 value={capacityFilters.endDate}
                 onChange={(value) => setCapacityFilters({ ...capacityFilters, endDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div className="flex items-end">

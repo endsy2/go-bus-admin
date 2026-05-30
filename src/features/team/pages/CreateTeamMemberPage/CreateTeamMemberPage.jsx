@@ -6,7 +6,7 @@ import { Label } from 'shared/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { Badge } from 'shared/components/ui/badge';
-import userService from '../../services/userService';
+import userService from '../../services/teamService';
 import adminService from 'features/admin/services/adminService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';

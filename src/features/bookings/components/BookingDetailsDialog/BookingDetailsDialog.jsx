@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatStatus } from 'shared/utils/formatters';
 import {
   Dialog,
   DialogContent,
@@ -104,10 +105,10 @@ const BookingDetailsDialog = ({ open, onClose, bookingId }) => {
                 </div>
                 <div className="flex gap-2 flex-wrap">
                   <Badge variant={getStatusColor(booking.bookingStatus)} className="text-xs">
-                    {booking.bookingStatus}
+                    {formatStatus(booking.bookingStatus)}
                   </Badge>
                   <Badge variant={getPaymentStatusColor(booking.paymentStatus)} className="text-xs">
-                    {booking.paymentStatus}
+                    {formatStatus(booking.paymentStatus)}
                   </Badge>
                 </div>
               </div>

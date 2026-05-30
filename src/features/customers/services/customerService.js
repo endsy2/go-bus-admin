@@ -15,15 +15,17 @@ const customerService = {
       pageStart,
       pageSize,
       isActive,
+      isEmployee,
       email,
       phone,
       username,
       // dropped — not supported by /admin/users:
-      isEmployee, isDeleted, userId,
+      isDeleted, userId,
       ...rest
     } = params;
 
     const translated = { ...rest };
+    if (isEmployee !== undefined && isEmployee !== null) translated.isEmployee = isEmployee;
     if (pageStart != null) translated.page = Math.max(0, Number(pageStart) - 1);
     if (pageSize != null) translated.size = pageSize;
     if (isActive !== undefined && isActive !== null && isActive !== '') {

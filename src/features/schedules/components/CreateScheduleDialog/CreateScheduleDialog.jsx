@@ -252,7 +252,7 @@ const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
               <DateTimePicker
                 value={formData.departureDateTime}
                 onChange={(value) => setFormData(prev => ({ ...prev, departureDateTime: value }))}
-                placeholder="Select departure date and time"
+                placeholder="Select Departure Date And Time"
               />
             </div>
 
@@ -265,7 +265,7 @@ const CreateScheduleDialog = ({ open, onClose, onSuccess }) => {
               <DateTimePicker
                 value={formData.arrivalDateTime}
                 onChange={(value) => setFormData(prev => ({ ...prev, arrivalDateTime: value }))}
-                placeholder="Select arrival date and time"
+                placeholder="Select Arrival Date And Time"
               />
             </div>
 

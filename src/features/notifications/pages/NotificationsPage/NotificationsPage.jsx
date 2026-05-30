@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { formatStatus } from 'shared/utils/formatters';
 import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
 import { Badge } from 'shared/components/ui/badge';
@@ -63,7 +64,7 @@ const NotificationsPage = () => {
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <Badge variant={notification.isRead ? 'secondary' : 'default'}>
-                      {notification.type}
+                      {formatStatus(notification.type)}
                     </Badge>
                     {!notification.isRead && (
                       <Badge variant="destructive">New</Badge>

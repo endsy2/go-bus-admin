@@ -78,7 +78,7 @@ const SeatsPage = () => {
           <Label className="text-sm font-semibold">Select Bus:</Label>
           <Select value={selectedBusId} onValueChange={setSelectedBusId}>
             <SelectTrigger className="w-64">
-              <SelectValue placeholder="Choose a bus" />
+              <SelectValue placeholder="Choose A Bus" />
             </SelectTrigger>
             <SelectContent>
               {buses.map(bus => (

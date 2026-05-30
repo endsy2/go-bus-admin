@@ -30,7 +30,7 @@ jest.mock('features/team/services/userService', () => ({
 }));
 
 import authService from '../../services/authService';
-import userService from 'features/team/services/userService';
+import userService from 'features/team/services/teamService';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

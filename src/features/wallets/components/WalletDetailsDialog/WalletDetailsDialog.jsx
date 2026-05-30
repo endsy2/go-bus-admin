@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { formatStatus } from 'shared/utils/formatters';
 import {
   Dialog,
   DialogContent,
@@ -104,7 +105,7 @@ const WalletDetailsDialog = ({ open, onClose, walletId }) => {
                   </div>
                 </div>
                 <Badge variant={getStatusColor(wallet.status)} className="text-sm px-3 py-1">
-                  {wallet.status}
+                  {formatStatus(wallet.status)}
                 </Badge>
               </div>
             </div>

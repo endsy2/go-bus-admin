@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatStatus } from 'shared/utils/formatters';
 import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
 import { Badge } from 'shared/components/ui/badge';
@@ -64,7 +65,7 @@ const SeatBookingFlow = ({
                 <div key={seat.id} className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
                     <span className="font-semibold">Seat {seat.seatNumber}</span>
-                    <Badge variant="outline" className="text-xs">{seat.type}</Badge>
+                    <Badge variant="outline" className="text-xs">{formatStatus(seat.type)}</Badge>
                   </div>
                   {showPricing && (
                     <span className="font-semibold">${(seat.price || 0).toFixed(2)}</span>

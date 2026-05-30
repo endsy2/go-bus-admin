@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from 'shared/components/ui/dialog';
-import { Button } from 'shared/components/ui/button';
+import { Button } from 'shared/components/common/Button';
 import { Lock } from 'lucide-react';
 
 export const UnauthorizedDialog = ({ isOpen, onOk }) => {
@@ -25,7 +25,7 @@ export const UnauthorizedDialog = ({ isOpen, onOk }) => {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="sm:justify-center">
-          <Button variant="destructive" onClick={onOk} className="px-10">
+          <Button variant="danger" onClick={onOk} className="px-10">
             OK
           </Button>
         </DialogFooter>

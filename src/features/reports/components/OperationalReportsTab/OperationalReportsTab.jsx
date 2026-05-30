@@ -213,7 +213,7 @@ const OperationalReportsTab = () => {
               <DatePicker
                 value={bookingFilters.startDate}
                 onChange={(value) => setBookingFilters({ ...bookingFilters, startDate: value })}
-                placeholder="Select start date"
+                placeholder="Select Start Date"
               />
             </div>
             <div>
@@ -223,7 +223,7 @@ const OperationalReportsTab = () => {
               <DatePicker
                 value={bookingFilters.endDate}
                 onChange={(value) => setBookingFilters({ ...bookingFilters, endDate: value })}
-                placeholder="Select end date"
+                placeholder="Select End Date"
               />
             </div>
             <div>
@@ -280,7 +280,7 @@ const OperationalReportsTab = () => {
               <DatePicker
                 value={routeRevenueFilters.startDate}
                 onChange={(value) => setRouteRevenueFilters({ ...routeRevenueFilters, startDate: value })}
-                placeholder="Select start date"
+                placeholder="Select Start Date"
               />
             </div>
             <div>
@@ -290,7 +290,7 @@ const OperationalReportsTab = () => {
               <DatePicker
                 value={routeRevenueFilters.endDate}
                 onChange={(value) => setRouteRevenueFilters({ ...routeRevenueFilters, endDate: value })}
-                placeholder="Select end date"
+                placeholder="Select End Date"
               />
             </div>
             <div className="flex items-end">
@@ -329,7 +329,7 @@ const OperationalReportsTab = () => {
               <DatePicker
                 value={popularRoutesFilters.startDate}
                 onChange={(value) => setPopularRoutesFilters({ ...popularRoutesFilters, startDate: value })}
-                placeholder="Select start date"
+                placeholder="Select Start Date"
               />
             </div>
             <div>
@@ -339,7 +339,7 @@ const OperationalReportsTab = () => {
               <DatePicker
                 value={popularRoutesFilters.endDate}
                 onChange={(value) => setPopularRoutesFilters({ ...popularRoutesFilters, endDate: value })}
-                placeholder="Select end date"
+                placeholder="Select End Date"
               />
             </div>
             <div>
@@ -396,7 +396,7 @@ const OperationalReportsTab = () => {
               </label>
               <Input
                 type="number"
-                placeholder="Leave empty for all schedules"
+                placeholder="Leave Empty For All Schedules"
                 value={occupancyFilters.scheduleId}
                 onChange={(e) => setOccupancyFilters({ ...occupancyFilters, scheduleId: e.target.value })}
               />
@@ -437,7 +437,7 @@ const OperationalReportsTab = () => {
               <DatePicker
                 value={ticketSalesFilters.startDate}
                 onChange={(value) => setTicketSalesFilters({ ...ticketSalesFilters, startDate: value })}
-                placeholder="Select start date"
+                placeholder="Select Start Date"
               />
             </div>
             <div>
@@ -447,7 +447,7 @@ const OperationalReportsTab = () => {
               <DatePicker
                 value={ticketSalesFilters.endDate}
                 onChange={(value) => setTicketSalesFilters({ ...ticketSalesFilters, endDate: value })}
-                placeholder="Select end date"
+                placeholder="Select End Date"
               />
             </div>
             <div>
@@ -456,7 +456,7 @@ const OperationalReportsTab = () => {
               </label>
               <Input
                 type="number"
-                placeholder="All routes"
+                placeholder="All Routes"
                 value={ticketSalesFilters.routeId}
                 onChange={(e) => setTicketSalesFilters({ ...ticketSalesFilters, routeId: e.target.value })}
               />
@@ -467,7 +467,7 @@ const OperationalReportsTab = () => {
               </label>
               <Input
                 type="number"
-                placeholder="All buses"
+                placeholder="All Buses"
                 value={ticketSalesFilters.busId}
                 onChange={(e) => setTicketSalesFilters({ ...ticketSalesFilters, busId: e.target.value })}
               />

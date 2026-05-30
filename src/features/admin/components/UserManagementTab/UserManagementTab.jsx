@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
-import { Input } from 'shared/components/ui/input';
+import { SearchInput } from 'shared/components/common/SearchInput';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
 import { Badge } from 'shared/components/ui/badge';
 import { useToast } from 'shared/components/ui/toast';
@@ -62,10 +62,10 @@ const UserManagementTab = () => {
   return (
     <Card className="p-6">
       <div className="mb-4">
-        <Input
-          placeholder="Search users..."
+        <SearchInput
+          placeholder="Search Users..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={setSearchTerm}
         />
       </div>
 

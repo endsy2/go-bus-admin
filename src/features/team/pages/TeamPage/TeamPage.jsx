@@ -14,7 +14,7 @@ import CreateTeamMemberPage from '../CreateTeamMemberPage/CreateTeamMemberPage';
 import { Pagination } from 'shared/components/feedback/Pagination';
 import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
 import adminService from 'features/admin/services/adminService';
-import userService from '../../services/userService';
+import userService from '../../services/teamService';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 

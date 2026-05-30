@@ -1,9 +1,10 @@
-import React, { useState, useMemo } from 'react';
-import { Calendar, TrendingUp, Bus, AlertCircle, Download, TrendingDown, ChevronDown, Check } from 'lucide-react';
+import React, { useState, useMemo, useCallback } from 'react';
+import { Calendar, TrendingUp, Bus, AlertCircle, Download, TrendingDown, ChevronDown, Check, Wifi, WifiOff } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useStats } from '../../hooks/useStats';
 import { useBookingVelocity } from '../../hooks/useBookingVelocity';
 import { useRevenueStream } from '../../hooks/useRevenueStream';
+import { useDashboardRealtime } from '../../hooks/useDashboardRealtime';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { Button } from 'shared/components/ui/button';
 import { Badge } from 'shared/components/ui/badge';
@@ -55,11 +56,22 @@ const DashboardPage = () => {
     return { fromDate, toDate };
   }, [dateRange]);
   
-  const { rawStats, loading: statsLoading } = useStats(fromDate, toDate);
-  const { velocityData, loading: velocityLoading } = useBookingVelocity(fromDate, toDate);
-  const { revenueStream, loading: revenueLoading } = useRevenueStream(fromDate, toDate);
+  const { rawStats, loading: statsLoading, refetch: refetchStats } = useStats(fromDate, toDate);
+  const { velocityData, loading: velocityLoading, refetch: refetchVelocity } = useBookingVelocity(fromDate, toDate);
+  const { revenueStream, loading: revenueLoading, refetch: refetchRevenue } = useRevenueStream(fromDate, toDate);
 
   const isLoading = statsLoading || velocityLoading || revenueLoading;
+
+  // ── Real-time dashboard updates ────────────────────────────────────────────
+  // On each dashboard event, silently re-pull all three datasets (silent=true
+  // skips the loading skeleton so cards/charts update in place, no refresh).
+  const handleDashboardUpdate = useCallback(() => {
+    refetchStats(true);
+    refetchVelocity(true);
+    refetchRevenue(true);
+  }, [refetchStats, refetchVelocity, refetchRevenue]);
+
+  const { isConnected: liveConnected } = useDashboardRealtime(handleDashboardUpdate);
   
   // Date range options
   const dateRangeOptions = [
@@ -166,8 +178,30 @@ const DashboardPage = () => {
       {/* Header */}
       <div className="mb-4 sm:mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-1">
-            Operational Overview
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground mb-1 flex items-center gap-2">
+            <span>Operational Overview</span>
+            {liveConnected ? (
+              <span
+                title="Real-time updates connected"
+                className="inline-flex items-center gap-1.5 rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-xs font-medium text-green-700 dark:border-green-900/50 dark:bg-green-900/20 dark:text-green-400"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-500 opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500"></span>
+                </span>
+                <Wifi className="w-3 h-3" />
+                <span>Live</span>
+              </span>
+            ) : (
+              <span
+                title="Real-time updates disconnected"
+                className="inline-flex items-center gap-1.5 rounded-full border border-border bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground"
+              >
+                <span className="inline-flex h-2 w-2 rounded-full bg-muted-foreground/50"></span>
+                <WifiOff className="w-3 h-3" />
+                <span>Offline</span>
+              </span>
+            )}
           </h1>
           <p className="text-xs sm:text-sm text-muted-foreground">
             Real-time performance and system health across the FTA network.

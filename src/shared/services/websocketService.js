@@ -5,13 +5,28 @@ const WS_URL =
   process.env.REACT_APP_WS_URL ||
   'https://go-bus-gateway-service-production.up.railway.app/bus-service/ws/bus';
 
+// Booking-service WebSocket endpoint (gateway route /booking-service/ws/booking/**).
+// Booking lifecycle events (/topic/admin/bookings, /topic/admin/dashboard) are
+// published on the booking-service broker, which is a SEPARATE in-memory broker
+// from bus-service — so it needs its own connection, not the bus-service one.
+const BOOKING_WS_URL =
+  process.env.REACT_APP_WS_BOOKING_URL ||
+  (process.env.REACT_APP_BASE_URL
+    ? `${process.env.REACT_APP_BASE_URL}/booking-service/ws/booking`
+    : 'https://go-bus-gateway-service-production.up.railway.app/booking-service/ws/booking');
+
 // Conservative reconnect strategy: 5 s fixed delay, give up after 8 failed attempts.
 // Do NOT set this lower than 3000 — rapid reconnects destabilise the server.
 const RECONNECT_DELAY_MS = 5000;
 const MAX_RECONNECT_ATTEMPTS = 8;
 
 class WebSocketService {
-  constructor() {
+  /**
+   * @param {string} url - SockJS endpoint this instance connects to. Defaults to
+   *   the bus-service endpoint so existing callers (seat features) are unaffected.
+   */
+  constructor(url = WS_URL) {
+    this.url = url;
     this.client = null;
 
     /** topic (string) → active STOMP Subscription object */
@@ -128,8 +143,8 @@ class WebSocketService {
         webSocketFactory: () => {
           const freshToken = this._getToken();
           const url = freshToken
-            ? `${WS_URL}?token=${encodeURIComponent(freshToken)}`
-            : WS_URL;
+            ? `${this.url}?token=${encodeURIComponent(freshToken)}`
+            : this.url;
           return new SockJS(url);
         },
 
@@ -373,6 +388,10 @@ class WebSocketService {
   }
 }
 
-// Singleton — one connection for the entire app lifetime
+// Singleton — one connection for the entire app lifetime (bus-service: seat updates)
 const websocketService = new WebSocketService();
 export default websocketService;
+
+// Separate singleton for the booking-service broker (booking lifecycle + dashboard
+// events). Kept distinct because STOMP simple brokers are per-service and in-memory.
+export const bookingWebsocketService = new WebSocketService(BOOKING_WS_URL);

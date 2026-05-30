@@ -1,10 +1,12 @@
 import React, { useState, useCallback, useEffect, useRef } from 'react';
+import { formatStatus } from 'shared/utils/formatters';
 import { useWallets } from '../../hooks/useWallets';
 import { useTransactions } from '../../hooks/useTransactions';
 import { Card, CardContent } from 'shared/components/ui/card';
 import { Badge } from 'shared/components/common/Badge';
 import { Button } from 'shared/components/common/Button';
 import { Input } from 'shared/components/common/Input';
+import { SearchInput } from 'shared/components/common/SearchInput';
 import { Label } from 'shared/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { DatePicker } from 'shared/components/ui/date-picker';
@@ -248,13 +250,14 @@ const WalletsPage = () => {
             {showWalletFilters && (
               <div className="space-y-4">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  <Input
-                    label={t('name') || 'Name'}
-                    name="name"
-                    value={walletFilters.name}
-                    onChange={handleWalletFilterChange}
-                    placeholder={t('searchByName') || 'Search by name...'}
-                  />
+                  <div className="space-y-2">
+                    <Label>{t('name') || 'Name'}</Label>
+                    <SearchInput
+                      value={walletFilters.name}
+                      onChange={(val) => setWalletFilters(prev => ({ ...prev, name: val }))}
+                      placeholder={t('searchByName') || 'Search by name...'}
+                    />
+                  </div>
 
                   <div className="space-y-2">
                     <Label>{t('status') || 'Status'}</Label>
@@ -432,7 +435,7 @@ const WalletsPage = () => {
                           </td>
                           <td className="px-4 py-4">
                             <Badge variant={getStatusColor(wallet.status)}>
-                              {wallet.status}
+                              {formatStatus(wallet.status)}
                             </Badge>
                           </td>
                           <td className="px-4 py-4">
@@ -539,13 +542,14 @@ const WalletsPage = () => {
                     </Select>
                   </div>
 
-                  <Input
-                    label={t('referenceId') || 'Reference ID'}
-                    name="referenceId"
-                    value={txFilters.referenceId}
-                    onChange={handleTxFilterChange}
-                    placeholder={t('searchByReference') || 'Search by reference...'}
-                  />
+                  <div className="space-y-2">
+                    <Label>{t('referenceId') || 'Reference ID'}</Label>
+                    <SearchInput
+                      value={txFilters.referenceId}
+                      onChange={(val) => setTxFilters(prev => ({ ...prev, referenceId: val }))}
+                      placeholder={t('searchByReference') || 'Search by reference...'}
+                    />
+                  </div>
 
                   <div className="space-y-2">
                     <Label>{t('fromDate') || 'From Date'}</Label>
@@ -644,11 +648,11 @@ const WalletsPage = () => {
                             <div className="flex items-center gap-2 mb-1">
                               <p className="font-semibold text-slate-900 dark:text-white">{tx.userName}</p>
                               <Badge variant={getTxStatusColor(tx.status)} className="text-xs">
-                                {tx.status}
+                                {formatStatus(tx.status)}
                               </Badge>
                             </div>
                             <p className="text-sm text-slate-600 dark:text-slate-400">
-                              {tx.type} • {new Date(tx.createdAt).toLocaleString()}
+                              {formatStatus(tx.type)} • {new Date(tx.createdAt).toLocaleString()}
                             </p>
                             {tx.description && (
                               <p className="text-xs text-slate-500 dark:text-slate-500 mt-1">{tx.description}</p>

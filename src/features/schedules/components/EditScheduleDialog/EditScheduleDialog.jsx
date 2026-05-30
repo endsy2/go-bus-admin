@@ -146,7 +146,7 @@ const EditScheduleDialog = ({ open, schedule, onClose, onSuccess }) => {
               <DateTimePicker
                 value={formData.departureDateTime}
                 onChange={(value) => setFormData({ ...formData, departureDateTime: value })}
-                placeholder="Select departure date and time"
+                placeholder="Select Departure Date And Time"
               />
             </div>
             <div className="space-y-2">
@@ -154,7 +154,7 @@ const EditScheduleDialog = ({ open, schedule, onClose, onSuccess }) => {
               <DateTimePicker
                 value={formData.arrivalDateTime}
                 onChange={(value) => setFormData({ ...formData, arrivalDateTime: value })}
-                placeholder="Select arrival date and time"
+                placeholder="Select Arrival Date And Time"
               />
             </div>
             <Input

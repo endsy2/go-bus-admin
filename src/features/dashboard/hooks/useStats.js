@@ -8,10 +8,12 @@ export const useStats = (fromDate = null, toDate = null) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchStats = useCallback(async () => {
-    setLoading(true);
+  // `silent` skips the loading flag so real-time refreshes don't flash the
+  // skeleton / full-page loader. Used by the dashboard WebSocket listener.
+  const fetchStats = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
-    
+
     try {
       const params = {};
       if (fromDate) params.fromDate = fromDate;
@@ -89,7 +91,7 @@ export const useStats = (fromDate = null, toDate = null) => {
       ];
       setStats(mockStats);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [fromDate, toDate]);
 

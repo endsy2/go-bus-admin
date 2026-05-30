@@ -207,7 +207,7 @@ const CreatePromoDialog = ({ open, onClose, onSuccess }) => {
               <DateTimePicker
                 value={formData.validFrom}
                 onChange={(value) => setFormData(prev => ({ ...prev, validFrom: value }))}
-                placeholder="Select start date and time"
+                placeholder="Select Start Date And Time"
               />
               {errors.validFrom && <p className="text-sm text-destructive mt-1">{errors.validFrom}</p>}
             </div>
@@ -217,7 +217,7 @@ const CreatePromoDialog = ({ open, onClose, onSuccess }) => {
               <DateTimePicker
                 value={formData.validTo}
                 onChange={(value) => setFormData(prev => ({ ...prev, validTo: value }))}
-                placeholder="No expiration"
+                placeholder="No Expiration"
               />
               {errors.validTo && <p className="text-sm text-destructive mt-1">{errors.validTo}</p>}
             </div>

@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { formatStatus } from 'shared/utils/formatters';
 import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
-import { Input } from 'shared/components/ui/input';
+import { SearchInput } from 'shared/components/common/SearchInput';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
 import { Badge } from 'shared/components/ui/badge';
 import adminService from '../../services/adminService';
@@ -68,10 +69,10 @@ const BookingManagementTab = () => {
   return (
     <Card className="p-6">
       <div className="mb-4">
-        <Input
-          placeholder="Search bookings..."
+        <SearchInput
+          placeholder="Search Bookings..."
           value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          onChange={setSearchTerm}
         />
       </div>
 
@@ -103,12 +104,12 @@ const BookingManagementTab = () => {
                 <TableCell>{booking.routeName}</TableCell>
                 <TableCell>
                   <Badge variant={booking.status === 'CONFIRMED' ? 'default' : 'secondary'}>
-                    {booking.status}
+                    {formatStatus(booking.status)}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant={booking.paymentStatus === 'PAID' ? 'default' : 'destructive'}>
-                    {booking.paymentStatus}
+                    {formatStatus(booking.paymentStatus)}
                   </Badge>
                 </TableCell>
                 <TableCell>

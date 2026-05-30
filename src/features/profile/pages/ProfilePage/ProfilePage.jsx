@@ -399,7 +399,7 @@ const ProfilePage = () => {
                       onChange={handleChange}
                       className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                     >
-                      <option value="">Select gender</option>
+                      <option value="">Select Gender</option>
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
                       <option value="OTHER">Other</option>

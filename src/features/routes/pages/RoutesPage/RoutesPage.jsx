@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, X, Eye, Trash2, AlertCircle, MapPin, Clock, Activity, Bus } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Plus, X, Eye, Trash2, AlertCircle, MapPin, Clock, Activity, Bus } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
 import { Card, CardContent } from 'shared/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
+import { Input } from 'shared/components/ui/input';
+import { Label } from 'shared/components/ui/label';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { useToast } from 'shared/components/ui/toast';
 import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
@@ -22,7 +23,8 @@ const RoutesPage = () => {
   const [loading, setLoading] = useState(true);
   const [searching, setSearching] = useState(false);
   const [error, setError] = useState('');
-  const [search, setSearch] = useState('');
+  const [originFilter, setOriginFilter] = useState('');
+  const [destinationFilter, setDestinationFilter] = useState('');
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [routeToDelete, setRouteToDelete] = useState(null);
   const [selectedRouteId, setSelectedRouteId] = useState(null);
@@ -46,12 +48,26 @@ const RoutesPage = () => {
     fetchAllRoutesForDropdown();
   }, []);
 
+  // Real-time search: re-run 400ms after the user stops typing in either field.
+  const skipFirstSearch = useRef(true);
+  useEffect(() => {
+    if (skipFirstSearch.current) {
+      skipFirstSearch.current = false;
+      return;
+    }
+    const handle = setTimeout(() => {
+      handleSearch();
+    }, 400);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [originFilter, destinationFilter]);
+
   // Fetches the current page of routes (uses 1-based page at the service boundary)
-  const fetchRoutes = async () => {
+  const fetchRoutes = async (page = pagination.currentPage) => {
     setLoading(true);
     try {
       const result = await routeService.getRoutesPaginated(
-        pagination.currentPage + 1,  // service is 1-based
+        page + 1,  // service is 1-based
         pagination.pageSize
       );
       const data = result.data || result;
@@ -81,31 +97,21 @@ const RoutesPage = () => {
     }
   };
 
-  const handleSearch = async (origin = null, destination = null) => {
-    let searchOrigin = origin;
-    let searchDestination = destination;
+  const handleSearch = async () => {
+    const origin = originFilter.trim();
+    const destination = destinationFilter.trim();
 
     if (!origin && !destination) {
-      if (!search.trim()) {
-        // Let the useEffect([pagination.currentPage]) handle the fetch
-        setPagination(prev => ({ ...prev, currentPage: 0 }));
-        return;
-      }
-      const searchTerms = search.trim().split(/\s+/);
-      if (searchTerms.length >= 2) {
-        searchOrigin = searchTerms[0];
-        searchDestination = searchTerms.slice(1).join(' ');
-      } else {
-        searchOrigin = search.trim();
-        searchDestination = search.trim();
-      }
+      setPagination(prev => ({ ...prev, currentPage: 0 }));
+      fetchRoutes(0);
+      return;
     }
 
     setSearching(true);
     setPagination(prev => ({ ...prev, currentPage: 0 }));
 
     try {
-      const result = await routeService.searchRoutes(searchOrigin, searchDestination);
+      const result = await routeService.searchRoutes(origin || undefined, destination || undefined);
       const data = result.data || result;
       const routesArray = Array.isArray(data) ? data : [];
       setRoutes(routesArray);
@@ -124,11 +130,8 @@ const RoutesPage = () => {
   };
 
   const handleClearFilters = () => {
-    if (search) {
-      setSearch('');
-      // Reset to page 0 — the useEffect([pagination.currentPage]) will trigger fetchRoutes automatically
-      setPagination(prev => ({ ...prev, currentPage: 0 }));
-    }
+    setOriginFilter('');
+    setDestinationFilter('');
   };
 
   const handlePageChange = (newPage) => {
@@ -295,55 +298,31 @@ const RoutesPage = () => {
       <Card>
         <CardContent className="p-6">
           {/* Search */}
-          <div className="flex flex-col sm:flex-row gap-2 mb-6">
-            <div className="flex-1 relative">
-              <Select value={search} onValueChange={setSearch}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder={t('selectRoute') || 'Select a route to search...'} />
-                </SelectTrigger>
-                <SelectContent>
-                  {allRoutes.map(route => (
-                    <SelectItem 
-                      key={route.id} 
-                      value={`${route.origin} → ${route.destination}`}
-                    >
-                      {route.origin} → {route.destination} ({route.distanceKm?.toFixed(0)}km, {formatDuration(route.durationMinutes)})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <div className="flex flex-col sm:flex-row gap-3 mb-6">
+            <div className="flex-1 space-y-1">
+              <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
+                <MapPin className="h-3.5 w-3.5 text-primary" />
+                {t('origin') || 'Origin'}
+              </Label>
+              <Input
+                value={originFilter}
+                onChange={e => setOriginFilter(e.target.value)}
+                placeholder={t('searchByOrigin') || 'e.g. Phnom Penh'}
+                disabled={searching}
+              />
             </div>
-            <Button
-              onClick={() => {
-                if (search) {
-                  const [origin, destination] = search.split(' → ');
-                  handleSearch(origin, destination);
-                }
-              }}
-              disabled={searching || !search}
-              className="gap-2"
-            >
-              {searching ? (
-                <>
-                  <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {t('searching') || 'Searching...'}
-                </>
-              ) : (
-                <>
-                  <Search className="h-4 w-4" />
-                  {t('search') || 'Search'}
-                </>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleClearFilters}
-              disabled={searching}
-              className="gap-2"
-            >
-              <X className="h-4 w-4" />
-              {t('clearFilters') || 'Clear Filters'}
-            </Button>
+            <div className="flex-1 space-y-1">
+              <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
+                <MapPin className="h-3.5 w-3.5 text-primary" />
+                {t('destination') || 'Destination'}
+              </Label>
+              <Input
+                value={destinationFilter}
+                onChange={e => setDestinationFilter(e.target.value)}
+                placeholder={t('searchByDestination') || 'e.g. Siem Reap'}
+                disabled={searching}
+              />
+            </div>
           </div>
 
           {/* Routes List */}
@@ -360,11 +339,11 @@ const RoutesPage = () => {
               </div>
               <h3 className="text-base font-semibold text-foreground mb-1">{t('noRoutesFound') || 'No routes found'}</h3>
               <p className="text-sm text-muted-foreground mb-4 px-4">
-                {search
+                {(originFilter || destinationFilter)
                   ? t('tryAdjustingFilters') || "Try adjusting your search to find what you're looking for"
                   : t('startByAddingRoute') || 'Start by adding your first route'}
               </p>
-              {search && (
+              {(originFilter || destinationFilter) && (
                 <Button variant="outline" onClick={handleClearFilters} className="gap-2">
                   <X className="h-4 w-4" />
                   {t('clearFilters') || 'Clear Filters'}

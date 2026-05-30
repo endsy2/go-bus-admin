@@ -13,7 +13,7 @@ import { Skeleton } from 'shared/components/ui/skeleton';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import walletService from '../../services/walletService';
-import userService from 'features/team/services/userService';
+import userService from 'features/team/services/teamService';
 import { Wallet, User, CheckCircle, AlertCircle } from 'lucide-react';
 
 const CreateWalletDialog = ({ open, onClose, onSuccess }) => {

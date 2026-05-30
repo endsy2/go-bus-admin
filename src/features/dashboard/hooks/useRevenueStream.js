@@ -6,10 +6,11 @@ export const useRevenueStream = (fromDate = null, toDate = null) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchRevenueStream = useCallback(async () => {
-    setLoading(true);
+  // `silent` skips the loading flag so real-time refreshes don't flash the loader.
+  const fetchRevenueStream = useCallback(async (silent = false) => {
+    if (!silent) setLoading(true);
     setError(null);
-    
+
     try {
       const params = {};
       if (fromDate) params.fromDate = fromDate;
@@ -24,7 +25,7 @@ export const useRevenueStream = (fromDate = null, toDate = null) => {
       setError(err.response?.data?.message || 'Failed to load revenue stream data');
       setRevenueStream(null);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [fromDate, toDate]);
 

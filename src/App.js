@@ -114,6 +114,12 @@ function App() {
       setUser(updatedUser);
       localStorage.setItem('user', JSON.stringify(updatedUser));
     } catch (error) {
+      // If the interceptor already cleared localStorage (both tokens expired),
+      // force logout straight away instead of leaving the user on a broken session.
+      if (!localStorage.getItem('user')) {
+        handleLogout();
+        return;
+      }
       console.error('[App] Failed to fetch profile on app load:', error);
     } finally {
       setIsLoading(false);

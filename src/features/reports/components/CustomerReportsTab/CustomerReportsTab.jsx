@@ -207,7 +207,7 @@ const CustomerReportsTab = () => {
               <DatePicker
                 value={activeCustomerFilters.startDate}
                 onChange={(value) => setActiveCustomerFilters({ ...activeCustomerFilters, startDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div>
@@ -217,7 +217,7 @@ const CustomerReportsTab = () => {
               <DatePicker
                 value={activeCustomerFilters.endDate}
                 onChange={(value) => setActiveCustomerFilters({ ...activeCustomerFilters, endDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div className="flex items-end">
@@ -256,7 +256,7 @@ const CustomerReportsTab = () => {
               <DatePicker
                 value={frequentTravelerFilters.startDate}
                 onChange={(value) => setFrequentTravelerFilters({ ...frequentTravelerFilters, startDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div>
@@ -266,7 +266,7 @@ const CustomerReportsTab = () => {
               <DatePicker
                 value={frequentTravelerFilters.endDate}
                 onChange={(value) => setFrequentTravelerFilters({ ...frequentTravelerFilters, endDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div>
@@ -324,7 +324,7 @@ const CustomerReportsTab = () => {
               <DatePicker
                 value={demographicsFilters.startDate}
                 onChange={(value) => setDemographicsFilters({ ...demographicsFilters, startDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div>
@@ -334,7 +334,7 @@ const CustomerReportsTab = () => {
               <DatePicker
                 value={demographicsFilters.endDate}
                 onChange={(value) => setDemographicsFilters({ ...demographicsFilters, endDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div className="flex items-end">
@@ -373,7 +373,7 @@ const CustomerReportsTab = () => {
               <DatePicker
                 value={patternsByDayFilters.startDate}
                 onChange={(value) => setPatternsByDayFilters({ ...patternsByDayFilters, startDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div>
@@ -383,7 +383,7 @@ const CustomerReportsTab = () => {
               <DatePicker
                 value={patternsByDayFilters.endDate}
                 onChange={(value) => setPatternsByDayFilters({ ...patternsByDayFilters, endDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div className="flex items-end">
@@ -422,7 +422,7 @@ const CustomerReportsTab = () => {
               <DatePicker
                 value={patternsByHourFilters.startDate}
                 onChange={(value) => setPatternsByHourFilters({ ...patternsByHourFilters, startDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div>
@@ -432,7 +432,7 @@ const CustomerReportsTab = () => {
               <DatePicker
                 value={patternsByHourFilters.endDate}
                 onChange={(value) => setPatternsByHourFilters({ ...patternsByHourFilters, endDate: value })}
-                placeholder="Select date"
+                placeholder="Select Date"
               />
             </div>
             <div className="flex items-end">

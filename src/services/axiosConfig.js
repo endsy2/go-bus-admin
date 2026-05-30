@@ -106,7 +106,10 @@ axiosInstance.interceptors.response.use(
         processQueue(refreshError, null);
         isRefreshing = false;
 
-        // Trigger unauthorized handler
+        // Clear the stale session immediately so queued requests don't retry
+        // with an expired token while the logout dialog is still visible.
+        localStorage.removeItem('user');
+
         if (unauthorizedHandler) {
           unauthorizedHandler();
         }
