@@ -12,9 +12,11 @@ export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 
   const [totalElements, setTotalElements] = useState(0);
   const [filters, setFilters] = useState(initialFilters);
 
-  const fetchBookings = useCallback(async () => {
+  // `silent` skips the loading flag so a catch-up refetch (e.g. on WebSocket
+  // reconnect) refreshes the rows in place without flashing the skeleton.
+  const fetchBookings = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       setError(null);
       // Backend uses 0-based pagination — send currentPage directly.
       const response = await bookingService.filterBookings(filters, currentPage, pageSize);
@@ -30,7 +32,7 @@ export const useBookings = (initialFilters = {}, initialPage = 0, initialSize = 
       setError(err.message || 'Failed to fetch bookings');
       setBookings([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, [filters, currentPage, pageSize]);
 

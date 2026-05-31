@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { useBookings } from '../../hooks/useBookings';
 import { useMultiScheduleWebSocket } from '../../hooks/useMultiScheduleWebSocket';
 import { useBookingEventsWebSocket } from '../../hooks/useBookingEventsWebSocket';
@@ -156,6 +156,19 @@ const BookingsPage = () => {
 
   const { isConnected: bookingWsConnected } = useBookingEventsWebSocket(handleBookingEvent);
   const liveConnected = wsConnected || bookingWsConnected;
+
+  // ── Catch-up on (re)connect ─────────────────────────────────────────────────
+  // STOMP's simple broker does NOT replay messages missed while the socket was
+  // down. So whenever the booking-events connection (re)establishes, silently
+  // re-pull the current page to absorb any events dropped during the outage.
+  // The initial connect is skipped — useBookings already does the first fetch.
+  const prevBookingWsConnected = useRef(bookingWsConnected);
+  useEffect(() => {
+    if (bookingWsConnected && !prevBookingWsConnected.current) {
+      refetch(true); // silent: no skeleton flash
+    }
+    prevBookingWsConnected.current = bookingWsConnected;
+  }, [bookingWsConnected, refetch]);
 
   // ── Filter handlers ───────────────────────────────────────────────────────
 
@@ -552,8 +565,8 @@ const BookingsPage = () => {
       {/* Content */}
       {loading ? (
         <>
-          <DesktopSkeleton />
-          <MobileSkeleton />
+          {DesktopSkeleton()}
+          {MobileSkeleton()}
         </>
       ) : bookings.length === 0 ? (
         <div className="text-center py-12 sm:py-16 bg-card rounded-lg border border-border">
@@ -569,8 +582,8 @@ const BookingsPage = () => {
         </div>
       ) : (
         <>
-          <DesktopTable />
-          <MobileCards />
+          {DesktopTable()}
+          {MobileCards()}
 
           {bookings.length > 0 && (
             <Pagination

@@ -11,7 +11,6 @@ import { Pagination } from 'shared/components/feedback/Pagination';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import WalletDetailsDialog from '../../components/WalletDetailsDialog/WalletDetailsDialog';
-import CreateWalletDialog from '../../components/CreateWalletDialog/CreateWalletDialog';
 import {
   Wallet,
   User,
@@ -79,8 +78,7 @@ const WalletsPage = () => {
   const [showTxFilters, setShowTxFilters] = useState(false);
   const [detailsDialogOpen, setDetailsDialogOpen] = useState(false);
   const [selectedWalletId, setSelectedWalletId] = useState(null);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  
+
   const [walletFilters, setWalletFilters] = useState({
     name: '',
     status: '',
@@ -104,7 +102,6 @@ const WalletsPage = () => {
   const {
     wallets, loading: walletsLoading, pagination: walletPagination,
     updateFilters: updateWalletFilters, goToPage: goToWalletPage, changePageSize: changeWalletPageSize,
-    refetch: refetchWallets,
   } = useWallets();
   const {
     transactions, loading: txLoading, pagination: txPagination,
@@ -206,24 +203,14 @@ const WalletsPage = () => {
 
   return (
     <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-slate-50 dark:bg-slate-950 min-h-screen">
-      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4 sm:mb-6 lg:mb-8">
-        <div>
-          <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
-            <Wallet className="w-6 h-6 sm:w-7 sm:h-7 text-blue-500 dark:text-blue-400 flex-shrink-0" />
-            {t('walletManagement') || 'Wallet Management'}
-          </h1>
-          <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
-            {t('manageUserWalletsTransactions') || 'Manage user wallets and transactions'}
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          onClick={() => setCreateDialogOpen(true)}
-          className="flex items-center justify-center gap-2 w-full sm:w-auto"
-        >
-          <Wallet className="w-4 h-4" />
-          {t('createWallet') || 'Create Wallet'}
-        </Button>
+      <div className="mb-4 sm:mb-6 lg:mb-8">
+        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-1 sm:mb-2 flex items-center gap-2 sm:gap-3">
+          <Wallet className="w-6 h-6 sm:w-7 sm:h-7 text-blue-500 dark:text-blue-400 flex-shrink-0" />
+          {t('walletManagement') || 'Wallet Management'}
+        </h1>
+        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400">
+          {t('manageUserWalletsTransactions') || 'Manage user wallets and transactions'}
+        </p>
       </div>
 
       {/* Tabs */}
@@ -768,13 +755,6 @@ const WalletsPage = () => {
           setSelectedWalletId(null);
         }}
         walletId={selectedWalletId}
-      />
-
-      {/* Create Wallet Dialog */}
-      <CreateWalletDialog
-        open={createDialogOpen}
-        onClose={() => setCreateDialogOpen(false)}
-        onSuccess={() => refetchWallets()}
       />
     </div>
   );

@@ -1,7 +1,7 @@
 import axiosInstance from 'services/axiosConfig';
 
 const walletService = {
-  // Create wallet for user
+  // Create wallet for user (used by CustomerDetailPage)
   createWallet: async (userId) => {
     const response = await axiosInstance.post(`/admin/wallets/user/${userId}`);
     return response.data;

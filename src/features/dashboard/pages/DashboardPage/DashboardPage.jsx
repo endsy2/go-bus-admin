@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Calendar, TrendingUp, Bus, AlertCircle, Download, TrendingDown, ChevronDown, Check, Wifi, WifiOff } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useStats } from '../../hooks/useStats';
@@ -68,6 +68,18 @@ const DashboardPage = () => {
   }, [refetchStats, refetchVelocity, refetchRevenue]);
 
   const { isConnected: liveConnected } = useDashboardRealtime(handleDashboardUpdate);
+
+  // Catch-up on (re)connect: the simple broker doesn't replay events missed
+  // while the socket was down, so re-pull all datasets whenever the dashboard
+  // connection (re)establishes. Initial connect is skipped — the hooks already
+  // do their first fetch on mount.
+  const prevLiveConnected = useRef(liveConnected);
+  useEffect(() => {
+    if (liveConnected && !prevLiveConnected.current) {
+      handleDashboardUpdate();
+    }
+    prevLiveConnected.current = liveConnected;
+  }, [liveConnected, handleDashboardUpdate]);
   
   // Date range options
   const dateRangeOptions = [
