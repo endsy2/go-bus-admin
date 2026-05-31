@@ -38,7 +38,6 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     scheduleId: '',
     phoneNumber: '',
-    promoCode: '',
   });
   const [scheduleFilters, setScheduleFilters] = useState({
     routeId: '',
@@ -488,7 +487,6 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
       const payload = {
         scheduleId: parseInt(formData.scheduleId),
         seatIds: selectedSeats.map(seat => seat.id),
-        promoCode: formData.promoCode.trim() || null,
         phoneNumber: formData.phoneNumber.trim() || null,
       };
       
@@ -501,7 +499,6 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
       setFormData({
         scheduleId: '',
         phoneNumber: '',
-        promoCode: '',
       });
       setScheduleFilters({
         routeId: '',
@@ -529,7 +526,6 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
       setFormData({
         scheduleId: '',
         phoneNumber: '',
-        promoCode: '',
       });
       setScheduleFilters({
         routeId: '',
@@ -1143,16 +1139,8 @@ const CreateBookingDialog = ({ open, onClose, onSuccess }) => {
               className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
             />
 
-            <Input
-              label={t('promoCode') || 'Promo Code (Optional)'}
-              name="promoCode"
-              value={formData.promoCode}
-              onChange={handleChange}
-              placeholder="SUMMER2024"
-              className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white uppercase"
-            />
 
-            <DialogFooter className="gap-2">
+<DialogFooter className="gap-2">
               <Button
                 type="button"
                 variant="secondary"

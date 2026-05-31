@@ -123,9 +123,8 @@ const BookingsPage = () => {
       } else if (data.type === 'SEAT_RELEASED') {
         addToast({ message: `Seat ${data.seatNumber} available on schedule #${data.scheduleId}`, type: 'info' });
       }
-      refetch();
     },
-    [addToast, refetch]
+    [addToast]
   );
 
   const { isConnected: wsConnected } = useMultiScheduleWebSocket(
