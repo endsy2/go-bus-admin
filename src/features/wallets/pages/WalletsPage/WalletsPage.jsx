@@ -294,10 +294,10 @@ const WalletsPage = () => {
                       className={inputClass}
                     >
                       <option value="">{t('all') || 'All'}</option>
-                      <option value="ACTIVE">ACTIVE</option>
-                      <option value="INACTIVE">INACTIVE</option>
-                      <option value="SUSPENDED">SUSPENDED</option>
-                      <option value="CLOSED">CLOSED</option>
+                      <option value="ACTIVE">Active</option>
+                      <option value="INACTIVE">Inactive</option>
+                      <option value="SUSPENDED">Suspended</option>
+                      <option value="CLOSED">Closed</option>
                     </select>
                   </div>
                 </div>
@@ -559,11 +559,11 @@ const WalletsPage = () => {
                       className={inputClass}
                     >
                       <option value="">{t('all') || 'All'}</option>
-                      <option value="TOP_UP">TOP_UP</option>
-                      <option value="PAYMENT">PAYMENT</option>
-                      <option value="REFUND">REFUND</option>
-                      <option value="WITHDRAWAL">WITHDRAWAL</option>
-                      <option value="BONUS">BONUS</option>
+                      <option value="TOP_UP">Top Up</option>
+                      <option value="PAYMENT">Payment</option>
+                      <option value="REFUND">Refund</option>
+                      <option value="WITHDRAWAL">Withdrawal</option>
+                      <option value="BONUS">Bonus</option>
                     </select>
                   </div>
 
@@ -576,10 +576,10 @@ const WalletsPage = () => {
                       className={inputClass}
                     >
                       <option value="">{t('all') || 'All'}</option>
-                      <option value="PENDING">PENDING</option>
-                      <option value="COMPLETED">COMPLETED</option>
-                      <option value="FAILED">FAILED</option>
-                      <option value="CANCELLED">CANCELLED</option>
+                      <option value="PENDING">Pending</option>
+                      <option value="COMPLETED">Completed</option>
+                      <option value="FAILED">Failed</option>
+                      <option value="CANCELLED">Cancelled</option>
                     </select>
                   </div>
 

@@ -171,8 +171,8 @@ const CreatePromoDialog = ({ open, onClose, onSuccess }) => {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="PERCENTAGE">PERCENTAGE</SelectItem>
-                  <SelectItem value="FIXED_AMOUNT">FIXED AMOUNT</SelectItem>
+                  <SelectItem value="PERCENTAGE">Percentage (%)</SelectItem>
+                  <SelectItem value="FIXED_AMOUNT">Fixed Amount ($)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

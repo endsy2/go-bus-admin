@@ -15,6 +15,9 @@ import { routeService } from 'features/routes';
 import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 
+const BUS_TYPE_LABELS = { SLEEPER: 'Sleeper', SEATER: 'Seater', AC: 'AC' };
+const BUS_STATUS_LABELS = { Active: 'Active', Standby: 'Standby', Maintenance: 'Maintenance', Inactive: 'Inactive', InService: 'In Service' };
+
 const BusesPage = () => {
   const { locale } = useLocale();
   const t = (key) => translations[locale]?.[key] || translations.en[key] || key;
@@ -538,7 +541,7 @@ const BusesPage = () => {
                         </td>
                         <td className="py-4 px-4">
                           <Badge variant={bus.busType === 'SLEEPER' ? 'info' : 'default'}>
-                            {bus.busType || 'N/A'}
+                            {BUS_TYPE_LABELS[bus.busType] || bus.busType || 'N/A'}
                           </Badge>
                         </td>
                         <td className="py-4 px-4">
@@ -561,7 +564,7 @@ const BusesPage = () => {
                             (bus.status || bus.busStatus) === 'InService' ? 'confirmed' :
                             'default'
                           }>
-                            {bus.status || bus.busStatus}
+                            {BUS_STATUS_LABELS[bus.status || bus.busStatus] || bus.status || bus.busStatus || 'N/A'}
                           </Badge>
                         </td>
                         <td className="py-4 px-4">

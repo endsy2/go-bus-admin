@@ -106,10 +106,10 @@ const RefundFilters = ({ onFilterChange, onReset }) => {
                 className={inputClass}
               >
                 <option value="">{t('all') || 'All'}</option>
-                <option value="PENDING">PENDING</option>
-                <option value="APPROVED">APPROVED</option>
-                <option value="REJECTED">REJECTED</option>
-                <option value="COMPLETED">COMPLETED</option>
+                <option value="PENDING">Pending</option>
+                <option value="APPROVED">Approved</option>
+                <option value="REJECTED">Rejected</option>
+                <option value="COMPLETED">Completed</option>
               </select>
             </div>
           </div>
