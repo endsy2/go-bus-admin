@@ -9,14 +9,16 @@ const profileService = {
 
   // Update current user profile
   updateProfile: async (userId, profileData) => {
-    // Only send fields that are allowed to be updated
+    // Only send fields that are allowed to be updated.
+    // gender maps to a backend enum (Gender) — an empty string can't be coerced
+    // to an enum and triggers a 500, so send null when it isn't set.
     const updatePayload = {
       userName: profileData.userName,
       fullName: profileData.fullName,
-      phone: profileData.phone,
-      gender: profileData.gender,
+      phone: profileData.phone || null,
+      gender: profileData.gender ? profileData.gender : null,
     };
-    
+
     const response = await axiosInstance.put(`/users/${userId}`, updatePayload);
     return response.data;
   },

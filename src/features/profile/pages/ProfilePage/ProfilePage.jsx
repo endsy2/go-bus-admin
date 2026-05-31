@@ -141,6 +141,9 @@ const ProfilePage = () => {
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Invalid email format';
     }
+    if (!formData.gender) {
+      newErrors.gender = 'Gender is required';
+    }
     return newErrors;
   };
 
@@ -357,8 +360,9 @@ const ProfilePage = () => {
                     onChange={handleChange}
                     error={errors.userName}
                     required
+                    disabled
                     placeholder="e.g. john_doe"
-                    className="bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-900 dark:text-white"
+                    className="bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
                   />
 
                   <Input
@@ -396,18 +400,26 @@ const ProfilePage = () => {
                   <div>
                     <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                       {t('gender') || 'Gender'}
+                      <span className="text-red-500 ml-0.5">*</span>
                     </label>
                     <select
                       name="gender"
                       value={formData.gender}
                       onChange={handleChange}
-                      className="w-full px-4 py-2.5 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                      className={`w-full px-4 py-2.5 border rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
+                        errors.gender
+                          ? 'border-red-500 dark:border-red-500'
+                          : 'border-slate-300 dark:border-slate-700'
+                      }`}
                     >
                       <option value="">Select Gender</option>
                       <option value="MALE">Male</option>
                       <option value="FEMALE">Female</option>
                       <option value="OTHER">Other</option>
                     </select>
+                    {errors.gender && (
+                      <p className="mt-1 text-sm text-red-500">{errors.gender}</p>
+                    )}
                   </div>
                 </div>
 

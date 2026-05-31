@@ -3,13 +3,13 @@ import axiosInstance from 'services/axiosConfig';
 const walletService = {
   // Create wallet for user
   createWallet: async (userId) => {
-    const response = await axiosInstance.post(`/admin/wallets/${userId}`);
+    const response = await axiosInstance.post(`/admin/wallets/user/${userId}`);
     return response.data;
   },
 
   // Get wallet by user ID
   getWalletByUser: async (userId) => {
-    const response = await axiosInstance.get(`/admin/wallets/${userId}`);
+    const response = await axiosInstance.get(`/admin/wallets/user/${userId}`);
     return response.data;
   },
 
