@@ -5,10 +5,6 @@ import { useTransactions } from '../../hooks/useTransactions';
 import { Card, CardContent } from 'shared/components/ui/card';
 import { Badge } from 'shared/components/common/Badge';
 import { Button } from 'shared/components/common/Button';
-import { Input } from 'shared/components/common/Input';
-import { SearchInput } from 'shared/components/common/SearchInput';
-import { Label } from 'shared/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { DatePicker } from 'shared/components/ui/date-picker';
 import { Skeleton } from 'shared/components/ui/skeleton';
 import { Pagination } from 'shared/components/feedback/Pagination';
@@ -27,8 +23,20 @@ import {
   ArrowDownLeft,
   Eye,
   Copy,
-  Check
+  Check,
+  ChevronUp,
+  ChevronDown
 } from 'lucide-react';
+
+// ── Shared filter field styling (matches BookingFilters) ───────────────────────
+const inputClass =
+  'w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+
+const labelClass =
+  'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide';
+
+const sectionTitleClass =
+  'text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2.5';
 
 // Trim string filter values (non-strings pass through). Empty values are kept
 // on purpose so they overwrite — and thereby clear — any previously-applied
@@ -89,6 +97,9 @@ const WalletsPage = () => {
     minAmount: '',
     maxAmount: '',
   });
+
+  const walletActiveCount = Object.values(walletFilters).filter((v) => v !== '').length;
+  const txActiveCount = Object.values(txFilters).filter((v) => v !== '').length;
 
   const {
     wallets, loading: walletsLoading, pagination: walletPagination,
@@ -178,14 +189,17 @@ const WalletsPage = () => {
     return statusMap[status] || 'default';
   };
 
+  // Inflows credit the wallet (green); outflows debit it (red).
+  const isInflow = (type) => type === 'TOP_UP' || type === 'REFUND' || type === 'BONUS';
+
   const getTxTypeIcon = (type) => {
-    return type === 'DEPOSIT' || type === 'CREDIT' || type === 'REFUND' 
+    return isInflow(type)
       ? <ArrowDownLeft className="w-4 h-4 text-green-400" />
       : <ArrowUpRight className="w-4 h-4 text-red-400" />;
   };
 
   const getTxTypeColor = (type) => {
-    return type === 'DEPOSIT' || type === 'CREDIT' || type === 'REFUND'
+    return isInflow(type)
       ? 'text-green-400'
       : 'text-red-400';
   };
@@ -232,81 +246,106 @@ const WalletsPage = () => {
       {activeTab === 'wallets' && (
         <>
           {/* Wallet Filters */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 mb-6">
-            <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center gap-2 mb-3 sm:mb-4">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Filter className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 mb-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                <Filter className="w-4 h-4 text-blue-500" />
                 {t('filters') || 'Filters'}
+                {walletActiveCount > 0 && (
+                  <span className="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full bg-blue-500 text-white text-xs font-bold">
+                    {walletActiveCount}
+                  </span>
+                )}
               </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowWalletFilters(!showWalletFilters)}
-              >
-                {showWalletFilters ? t('hide') || 'Hide' : t('show') || 'Show'}
-              </Button>
+              <div className="flex items-center gap-2">
+                {walletActiveCount > 0 && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={resetWalletFilters}
+                    className="flex items-center gap-1 text-slate-600 dark:text-slate-300 text-xs border-slate-200 dark:border-slate-700"
+                  >
+                    <X className="w-3 h-3" />
+                    {t('resetFilters') || 'Clear All'}
+                  </Button>
+                )}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowWalletFilters(!showWalletFilters)}
+                  className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white text-sm"
+                >
+                  {showWalletFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  {showWalletFilters ? t('hide') || 'Hide' : t('show') || 'Show'}
+                </Button>
+              </div>
             </div>
 
             {showWalletFilters && (
-              <div className="space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-                  <div className="space-y-2">
-                    <Label>{t('name') || 'Name'}</Label>
-                    <SearchInput
+              <div className="mt-4 space-y-5">
+
+                {/* ── Section 1: Name & Status ───────────────────────── */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                  <div>
+                    <label className={labelClass}>{t('name') || 'Name'}</label>
+                    <input
+                      type="text"
+                      name="name"
                       value={walletFilters.name}
-                      onChange={(val) => setWalletFilters(prev => ({ ...prev, name: val }))}
+                      onChange={handleWalletFilterChange}
                       placeholder={t('searchByName') || 'Search by name...'}
+                      className={inputClass}
                     />
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>{t('status') || 'Status'}</Label>
-                    <Select
-                      value={walletFilters.status || '__all__'}
-                      onValueChange={(value) => setWalletFilters(prev => ({ ...prev, status: value === '__all__' ? '' : value }))}
+                  <div>
+                    <label className={labelClass}>{t('status') || 'Status'}</label>
+                    <select
+                      name="status"
+                      value={walletFilters.status}
+                      onChange={handleWalletFilterChange}
+                      className={inputClass}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('all') || 'All'} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__all__">{t('all') || 'All'}</SelectItem>
-                        <SelectItem value="ACTIVE">ACTIVE</SelectItem>
-                        <SelectItem value="INACTIVE">INACTIVE</SelectItem>
-                        <SelectItem value="SUSPENDED">SUSPENDED</SelectItem>
-                        <SelectItem value="CLOSED">CLOSED</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="">{t('all') || 'All'}</option>
+                      <option value="ACTIVE">ACTIVE</option>
+                      <option value="INACTIVE">INACTIVE</option>
+                      <option value="SUSPENDED">SUSPENDED</option>
+                      <option value="CLOSED">CLOSED</option>
+                    </select>
                   </div>
-
-                  <Input
-                    label={t('minBalance') || 'Min Balance'}
-                    name="minBalance"
-                    type="number"
-                    value={walletFilters.minBalance}
-                    onChange={handleWalletFilterChange}
-                    placeholder="0.00"
-                  />
-
-                  <Input
-                    label={t('maxBalance') || 'Max Balance'}
-                    name="maxBalance"
-                    type="number"
-                    value={walletFilters.maxBalance}
-                    onChange={handleWalletFilterChange}
-                    placeholder="10000.00"
-                  />
                 </div>
 
-                <div className="flex gap-3">
-                  <Button
-                    variant="secondary"
-                    onClick={resetWalletFilters}
-                    className="flex items-center gap-2"
-                  >
-                    <X className="w-4 h-4" />
-                    {t('resetFilters') || 'Reset'}
-                  </Button>
+                <div className="border-t border-slate-100 dark:border-slate-800" />
+
+                {/* ── Section 2: Balance Range ───────────────────────── */}
+                <div>
+                  <p className={sectionTitleClass}>{t('balance') || 'Balance'} Range</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className={labelClass}>{t('minBalance') || 'Min Balance'}</label>
+                      <input
+                        type="number"
+                        name="minBalance"
+                        value={walletFilters.minBalance}
+                        onChange={handleWalletFilterChange}
+                        placeholder="0.00"
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>{t('maxBalance') || 'Max Balance'}</label>
+                      <input
+                        type="number"
+                        name="maxBalance"
+                        value={walletFilters.maxBalance}
+                        onChange={handleWalletFilterChange}
+                        placeholder="10000.00"
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
                 </div>
+
               </div>
             )}
           </div>
@@ -484,120 +523,148 @@ const WalletsPage = () => {
       {activeTab === 'transactions' && (
         <>
           {/* Transaction Filters */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-5 mb-6">
-            <div className="flex flex-col xs:flex-row xs:justify-between xs:items-center gap-2 mb-3 sm:mb-4">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Filter className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 mb-6">
+            <div className="flex justify-between items-center">
+              <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+                <Filter className="w-4 h-4 text-blue-500" />
                 {t('filters') || 'Filters'}
+                {txActiveCount > 0 && (
+                  <span className="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full bg-blue-500 text-white text-xs font-bold">
+                    {txActiveCount}
+                  </span>
+                )}
               </h3>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowTxFilters(!showTxFilters)}
-              >
-                {showTxFilters ? t('hide') || 'Hide' : t('show') || 'Show'}
-              </Button>
+              <div className="flex items-center gap-2">
+                {txActiveCount > 0 && (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={resetTxFilters}
+                    className="flex items-center gap-1 text-slate-600 dark:text-slate-300 text-xs border-slate-200 dark:border-slate-700"
+                  >
+                    <X className="w-3 h-3" />
+                    {t('resetFilters') || 'Clear All'}
+                  </Button>
+                )}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowTxFilters(!showTxFilters)}
+                  className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-white text-sm"
+                >
+                  {showTxFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  {showTxFilters ? t('hide') || 'Hide' : t('show') || 'Show'}
+                </Button>
+              </div>
             </div>
 
             {showTxFilters && (
-              <div className="space-y-4">
+              <div className="mt-4 space-y-5">
+
+                {/* ── Section 1: Type, Status & Reference ────────────── */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                  <div className="space-y-2">
-                    <Label>{t('type') || 'Type'}</Label>
-                    <Select
-                      value={txFilters.type || '__all__'}
-                      onValueChange={(value) => setTxFilters(prev => ({ ...prev, type: value === '__all__' ? '' : value }))}
+                  <div>
+                    <label className={labelClass}>{t('type') || 'Type'}</label>
+                    <select
+                      name="type"
+                      value={txFilters.type}
+                      onChange={handleTxFilterChange}
+                      className={inputClass}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('all') || 'All'} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__all__">{t('all') || 'All'}</SelectItem>
-                        <SelectItem value="DEPOSIT">DEPOSIT</SelectItem>
-                        <SelectItem value="WITHDRAWAL">WITHDRAWAL</SelectItem>
-                        <SelectItem value="PAYMENT">PAYMENT</SelectItem>
-                        <SelectItem value="REFUND">REFUND</SelectItem>
-                        <SelectItem value="CREDIT">CREDIT</SelectItem>
-                        <SelectItem value="DEBIT">DEBIT</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="">{t('all') || 'All'}</option>
+                      <option value="TOP_UP">TOP_UP</option>
+                      <option value="PAYMENT">PAYMENT</option>
+                      <option value="REFUND">REFUND</option>
+                      <option value="WITHDRAWAL">WITHDRAWAL</option>
+                      <option value="BONUS">BONUS</option>
+                    </select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>{t('status') || 'Status'}</Label>
-                    <Select
-                      value={txFilters.status || '__all__'}
-                      onValueChange={(value) => setTxFilters(prev => ({ ...prev, status: value === '__all__' ? '' : value }))}
+                  <div>
+                    <label className={labelClass}>{t('status') || 'Status'}</label>
+                    <select
+                      name="status"
+                      value={txFilters.status}
+                      onChange={handleTxFilterChange}
+                      className={inputClass}
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder={t('all') || 'All'} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="__all__">{t('all') || 'All'}</SelectItem>
-                        <SelectItem value="PENDING">PENDING</SelectItem>
-                        <SelectItem value="COMPLETED">COMPLETED</SelectItem>
-                        <SelectItem value="FAILED">FAILED</SelectItem>
-                        <SelectItem value="CANCELLED">CANCELLED</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      <option value="">{t('all') || 'All'}</option>
+                      <option value="PENDING">PENDING</option>
+                      <option value="COMPLETED">COMPLETED</option>
+                      <option value="FAILED">FAILED</option>
+                      <option value="CANCELLED">CANCELLED</option>
+                    </select>
                   </div>
 
-                  <div className="space-y-2">
-                    <Label>{t('referenceId') || 'Reference ID'}</Label>
-                    <SearchInput
+                  <div>
+                    <label className={labelClass}>{t('referenceId') || 'Reference ID'}</label>
+                    <input
+                      type="text"
+                      name="referenceId"
                       value={txFilters.referenceId}
-                      onChange={(val) => setTxFilters(prev => ({ ...prev, referenceId: val }))}
+                      onChange={handleTxFilterChange}
                       placeholder={t('searchByReference') || 'Search by reference...'}
+                      className={inputClass}
                     />
                   </div>
-
-                  <div className="space-y-2">
-                    <Label>{t('fromDate') || 'From Date'}</Label>
-                    <DatePicker
-                      value={txFilters.fromDate}
-                      onChange={(value) => setTxFilters(prev => ({ ...prev, fromDate: value }))}
-                      placeholder={t('fromDate') || 'From Date'}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label>{t('toDate') || 'To Date'}</Label>
-                    <DatePicker
-                      value={txFilters.toDate}
-                      onChange={(value) => setTxFilters(prev => ({ ...prev, toDate: value }))}
-                      placeholder={t('toDate') || 'To Date'}
-                    />
-                  </div>
-
-                  <Input
-                    label={t('minAmount') || 'Min Amount'}
-                    name="minAmount"
-                    type="number"
-                    value={txFilters.minAmount}
-                    onChange={handleTxFilterChange}
-                    placeholder="0.00"
-                  />
-
-                  <Input
-                    label={t('maxAmount') || 'Max Amount'}
-                    name="maxAmount"
-                    type="number"
-                    value={txFilters.maxAmount}
-                    onChange={handleTxFilterChange}
-                    placeholder="10000.00"
-                  />
                 </div>
 
-                <div className="flex gap-3">
-                  <Button
-                    variant="secondary"
-                    onClick={resetTxFilters}
-                    className="flex items-center gap-2"
-                  >
-                    <X className="w-4 h-4" />
-                    {t('resetFilters') || 'Reset'}
-                  </Button>
+                <div className="border-t border-slate-100 dark:border-slate-800" />
+
+                {/* ── Section 2: Date Range ──────────────────────────── */}
+                <div>
+                  <p className={sectionTitleClass}>{t('date') || 'Date'} Range</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className={labelClass}>{t('fromDate') || 'From Date'}</label>
+                      <DatePicker
+                        value={txFilters.fromDate}
+                        onChange={(value) => setTxFilters(prev => ({ ...prev, fromDate: value }))}
+                        placeholder={t('fromDate') || 'From Date'}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>{t('toDate') || 'To Date'}</label>
+                      <DatePicker
+                        value={txFilters.toDate}
+                        onChange={(value) => setTxFilters(prev => ({ ...prev, toDate: value }))}
+                        placeholder={t('toDate') || 'To Date'}
+                      />
+                    </div>
+                  </div>
                 </div>
+
+                <div className="border-t border-slate-100 dark:border-slate-800" />
+
+                {/* ── Section 3: Amount Range ────────────────────────── */}
+                <div>
+                  <p className={sectionTitleClass}>{t('amount') || 'Amount'} Range</p>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div>
+                      <label className={labelClass}>{t('minAmount') || 'Min Amount'}</label>
+                      <input
+                        type="number"
+                        name="minAmount"
+                        value={txFilters.minAmount}
+                        onChange={handleTxFilterChange}
+                        placeholder="0.00"
+                        className={inputClass}
+                      />
+                    </div>
+                    <div>
+                      <label className={labelClass}>{t('maxAmount') || 'Max Amount'}</label>
+                      <input
+                        type="number"
+                        name="maxAmount"
+                        value={txFilters.maxAmount}
+                        onChange={handleTxFilterChange}
+                        placeholder="10000.00"
+                        className={inputClass}
+                      />
+                    </div>
+                  </div>
+                </div>
+
               </div>
             )}
           </div>
@@ -637,7 +704,7 @@ const WalletsPage = () => {
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-4 flex-1 min-w-0">
                           <div className={`p-3 rounded-lg ${
-                            tx.type === 'DEPOSIT' || tx.type === 'CREDIT' || tx.type === 'REFUND'
+                            isInflow(tx.type)
                               ? 'bg-green-500/10'
                               : 'bg-red-500/10'
                           }`}>
@@ -662,7 +729,7 @@ const WalletsPage = () => {
 
                         <div className="text-right">
                           <p className={`text-xl font-bold ${getTxTypeColor(tx.type)}`}>
-                            {tx.type === 'DEPOSIT' || tx.type === 'CREDIT' || tx.type === 'REFUND' ? '+' : '-'}
+                            {isInflow(tx.type) ? '+' : '-'}
                             ${tx.amount?.toFixed(2)}
                           </p>
                           {tx.referenceId && (

@@ -25,12 +25,10 @@ const profileService = {
   uploadProfileImage: async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    
-    const response = await axiosInstance.post('/profile/image', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+
+    // Content-Type is intentionally not set here — the axios interceptor strips it
+    // for FormData so the browser adds `multipart/form-data; boundary=…`.
+    const response = await axiosInstance.post('/profile/image', formData);
     return response.data;
   },
 

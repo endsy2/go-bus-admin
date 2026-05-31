@@ -28,10 +28,6 @@ const DashboardPage = () => {
         fromDateCalc.setDate(fromDateCalc.getDate() - 30);
         fromDate = fromDateCalc.toISOString();
         break;
-      case '1month':
-        fromDateCalc.setMonth(fromDateCalc.getMonth() - 1);
-        fromDate = fromDateCalc.toISOString();
-        break;
       case '2months':
         fromDateCalc.setMonth(fromDateCalc.getMonth() - 2);
         fromDate = fromDateCalc.toISOString();
@@ -76,7 +72,6 @@ const DashboardPage = () => {
   // Date range options
   const dateRangeOptions = [
     { value: '30days', label: 'Last 30 Days' },
-    { value: '1month', label: 'Last 1 Month' },
     { value: '2months', label: 'Last 2 Months' },
     { value: '3months', label: 'Last 3 Months' },
     { value: '6months', label: 'Last 6 Months' },

@@ -39,7 +39,13 @@ axiosInstance.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
+    // For multipart uploads, drop the default JSON Content-Type so the browser
+    // sets `multipart/form-data` with the required boundary automatically.
+    if (config.data instanceof FormData) {
+      config.headers.delete('Content-Type');
+    }
+
     return config;
   },
   (error) => {

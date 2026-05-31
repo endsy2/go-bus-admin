@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X, Users, Mail, Phone, Calendar, Eye, Copy, AlertCircle, CheckCircle, XCircle, Power } from 'lucide-react';
+import { Plus, X, Users, Mail, Phone, Calendar, Eye, Copy, AlertCircle, Power, Filter, ChevronUp, ChevronDown } from 'lucide-react';
 import { Button } from 'shared/components/ui/button';
-import { Input } from 'shared/components/ui/input';
-import { Label } from 'shared/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from 'shared/components/ui/card';
 import { Badge } from 'shared/components/common/Badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from 'shared/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
 import { useToast } from 'shared/components/ui/toast';
 import EditCustomerDialog from '../../components/EditCustomerDialog/EditCustomerDialog';
 import { Pagination } from 'shared/components/feedback/Pagination';
@@ -19,6 +16,16 @@ import { useLocale } from 'shared/context/LocaleContext';
 import { translations } from 'shared/locales/translations';
 import { canViewCustomers, canEditCustomers, canDeleteCustomers, canCreateCustomers } from 'shared/utils/permissions';
 import useAuth from 'shared/hooks/useAuth';
+
+// ── Shared filter field styling (matches BookingFilters) ───────────────────────
+const inputClass =
+  'w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+
+const labelClass =
+  'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide';
+
+const sectionTitleClass =
+  'text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2.5';
 
 const CustomersPage = () => {
   const { locale } = useLocale();
@@ -48,6 +55,11 @@ const CustomersPage = () => {
     isActive: 'all',
     isDeleted: 'all'
   });
+  const [showFilters, setShowFilters] = useState(true);
+  const activeFilterCount =
+    [filters.username, filters.email, filters.phone].filter((v) => v.trim() !== '').length +
+    (filters.isActive !== 'all' ? 1 : 0) +
+    (filters.isDeleted !== 'all' ? 1 : 0);
   // currentPage is 0-based (matches <Pagination> convention).
   // The service expects 1-based pageStart, so we add +1 at the call site.
   const [pagination, setPagination] = useState({
@@ -290,25 +302,22 @@ const CustomersPage = () => {
           </Button>
         </div>
 
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle className="text-base">Filter Customers</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="space-y-2">
-                  <div className="h-4 w-20 bg-muted animate-pulse rounded" />
-                  <div className="h-10 bg-muted animate-pulse rounded" />
-                </div>
-              ))}
-              <div className="col-span-full flex gap-3 justify-end pt-5 border-t-2">
-              <Button variant="outline" disabled><X className="h-4 w-4" />{t('clearFilters')}</Button>
-            </div>
-            </div>
-            
-          </CardContent>
-        </Card>
+        <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 mb-6 sm:mb-8">
+          <div className="flex justify-between items-center">
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+              <Filter className="w-4 h-4 text-blue-500" />
+              Filter Customers
+            </h3>
+          </div>
+          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="space-y-2">
+                <div className="h-3 w-20 bg-muted animate-pulse rounded" />
+                <div className="h-10 bg-muted animate-pulse rounded-lg" />
+              </div>
+            ))}
+          </div>
+        </div>
 
         <Card>
           <Table>
@@ -402,92 +411,122 @@ const CustomersPage = () => {
         </Card>
       )}
 
-      {/* Filters Card */}
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="text-base">Filter Customers</CardTitle>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 sm:gap-4">
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
-                <Users className="h-3.5 w-3.5 text-primary" />
-                {t('username')}
-              </Label>
-              <Input
-                name="username"
-                value={filters.username}
-                onChange={handleFilterChange}
-                placeholder={t('username')}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
-                <Mail className="h-3.5 w-3.5 text-primary" />
-                {t('email')}
-              </Label>
-              <Input
-                type="email"
-                name="email"
-                value={filters.email}
-                onChange={handleFilterChange}
-                placeholder={t('email')}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
-                <Phone className="h-3.5 w-3.5 text-primary" />
-                {t('phone')}
-              </Label>
-              <Input
-                type="tel"
-                name="phone"
-                value={filters.phone}
-                onChange={handleFilterChange}
-                placeholder={t('phone')}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
-                <CheckCircle className="h-3.5 w-3.5 text-primary" />
-                Is Active
-              </Label>
-              <Select value={filters.isActive} onValueChange={(value) => setFilters(prev => ({ ...prev, isActive: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="true">Active</SelectItem>
-                  <SelectItem value="false">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide">
-                <XCircle className="h-3.5 w-3.5 text-primary" />
-                Is Deleted
-              </Label>
-              <Select value={filters.isDeleted} onValueChange={(value) => setFilters(prev => ({ ...prev, isDeleted: value }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="All" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="false">Not Deleted</SelectItem>
-                  <SelectItem value="true">Deleted</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-          <div className="flex justify-end mt-4 pt-4 border-t">
-            <Button variant="outline" onClick={handleClearFilters} className="whitespace-nowrap">
-              <X className="h-4 w-4 mr-2" />
-              {t('clearFilters')}
+      {/* Filters */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 mb-6 sm:mb-8">
+
+        {/* Header row */}
+        <div className="flex justify-between items-center">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+            <Filter className="w-4 h-4 text-blue-500" />
+            Filter Customers
+            {activeFilterCount > 0 && (
+              <span className="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full bg-blue-500 text-white text-xs font-bold">
+                {activeFilterCount}
+              </span>
+            )}
+          </h3>
+          <div className="flex items-center gap-2">
+            {activeFilterCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearFilters}
+                className="flex items-center gap-1 text-xs"
+              >
+                <X className="w-3 h-3" />
+                {t('clearFilters')}
+              </Button>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-1 text-sm"
+            >
+              {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              {showFilters ? 'Hide' : 'Show'}
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+
+        {showFilters && (
+          <div className="mt-4 space-y-5">
+
+            {/* ── Section 1: Customer info ───────────────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div>
+                <label className={labelClass}>{t('username')}</label>
+                <input
+                  type="text"
+                  name="username"
+                  value={filters.username}
+                  onChange={handleFilterChange}
+                  placeholder={t('username')}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>{t('email')}</label>
+                <input
+                  type="email"
+                  name="email"
+                  value={filters.email}
+                  onChange={handleFilterChange}
+                  placeholder={t('email')}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>{t('phone')}</label>
+                <input
+                  type="tel"
+                  name="phone"
+                  value={filters.phone}
+                  onChange={handleFilterChange}
+                  placeholder={t('phone')}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-slate-800" />
+
+            {/* ── Section 2: Status ──────────────────────────────── */}
+            <div>
+              <p className={sectionTitleClass}>Status</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className={labelClass}>Is Active</label>
+                  <select
+                    name="isActive"
+                    value={filters.isActive}
+                    onChange={handleFilterChange}
+                    className={inputClass}
+                  >
+                    <option value="all">All</option>
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                  </select>
+                </div>
+                <div>
+                  <label className={labelClass}>Is Deleted</label>
+                  <select
+                    name="isDeleted"
+                    value={filters.isDeleted}
+                    onChange={handleFilterChange}
+                    className={inputClass}
+                  >
+                    <option value="all">All</option>
+                    <option value="false">Not Deleted</option>
+                    <option value="true">Deleted</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        )}
+      </div>
 
       {/* Table Card */}
       <Card className="overflow-hidden">

@@ -66,6 +66,10 @@ const ProfilePage = () => {
         setProfileImageUrl(imageUrl);
       }
     } catch (error) {
+      // Non-fatal: the avatar simply falls back to the initials gradient.
+      // Logged so a genuine failure (e.g. expired presigned URL, MinIO down)
+      // is diagnosable instead of silently swallowed.
+      console.warn('Failed to load profile image URL:', error?.response?.data?.message || error.message);
     }
   };
 

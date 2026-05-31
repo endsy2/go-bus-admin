@@ -1,20 +1,27 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Card } from 'shared/components/ui/card';
 import { Button } from 'shared/components/ui/button';
-import { Label } from 'shared/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from 'shared/components/ui/select';
-import { Input } from 'shared/components/common/Input';
 import { ConfirmDialog } from 'shared/components/feedback/ConfirmDialog';
 import { DatePicker } from 'shared/components/ui/date-picker';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from 'shared/components/ui/table';
 import { Pagination } from 'shared/components/feedback/Pagination';
 import { useToast } from 'shared/components/ui/toast';
-import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, Filter, X, ChevronUp, ChevronDown } from 'lucide-react';
 import scheduleService from '../../services/scheduleService';
 import busService from '../../../buses/services/busService';
 import routeService from '../../../routes/services/routeService';
 import CreateScheduleDialog from '../../components/CreateScheduleDialog/CreateScheduleDialog';
 import EditScheduleDialog from '../../components/EditScheduleDialog/EditScheduleDialog';
+
+// ── Shared filter field styling (matches BookingFilters) ───────────────────────
+const inputClass =
+  'w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm';
+
+const labelClass =
+  'block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wide';
+
+const sectionTitleClass =
+  'text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2.5';
 
 const SchedulesPage = () => {
   const { addToast } = useToast();
@@ -43,6 +50,8 @@ const SchedulesPage = () => {
   const [deleteScheduleId, setDeleteScheduleId] = useState(null);
   const [deleting, setDeleting] = useState(false);
   const [filters, setFilters] = useState(initialFilters);
+  const [showFilters, setShowFilters] = useState(true);
+  const activeCount = Object.values(filters).filter((v) => v !== '').length;
   // currentPage is 0-based. The service expects 1-based pageNo, so we add +1 at the call site.
   const [currentPage, setCurrentPage] = useState(0);
   const [pageSize, setPageSize] = useState(15);
@@ -182,107 +191,127 @@ const SchedulesPage = () => {
         </Button>
       </div>
 
-      {/* Filters Card */}
-      <Card className="p-4 sm:p-6 mb-4 sm:mb-6">
-        <h2 className="text-sm font-medium text-muted-foreground mb-3 sm:mb-4">
-          Filter Schedules
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-wrap items-end gap-3 sm:gap-4">
+      {/* Filters */}
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 sm:p-5 mb-4 sm:mb-6">
 
-          {/* Route Filter */}
-          <div className="flex flex-col gap-1.5 w-full lg:flex-1 lg:min-w-[140px]">
-            <Label>Route</Label>
-            <Select
-              value={filters.routeId || '__all__'}
-              onValueChange={(value) => updateFilter('routeId', value === '__all__' ? '' : value)}
-              disabled={loadingRoutes}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All Routes" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">All Routes</SelectItem>
-                {routes.map(route => (
-                  <SelectItem key={route.id} value={String(route.id)}>
-                    {route.origin} → {route.destination}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Bus Filter */}
-          <div className="flex flex-col gap-1.5 w-full lg:flex-1 lg:min-w-[140px]">
-            <Label>Bus</Label>
-            <Select
-              value={filters.busId || '__all__'}
-              onValueChange={(value) => updateFilter('busId', value === '__all__' ? '' : value)}
-              disabled={loadingBuses}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="All Buses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="__all__">All Buses</SelectItem>
-                {buses.map(bus => (
-                  <SelectItem key={bus.id} value={String(bus.id)}>
-                    {bus.busNumber} | {bus.busType}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* From Date */}
-          <div className="flex flex-col gap-1.5 w-full lg:flex-1 lg:min-w-[140px]">
-            <Label>From Date</Label>
-            <DatePicker
-              value={filters.fromDate}
-              onChange={(value) => updateFilter('fromDate', value)}
-              placeholder="Select From Date"
-              className="h-[42px] rounded-xl"
-            />
-          </div>
-
-          {/* To Date */}
-          <div className="flex flex-col gap-1.5 w-full lg:flex-1 lg:min-w-[140px]">
-            <Label>To Date</Label>
-            <DatePicker
-              value={filters.toDate}
-              onChange={(value) => updateFilter('toDate', value)}
-              placeholder="Select To Date"
-              className="h-[42px] rounded-xl"
-            />
-          </div>
-
-          {/* Max Price */}
-          <div className="flex flex-col gap-1.5 w-full lg:flex-1 lg:min-w-[120px]">
-            <Input
-              label="Max Price"
-              name="maxPrice"
-              type="number"
-              step="0.01"
-              min="0"
-              value={filters.maxPrice}
-              onChange={(e) => updateFilter('maxPrice', e.target.value)}
-              placeholder="Any Price"
-            />
-          </div>
-
-          {/* Clear Button — no label, aligned to bottom via items-end on parent */}
-          <div className="flex items-center gap-2 shrink-0 sm:col-span-2 lg:col-span-1">
+        {/* Header row */}
+        <div className="flex justify-between items-center">
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white flex items-center gap-2">
+            <Filter className="w-4 h-4 text-blue-500" />
+            Filter Schedules
+            {activeCount > 0 && (
+              <span className="inline-flex items-center justify-center h-5 min-w-[1.25rem] px-1.5 rounded-full bg-blue-500 text-white text-xs font-bold">
+                {activeCount}
+              </span>
+            )}
+          </h3>
+          <div className="flex items-center gap-2">
+            {activeCount > 0 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleClearFilters}
+                disabled={loading}
+                className="flex items-center gap-1 text-xs"
+              >
+                <X className="w-3 h-3" />
+                Clear All
+              </Button>
+            )}
             <Button
-              type="button"
               variant="outline"
-              onClick={handleClearFilters}
-              disabled={loading}
+              size="sm"
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center gap-1 text-sm"
             >
-              Clear
+              {showFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+              {showFilters ? 'Hide' : 'Show'}
             </Button>
           </div>
-
         </div>
-      </Card>
+
+        {showFilters && (
+          <div className="mt-4 space-y-5">
+
+            {/* ── Section 1: Route, Bus & Price ──────────────────────── */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+              <div>
+                <label className={labelClass}>Route</label>
+                <select
+                  value={filters.routeId}
+                  onChange={(e) => updateFilter('routeId', e.target.value)}
+                  disabled={loadingRoutes}
+                  className={inputClass}
+                >
+                  <option value="">All Routes</option>
+                  {routes.map((route) => (
+                    <option key={route.id} value={String(route.id)}>
+                      {route.origin} → {route.destination}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass}>Bus</label>
+                <select
+                  value={filters.busId}
+                  onChange={(e) => updateFilter('busId', e.target.value)}
+                  disabled={loadingBuses}
+                  className={inputClass}
+                >
+                  <option value="">All Buses</option>
+                  {buses.map((bus) => (
+                    <option key={bus.id} value={String(bus.id)}>
+                      {bus.busNumber} | {bus.busType}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className={labelClass}>Max Price</label>
+                <input
+                  type="number"
+                  name="maxPrice"
+                  step="0.01"
+                  min="0"
+                  value={filters.maxPrice}
+                  onChange={(e) => updateFilter('maxPrice', e.target.value)}
+                  placeholder="Any Price"
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <div className="border-t border-slate-100 dark:border-slate-800" />
+
+            {/* ── Section 2: Departure Date ──────────────────────────── */}
+            <div>
+              <p className={sectionTitleClass}>Departure Date</p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                <div>
+                  <label className={labelClass}>From</label>
+                  <DatePicker
+                    value={filters.fromDate}
+                    onChange={(value) => updateFilter('fromDate', value)}
+                    placeholder="Select from date"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>To</label>
+                  <DatePicker
+                    value={filters.toDate}
+                    onChange={(value) => updateFilter('toDate', value)}
+                    placeholder="Select to date"
+                  />
+                </div>
+              </div>
+            </div>
+
+          </div>
+        )}
+      </div>
 
       {/* Results Card */}
       <Card className="overflow-hidden">

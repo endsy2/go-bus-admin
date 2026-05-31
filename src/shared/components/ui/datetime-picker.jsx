@@ -6,8 +6,11 @@ import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
 export function DateTimePicker({ value, onChange, placeholder = "Pick date and time", className, disabled }) {
+  // Convert a 24-hour value (0-23) to the 12-hour display hour (1-12).
+  const to12Hour = (h) => (h % 12 === 0 ? 12 : h % 12);
+
   const [date, setDate] = React.useState(value ? new Date(value) : undefined);
-  const [hours, setHours] = React.useState(value ? new Date(value).getHours() : 12);
+  const [hours, setHours] = React.useState(value ? to12Hour(new Date(value).getHours()) : 12);
   const [minutes, setMinutes] = React.useState(value ? new Date(value).getMinutes() : 0);
   const [period, setPeriod] = React.useState(value ? (new Date(value).getHours() >= 12 ? 'PM' : 'AM') : 'PM');
 
@@ -16,9 +19,16 @@ export function DateTimePicker({ value, onChange, placeholder = "Pick date and t
       const d = new Date(value);
       setDate(d);
       const h = d.getHours();
-      setHours(h > 12 ? h - 12 : h === 0 ? 12 : h);
+      setHours(to12Hour(h));
       setMinutes(d.getMinutes());
       setPeriod(h >= 12 ? 'PM' : 'AM');
+    } else {
+      // Reset when the value is cleared/empty so the picker doesn't keep showing
+      // a stale date when the parent form is reset or a different record loads.
+      setDate(undefined);
+      setHours(12);
+      setMinutes(0);
+      setPeriod('PM');
     }
   }, [value]);
 

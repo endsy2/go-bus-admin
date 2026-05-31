@@ -246,8 +246,13 @@ const TeamPage = () => {
   const handleSaveRolePermissions = async (role) => {
     setSavingRole(role.id);
     try {
-      const permissionIds = Array.from(rolePermissions[role.id] || []);
-      await adminService.roles.updatePermissions(role.id, { permissionIds });
+      const selectedIds = rolePermissions[role.id] || new Set();
+      // Backend expects a list of permission NAMES under the `permissions` key,
+      // but rolePermissions stores permission IDs — map them back to names.
+      const permissions = allPermissions
+        .filter(p => selectedIds.has(p.id))
+        .map(p => p.name);
+      await adminService.roles.updatePermissions(role.id, { permissions });
       addToast({
         message: `Permissions for ${role.name.replace('ROLE_', '')} updated!`,
         type: 'success',
