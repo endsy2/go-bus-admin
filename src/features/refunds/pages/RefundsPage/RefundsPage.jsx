@@ -14,6 +14,7 @@ import {
   Calendar,
   FileText,
   CheckCircle,
+  CreditCard,
 } from 'lucide-react';
 import RefundFilters from '../../components/RefundFilters/RefundFilters';
 import ProcessRefundDialog from '../../components/ProcessRefundDialog/ProcessRefundDialog';
@@ -114,7 +115,7 @@ const RefundsPage = () => {
             <table className="w-full">
               <thead className="bg-slate-100 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                 <tr>
-                  {['Refund ID', 'Booking ID', 'Customer', 'Amount', 'Reason', 'Status', 'Created Date', 'Actions'].map(col => (
+                  {['Refund ID', 'Booking ID', 'Customer', 'Amount', 'Refund Method', 'Reason', 'Status', 'Created Date', 'Actions'].map(col => (
                     <th key={col} className="px-4 py-3">
                       <Skeleton className="h-4 w-20" />
                     </th>
@@ -124,7 +125,7 @@ const RefundsPage = () => {
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {[1, 2, 3, 4, 5].map(i => (
                   <tr key={i}>
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(j => (
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9].map(j => (
                       <td key={j} className="px-4 py-4">
                         <Skeleton className="h-5 w-full" />
                       </td>
@@ -168,6 +169,9 @@ const RefundsPage = () => {
                       {t('amount') || 'Amount'}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
+                      {t('refundMethod') || 'Refund Method'}
+                    </th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
                       {t('reason') || 'Reason'}
                     </th>
                     <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">
@@ -204,6 +208,11 @@ const RefundsPage = () => {
                       <td className="px-4 py-4 text-right">
                         <span className="font-bold text-lg text-green-400">
                           ${(refund.amount ?? refund.refundAmount)?.toFixed(2) ?? '0.00'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="text-sm text-slate-900 dark:text-white">
+                          {refund.refundMethod ? formatStatus(refund.refundMethod) : 'N/A'}
                         </span>
                       </td>
                       <td className="px-4 py-4">
@@ -278,6 +287,10 @@ const RefundsPage = () => {
                   {refund.reason && (
                     <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2">{refund.reason}</p>
                   )}
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+                    <CreditCard className="w-3 h-3 text-amber-400" />
+                    <span>{refund.refundMethod ? formatStatus(refund.refundMethod) : 'N/A'}</span>
+                  </div>
                   <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
                     <Calendar className="w-3 h-3 text-pink-400" />
                     <span>{refund.createdAt ? new Date(refund.createdAt).toLocaleDateString() : 'N/A'}</span>

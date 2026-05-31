@@ -22,12 +22,25 @@ export const findConflictingSchedule = (schedules, departure, arrival, excludeId
   const depMs = toMs(departure);
   const arrMs = toMs(arrival);
   if (Number.isNaN(depMs) || Number.isNaN(arrMs)) return null;
+  // A zero-length or inverted requested window can't meaningfully overlap.
+  if (arrMs <= depMs) return null;
 
   return (
     (schedules || []).find((s) => {
       if (excludeId != null && s.id === excludeId) return false;
       if (!s.departureDateTime || !s.arrivalDateTime) return false;
-      return depMs < toMs(s.arrivalDateTime) && toMs(s.departureDateTime) < arrMs;
+
+      const sDepMs = toMs(s.departureDateTime);
+      const sArrMs = toMs(s.arrivalDateTime);
+      // Ignore corrupt existing rows (unparseable dates, or an arrival that is
+      // not strictly after its departure). A single bad row would otherwise
+      // report a phantom overlap against every new schedule.
+      if (Number.isNaN(sDepMs) || Number.isNaN(sArrMs)) return false;
+      if (sArrMs <= sDepMs) return false;
+
+      // Two windows overlap iff each starts strictly before the other ends, so
+      // back-to-back schedules (one ends exactly when the next starts) are fine.
+      return depMs < sArrMs && sDepMs < arrMs;
     }) || null
   );
 };
