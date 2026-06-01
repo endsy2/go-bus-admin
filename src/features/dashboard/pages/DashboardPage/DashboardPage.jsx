@@ -210,9 +210,9 @@ const DashboardPage = () => {
               </span>
             )}
           </h1>
-          <p className="text-xs sm:text-sm text-muted-foreground">
+          {/* <p className="text-xs sm:text-sm text-muted-foreground">
             Real-time performance and system health across the FTA network.
-          </p>
+          </p> */}
         </div>
         <div className="flex gap-3">
           {/* Date Range Selector */}
