@@ -2,7 +2,7 @@ import * as React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "lib/utils";
 
-export function Calendar({ mode = "single", selected, onSelect, className, initialFocus }) {
+export function Calendar({ mode = "single", selected, onSelect, className, initialFocus, minDate }) {
   const [currentMonth, setCurrentMonth] = React.useState(
     selected ? new Date(selected) : new Date()
   );
@@ -35,6 +35,16 @@ export function Calendar({ mode = "single", selected, onSelect, className, initi
     if (onSelect) {
       onSelect(newDate);
     }
+  };
+
+  // A day is disabled when it falls before minDate (compared at day granularity).
+  const isDisabled = (day) => {
+    if (!minDate) return false;
+    const checkDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+    checkDate.setHours(0, 0, 0, 0);
+    const min = new Date(minDate);
+    min.setHours(0, 0, 0, 0);
+    return checkDate < min;
   };
 
   const handleNavClick = (e, action) => {
@@ -74,19 +84,24 @@ export function Calendar({ mode = "single", selected, onSelect, className, initi
 
   // Days of the month
   for (let day = 1; day <= totalDays; day++) {
+    const disabled = isDisabled(day);
     days.push(
       <button
         key={day}
         type="button"
+        disabled={disabled}
         onClick={(e) => {
           e.stopPropagation();
-          handleDayClick(day);
+          if (!disabled) handleDayClick(day);
         }}
         className={cn(
-          "w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800/50 transition-all duration-200 active:scale-95 relative",
-          isSelected(day) && "bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/30",
-          isToday(day) && !isSelected(day) && "border-2 border-blue-500/50 text-blue-500 dark:text-blue-400 font-bold",
-          !isSelected(day) && !isToday(day) && "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
+          "w-9 h-9 flex items-center justify-center text-sm font-medium rounded-lg transition-all duration-200 relative",
+          disabled
+            ? "text-slate-300 dark:text-slate-700 cursor-not-allowed opacity-50"
+            : "hover:bg-slate-200 dark:hover:bg-slate-800/50 active:scale-95",
+          !disabled && isSelected(day) && "bg-blue-500 text-white hover:bg-blue-600 shadow-lg shadow-blue-500/30",
+          !disabled && isToday(day) && !isSelected(day) && "border-2 border-blue-500/50 text-blue-500 dark:text-blue-400 font-bold",
+          !disabled && !isSelected(day) && !isToday(day) && "text-slate-700 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white"
         )}
       >
         {day}

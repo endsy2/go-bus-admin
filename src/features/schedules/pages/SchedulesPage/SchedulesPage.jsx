@@ -25,16 +25,23 @@ const sectionTitleClass =
 
 const SchedulesPage = () => {
   const { addToast } = useToast();
-  const getTodayStartISO = () => {
+  // Local YYYY-MM-DD (avoids toISOString() shifting the day in UTC+7).
+  const getTodayLocalDate = () => {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of day
-    return today.toISOString();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
   };
+
+  // Earliest selectable date in the pickers (today at midnight).
+  const minSelectableDate = new Date();
+  minSelectableDate.setHours(0, 0, 0, 0);
 
   const initialFilters = {
     routeId: '',
     busId: '',
-    fromDate: getTodayStartISO(), // Auto-set to today at midnight
+    fromDate: getTodayLocalDate(), // Auto-set to today
     toDate: '',
     maxPrice: '',
   };
@@ -296,6 +303,7 @@ const SchedulesPage = () => {
                     value={filters.fromDate}
                     onChange={(value) => updateFilter('fromDate', value)}
                     placeholder="Select from date"
+                    minDate={minSelectableDate}
                   />
                 </div>
                 <div>
@@ -304,6 +312,7 @@ const SchedulesPage = () => {
                     value={filters.toDate}
                     onChange={(value) => updateFilter('toDate', value)}
                     placeholder="Select to date"
+                    minDate={filters.fromDate ? new Date(filters.fromDate) : minSelectableDate}
                   />
                 </div>
               </div>

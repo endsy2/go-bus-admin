@@ -47,16 +47,17 @@ const scheduleService = {
     // Only add parameters if they have values
     if (routeId) params.append('routeId', routeId);
     
-    // Format dates to YYYY-MM-DD (LocalDate format expected by backend)
+    // Backend expects LocalDateTime in ISO.DATE_TIME format (e.g. 2026-05-31T00:00:00).
+    // The pickers give us a YYYY-MM-DD date, so we attach a fixed time:
+    //  - fromDate -> start of the day (00:00:00)
+    //  - toDate   -> end of the day   (23:59:59) so the whole day is included
     if (fromDate) {
-      const date = new Date(fromDate);
-      const formattedDate = date.toISOString().split('T')[0]; // Extract YYYY-MM-DD
-      params.append('fromDate', formattedDate);
+      const datePart = String(fromDate).split('T')[0]; // YYYY-MM-DD
+      params.append('fromDate', `${datePart}T00:00:00`);
     }
     if (toDate) {
-      const date = new Date(toDate);
-      const formattedDate = date.toISOString().split('T')[0]; // Extract YYYY-MM-DD
-      params.append('toDate', formattedDate);
+      const datePart = String(toDate).split('T')[0]; // YYYY-MM-DD
+      params.append('toDate', `${datePart}T23:59:59`);
     }
     
     if (maxPrice) params.append('maxPrice', maxPrice);

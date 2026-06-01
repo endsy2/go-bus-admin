@@ -5,7 +5,7 @@ import { Button } from "./button";
 import { Calendar } from "./calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "./popover";
 
-export function DatePicker({ value, onChange, placeholder = "Pick a date", className, disabled }) {
+export function DatePicker({ value, onChange, placeholder = "Pick a date", className, disabled, minDate }) {
   const parseDate = (dateString) => {
     if (!dateString) return undefined;
     // Parse YYYY-MM-DD as local date (no timezone conversion)
@@ -84,6 +84,7 @@ export function DatePicker({ value, onChange, placeholder = "Pick a date", class
           mode="single"
           selected={date}
           onSelect={handleSelect}
+          minDate={minDate}
           initialFocus
           className="bg-transparent"
         />
