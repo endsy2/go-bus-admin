@@ -76,6 +76,8 @@ export const translations = {
     type: 'Type',
     allTypes: 'All Types',
     allStatus: 'All Status',
+    allStatuses: 'All Statuses',
+    allMethods: 'All Methods',
     allRoutes: 'All Routes',
     minSeats: 'Min Seats',
     maxSeats: 'Max Seats',
@@ -151,6 +153,26 @@ export const translations = {
     // Dashboard
     welcomeBack: 'Welcome back! Here\'s what\'s happening today.',
     
+    // Filters (shared)
+    hide: 'Hide',
+    show: 'Show',
+    from: 'From',
+    customerName: 'Customer Name / Username',
+    searchByUsername: 'Search By Name Or Username',
+    refundRequest: 'Refund Request',
+    hasRefundRequest: 'Has Refund Request',
+    noRefundRequest: 'No Refund Request',
+    travelDate: 'Travel Date (Departure)',
+    bookingDate: 'Booking Date (When Booked)',
+    searchByName: 'Search by name...',
+    minBalance: 'Min Balance',
+    maxBalance: 'Max Balance',
+    referenceId: 'Reference ID',
+    searchByReference: 'Search by reference...',
+    user: 'User',
+    percentage: 'Percentage (%)',
+    fixedAmount: 'Fixed Amount ($)',
+
     // Bookings
     bookings: 'Bookings',
     bookingsManagement: 'Bookings Management',
@@ -605,6 +627,8 @@ export const translations = {
     type: 'ប្រភេទ',
     allTypes: 'ប្រភេទទាំងអស់',
     allStatus: 'ស្ថានភាពទាំងអស់',
+    allStatuses: 'ស្ថានភាពទាំងអស់',
+    allMethods: 'វិធីទាំងអស់',
     allRoutes: 'ផ្លូវទាំងអស់',
     minSeats: 'កៅអីអប្បបរមា',
     maxSeats: 'កៅអីអតិបរមា',
@@ -677,6 +701,26 @@ export const translations = {
     // Dashboard
     welcomeBack: 'សូមស្វាគមន៍! នេះជាអ្វីដែលកំពុងកើតឡើងថ្ងៃនេះ។',
     
+    // Filters (shared)
+    hide: 'លាក់',
+    show: 'បង្ហាញ',
+    from: 'ពី',
+    customerName: 'ឈ្មោះអតិថិជន / ឈ្មោះអ្នកប្រើ',
+    searchByUsername: 'ស្វែងរកតាមឈ្មោះឬឈ្មោះអ្នកប្រើ',
+    refundRequest: 'សំណើសងប្រាក់',
+    hasRefundRequest: 'មានសំណើសងប្រាក់',
+    noRefundRequest: 'គ្មានសំណើសងប្រាក់',
+    travelDate: 'កាលបរិច្ឆេទដំណើរ (ចេញ)',
+    bookingDate: 'កាលបរិច្ឆេទកក់ (ពេលកក់)',
+    searchByName: 'ស្វែងរកតាមឈ្មោះ...',
+    minBalance: 'សមតុល្យអប្បបរមា',
+    maxBalance: 'សមតុល្យអតិបរមា',
+    referenceId: 'លេខយោង',
+    searchByReference: 'ស្វែងរកតាមលេខយោង...',
+    user: 'អ្នកប្រើ',
+    percentage: 'ភាគរយ (%)',
+    fixedAmount: 'ចំនួនថេរ ($)',
+
     // Bookings
     bookings: 'ការកក់',
     bookingsManagement: 'ការគ្រប់គ្រងការកក់',
